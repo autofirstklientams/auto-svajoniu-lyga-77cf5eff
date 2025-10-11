@@ -32,8 +32,11 @@ const Header = () => {
               <Phone className="h-4 w-4" />
               +370 600 00000
             </Button>
-            <Button className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold">
-              Susisiekti
+            <Button 
+              onClick={() => window.location.href = '/partner-login'}
+              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+            >
+              Partnerio zona
             </Button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { Car, Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
+import logo from "@/assets/autokopers-logo.jpeg";
 
 const Header = () => {
   return (
@@ -7,9 +8,9 @@ const Header = () => {
       <div className="bg-muted/50 border-b border-border">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-end gap-6 h-10 text-sm">
-            <a href="mailto:info@autofinancelt.lt" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+            <a href="mailto:info@autokopers.lt" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
               <Mail className="h-4 w-4" />
-              info@autofinancelt.lt
+              info@autokopers.lt
             </a>
             <a href="tel:+37064444999" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
               <Phone className="h-4 w-4" />
@@ -26,11 +27,8 @@ const Header = () => {
       <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-2">
-              <Car className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold text-primary">auto</span>
-              <span className="text-2xl font-bold text-accent">finance</span>
-              <span className="text-xl font-bold text-muted-foreground">.lt</span>
+            <div className="flex items-center">
+              <img src={logo} alt="AutoKOPERS" className="h-12" />
             </div>
 
             <nav className="hidden md:flex items-center gap-8">

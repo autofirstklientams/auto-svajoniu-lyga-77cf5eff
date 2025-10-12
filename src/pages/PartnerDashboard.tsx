@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Car, Plus, LogOut, FileText } from "lucide-react";
+import { Plus, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import logo from "@/assets/autokopers-logo.jpeg";
 
 // Mock duomenys
 const mockListings = [
@@ -46,10 +47,8 @@ const PartnerDashboard = () => {
       <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-2">
-              <Car className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold text-primary">AutoFinance</span>
-              <span className="text-2xl font-bold text-accent">LT</span>
+            <div className="flex items-center gap-4">
+              <img src={logo} alt="AutoKOPERS" className="h-10" />
               <span className="ml-4 text-sm text-muted-foreground">Partnerio zona</span>
             </div>
 

@@ -5,8 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Car, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
+import logo from "@/assets/autokopers-logo.jpeg";
 
 const PartnerLogin = () => {
   const navigate = useNavigate();
@@ -48,10 +49,8 @@ const PartnerLogin = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Grįžti į pagrindinį
           </Button>
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <Car className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-primary">AutoFinance</span>
-            <span className="text-2xl font-bold text-accent">LT</span>
+          <div className="flex items-center justify-center mb-4">
+            <img src={logo} alt="AutoKOPERS" className="h-12" />
           </div>
           <p className="text-muted-foreground">Partnerių Prisijungimas</p>
         </div>

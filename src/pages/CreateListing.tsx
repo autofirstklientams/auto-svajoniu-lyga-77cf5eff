@@ -6,8 +6,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Car, ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload } from "lucide-react";
 import { toast } from "sonner";
+import logo from "@/assets/autokopers-logo.jpeg";
 
 const CreateListing = () => {
   const navigate = useNavigate();
@@ -36,10 +37,8 @@ const CreateListing = () => {
       <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-2">
-              <Car className="h-8 w-8 text-primary" />
-              <span className="text-2xl font-bold text-primary">AutoFinance</span>
-              <span className="text-2xl font-bold text-accent">LT</span>
+            <div className="flex items-center">
+              <img src={logo} alt="AutoKOPERS" className="h-10" />
             </div>
 
             <Button

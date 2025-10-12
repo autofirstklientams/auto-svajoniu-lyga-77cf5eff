@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 const LoanCalculator = () => {
   const [loanAmount, setLoanAmount] = useState(7000);
@@ -14,6 +15,12 @@ const LoanCalculator = () => {
     ? (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) / 
       (Math.pow(1 + monthlyRate, loanTerm) - 1)
     : 0;
+
+  const handleSubmit = () => {
+    toast.success("Paraiška pateikta! Netrukus susisieksime su jumis.", {
+      description: `Paskolos suma: ${loanAmount}€, Terminas: ${loanTerm} mėn., Mėnesinė įmoka: ${monthlyPayment.toFixed(2)}€`
+    });
+  };
 
   return (
     <section className="py-16 bg-gradient-to-b from-secondary to-background">
@@ -110,7 +117,10 @@ const LoanCalculator = () => {
                       {monthlyPayment.toFixed(2)} €
                     </span>
                   </div>
-                  <Button className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+                  <Button 
+                    onClick={handleSubmit}
+                    className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
+                  >
                     Pateikti paraišką
                   </Button>
                 </div>

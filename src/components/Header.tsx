@@ -1,47 +1,65 @@
 import { Button } from "@/components/ui/button";
-import { Car, Phone } from "lucide-react";
+import { Car, Phone, Mail, MapPin } from "lucide-react";
 
 const Header = () => {
   return (
-    <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-20">
-          <div className="flex items-center gap-2">
-            <Car className="h-8 w-8 text-primary" />
-            <span className="text-2xl font-bold text-primary">AutoFinance</span>
-            <span className="text-2xl font-bold text-accent">LT</span>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-8">
-            <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
-              Automobiliai
+    <>
+      <div className="bg-muted/50 border-b border-border">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-end gap-6 h-10 text-sm">
+            <a href="mailto:info@autofinancelt.lt" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+              <Mail className="h-4 w-4" />
+              info@autofinancelt.lt
             </a>
-            <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
-              Finansavimas
-            </a>
-            <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
-              Apie Mus
-            </a>
-            <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
-              Kontaktai
-            </a>
-          </nav>
-
-          <div className="flex items-center gap-4">
-            <Button variant="outline" className="hidden sm:flex items-center gap-2">
+            <a href="tel:+37064444999" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
               <Phone className="h-4 w-4" />
-              +370 600 00000
-            </Button>
-            <Button 
-              onClick={() => window.location.href = '/partner-login'}
-              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-            >
-              Partnerio zona
-            </Button>
+              +370 6 4444 999
+            </a>
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="h-4 w-4" />
+              Gariūnų g. 49, Vilnius
+            </div>
           </div>
         </div>
       </div>
-    </header>
+      
+      <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-20">
+            <div className="flex items-center gap-2">
+              <Car className="h-8 w-8 text-primary" />
+              <span className="text-2xl font-bold text-primary">auto</span>
+              <span className="text-2xl font-bold text-accent">finance</span>
+              <span className="text-xl font-bold text-muted-foreground">.lt</span>
+            </div>
+
+            <nav className="hidden md:flex items-center gap-8">
+              <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
+                Auto supirkimas
+              </a>
+              <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
+                Auto paieška
+              </a>
+              <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
+                Lizingas
+              </a>
+              <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
+                Kontaktai
+              </a>
+            </nav>
+
+            <div className="flex items-center gap-4">
+              <Button 
+                onClick={() => window.location.href = '/partner-login'}
+                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+              >
+                Partnerio zona
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+    </>
   );
 };
 

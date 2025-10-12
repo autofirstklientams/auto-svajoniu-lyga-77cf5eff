@@ -17,16 +17,16 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 220 18% 20%;
 
-    --primary: 220 70% 25%;
+    --primary: 200 100% 40%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 20% 95%;
-    --secondary-foreground: 220 70% 25%;
+    --secondary: 200 20% 96%;
+    --secondary-foreground: 200 100% 30%;
 
     --muted: 210 20% 95%;
     --muted-foreground: 220 10% 50%;
 
-    --accent: 25 95% 60%;
+    --accent: 200 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
@@ -34,14 +34,14 @@ All colors MUST be HSL.
 
     --border: 220 15% 90%;
     --input: 220 15% 90%;
-    --ring: 220 70% 25%;
+    --ring: 200 100% 40%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
     
-    --gradient-hero: linear-gradient(135deg, hsl(220 70% 25%), hsl(220 60% 35%));
-    --gradient-accent: linear-gradient(135deg, hsl(25 95% 60%), hsl(15 90% 55%));
-    --shadow-card: 0 4px 20px -2px hsl(220 70% 25% / 0.1);
-    --shadow-hover: 0 8px 30px -4px hsl(220 70% 25% / 0.15);
+    --gradient-hero: linear-gradient(135deg, hsl(200 100% 40%), hsl(200 80% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(200 100% 50%), hsl(180 90% 45%));
+    --shadow-card: 0 4px 20px -2px hsl(200 100% 40% / 0.1);
+    --shadow-hover: 0 8px 30px -4px hsl(200 100% 40% / 0.15);
 
     --sidebar-background: 0 0% 98%;
 
@@ -70,7 +70,7 @@ All colors MUST be HSL.
     --popover: 220 20% 15%;
     --popover-foreground: 210 20% 95%;
 
-    --primary: 220 70% 60%;
+    --primary: 200 100% 50%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 20% 20%;
@@ -79,7 +79,7 @@ All colors MUST be HSL.
     --muted: 220 20% 20%;
     --muted-foreground: 220 10% 65%;
 
-    --accent: 25 95% 60%;
+    --accent: 200 100% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62.8% 50%;
@@ -87,10 +87,10 @@ All colors MUST be HSL.
 
     --border: 220 20% 20%;
     --input: 220 20% 20%;
-    --ring: 220 70% 60%;
+    --ring: 200 100% 50%;
     
-    --gradient-hero: linear-gradient(135deg, hsl(220 70% 25%), hsl(220 60% 35%));
-    --gradient-accent: linear-gradient(135deg, hsl(25 95% 60%), hsl(15 90% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(200 100% 40%), hsl(200 80% 50%));
+    --gradient-accent: linear-gradient(135deg, hsl(200 100% 50%), hsl(180 90% 45%));
     --shadow-card: 0 4px 20px -2px hsl(0 0% 0% / 0.3);
     --shadow-hover: 0 8px 30px -4px hsl(0 0% 0% / 0.4);
     --sidebar-background: 240 5.9% 10%;

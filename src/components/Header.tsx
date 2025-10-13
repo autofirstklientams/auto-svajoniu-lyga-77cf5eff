@@ -32,16 +32,44 @@ const Header = () => {
             </div>
 
             <nav className="hidden md:flex items-center gap-8">
-              <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
+              <a 
+                href="#featured-cars" 
+                className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('featured-cars')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 Auto supirkimas
               </a>
-              <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
+              <a 
+                href="#featured-cars" 
+                className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('featured-cars')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 Auto paieška
               </a>
-              <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
+              <a 
+                href="#financing" 
+                className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('financing')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 Lizingas
               </a>
-              <a href="#" className="text-foreground hover:text-primary font-medium transition-colors">
+              <a 
+                href="#contact" 
+                className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 Kontaktai
               </a>
             </nav>

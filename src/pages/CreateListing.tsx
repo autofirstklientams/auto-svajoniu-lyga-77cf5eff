@@ -71,52 +71,67 @@ const CreateListing = () => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="make">Markė</Label>
+                  <Label htmlFor="make">Automobilio markė</Label>
                   <Input
                     id="make"
-                    placeholder="BMW"
+                    placeholder="pvz. BMW, Audi, Mercedes-Benz"
                     required
+                    minLength={2}
+                    maxLength={50}
+                    aria-label="Įveskite automobilio markę"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="model">Modelis</Label>
+                  <Label htmlFor="model">Automobilio modelis</Label>
                   <Input
                     id="model"
-                    placeholder="X5"
+                    placeholder="pvz. X5, A6, E-Class"
                     required
+                    minLength={1}
+                    maxLength={50}
+                    aria-label="Įveskite automobilio modelį"
                   />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-3 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="year">Metai</Label>
+                  <Label htmlFor="year">Pagaminimo metai</Label>
                   <Input
                     id="year"
                     type="number"
-                    placeholder="2022"
+                    placeholder="pvz. 2022"
                     required
+                    min={1990}
+                    max={new Date().getFullYear() + 1}
+                    aria-label="Įveskite automobilio pagaminimo metus"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="mileage">Rida (km)</Label>
+                  <Label htmlFor="mileage">Rida (kilometrais)</Label>
                   <Input
                     id="mileage"
                     type="number"
-                    placeholder="35000"
+                    placeholder="pvz. 35000"
                     required
+                    min={0}
+                    max={999999}
+                    aria-label="Įveskite automobilio ridą kilometrais"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="price">Kaina (€)</Label>
+                  <Label htmlFor="price">Pardavimo kaina (eurais)</Label>
                   <Input
                     id="price"
                     type="number"
-                    placeholder="42990"
+                    placeholder="pvz. 42990"
                     required
+                    min={100}
+                    max={999999}
+                    aria-label="Įveskite automobilio kainą eurais"
                   />
                 </div>
               </div>
@@ -152,42 +167,49 @@ const CreateListing = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Aprašymas</Label>
+                <Label htmlFor="description">Detalus automobilio aprašymas</Label>
                 <Textarea
                   id="description"
-                  placeholder="Detalus automobilio aprašymas, komplektacija, būklė..."
-                  rows={5}
+                  placeholder="Aprašykite automobilio būklę, komplektaciją, papildomą įrangą, priežiūros istoriją ir kitus svarbius aspektus, kurie padės pirkėjui priimti sprendimą..."
+                  rows={6}
                   required
+                  minLength={50}
+                  maxLength={2000}
+                  aria-label="Įveskite išsamų automobilio aprašymą (mažiausiai 50 simbolių)"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="photos">Nuotraukos</Label>
-                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary transition-colors cursor-pointer">
+                <Label htmlFor="photos">Automobilio nuotraukos</Label>
+                <div className="border-2 border-dashed border-input rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-background">
                   <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Spustelėkite arba nuvilkite nuotraukas čia
+                  <p className="text-sm text-foreground mb-2 font-medium">
+                    Įkelkite automobilio nuotraukas
+                  </p>
+                  <p className="text-xs text-muted-foreground mb-1">
+                    Spustelėkite čia arba nuvilkite failus
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    PNG, JPG iki 10MB
+                    Palaikomi formatai: PNG, JPG, JPEG (maks. 10MB kiekviena)
                   </p>
                   <Input
                     id="photos"
                     type="file"
                     multiple
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/jpg"
                     className="hidden"
+                    aria-label="Pasirinkite automobilio nuotraukas"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-4">
+              <div className="flex gap-4 pt-4">
                 <Button
                   type="submit"
-                  className="flex-1 bg-accent hover:bg-accent/90 text-accent-foreground"
+                  className="flex-1"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Kuriama..." : "Sukurti skelbimą"}
+                  {isLoading ? "Kuriamas skelbimas..." : "Paskelbti automobilį"}
                 </Button>
                 <Button
                   type="button"

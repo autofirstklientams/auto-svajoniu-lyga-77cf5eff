@@ -72,12 +72,13 @@ const PartnerLogin = () => {
               <CardContent>
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="email">El. paštas</Label>
+                    <Label htmlFor="email">Elektroninis paštas</Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="jusu@pastas.lt"
+                      placeholder="vardas.pavarde@jusuimonė.lt"
                       required
+                      aria-label="Įveskite savo elektroninį paštą"
                     />
                   </div>
                   <div className="space-y-2">
@@ -85,13 +86,15 @@ const PartnerLogin = () => {
                     <Input
                       id="password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="Mažiausiai 8 simboliai"
                       required
+                      minLength={8}
+                      aria-label="Įveskite savo slaptažodį"
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-primary hover:bg-primary/90"
+                    className="w-full"
                     disabled={isLoading}
                   >
                     {isLoading ? "Jungiamasi..." : "Prisijungti"}
@@ -116,17 +119,21 @@ const PartnerLogin = () => {
                     <Input
                       id="company"
                       type="text"
-                      placeholder="UAB Automobiliai"
+                      placeholder="pvz. UAB Auto prekybos centras"
                       required
+                      minLength={3}
+                      maxLength={100}
+                      aria-label="Įveskite savo įmonės oficialų pavadinimą"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="signup-email">El. paštas</Label>
+                    <Label htmlFor="signup-email">Elektroninis paštas</Label>
                     <Input
                       id="signup-email"
                       type="email"
-                      placeholder="jusu@pastas.lt"
+                      placeholder="kontaktai@jusuimonė.lt"
                       required
+                      aria-label="Įveskite įmonės elektroninį paštą"
                     />
                   </div>
                   <div className="space-y-2">
@@ -134,25 +141,29 @@ const PartnerLogin = () => {
                     <Input
                       id="signup-password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="Mažiausiai 8 simboliai"
                       required
+                      minLength={8}
+                      aria-label="Sukurkite saugų slaptažodį (mažiausiai 8 simboliai)"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefonas</Label>
+                    <Label htmlFor="phone">Kontaktinis telefonas</Label>
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="+370 600 00000"
+                      placeholder="+370 600 12345"
                       required
+                      pattern="[+]?[0-9\s\-()]+"
+                      aria-label="Įveskite kontaktinį telefono numerį"
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full bg-accent hover:bg-accent/90"
+                    className="w-full"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Kuriama..." : "Sukurti paskyrą"}
+                    {isLoading ? "Kuriama paskyra..." : "Sukurti partnerio paskyrą"}
                   </Button>
                 </form>
               </CardContent>

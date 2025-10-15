@@ -41,15 +41,15 @@ const Footer = () => {
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4" />
-                +370 6 4444 999
+                +370 628 51439
               </li>
               <li className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                info@autokopers.lt
+                labas@autokopers.lt
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                Gariūnų g. 49, Vilnius
+                Varduvos g. 2, Kaunas
               </li>
             </ul>
           </div>

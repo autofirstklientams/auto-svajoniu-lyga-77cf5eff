@@ -30,22 +30,22 @@ const Index = () => {
                 <div className="p-6 bg-background rounded-lg shadow-sm">
                   <Mail className="h-8 w-8 mx-auto mb-4 text-primary" />
                   <h3 className="font-semibold mb-2">El. paštas</h3>
-                  <a href="mailto:info@autokopers.lt" className="text-primary hover:underline">
-                    info@autokopers.lt
+                  <a href="mailto:labas@autokopers.lt" className="text-primary hover:underline break-all">
+                    labas@autokopers.lt
                   </a>
                 </div>
                 <div className="p-6 bg-background rounded-lg shadow-sm">
                   <Phone className="h-8 w-8 mx-auto mb-4 text-primary" />
                   <h3 className="font-semibold mb-2">Telefonas</h3>
-                  <a href="tel:+37064444999" className="text-primary hover:underline">
-                    +370 6 4444 999
+                  <a href="tel:+37062851439" className="text-primary hover:underline">
+                    +370 628 51439
                   </a>
                 </div>
                 <div className="p-6 bg-background rounded-lg shadow-sm">
                   <MapPin className="h-8 w-8 mx-auto mb-4 text-primary" />
                   <h3 className="font-semibold mb-2">Adresas</h3>
                   <p className="text-muted-foreground">
-                    Gariūnų g. 49, Vilnius
+                    Varduvos g. 2, Kaunas
                   </p>
                 </div>
               </div>

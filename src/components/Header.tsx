@@ -7,18 +7,18 @@ const Header = () => {
     <>
       <div className="bg-muted/50 border-b border-border">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-end gap-6 h-10 text-sm">
-            <a href="mailto:info@autokopers.lt" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-              <Mail className="h-4 w-4" />
-              info@autokopers.lt
+          <div className="flex flex-wrap items-center justify-center md:justify-end gap-3 md:gap-6 py-2 md:py-0 md:h-10 text-xs md:text-sm">
+            <a href="mailto:labas@autokopers.lt" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+              <Mail className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">labas@autokopers.lt</span>
             </a>
-            <a href="tel:+37064444999" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-              <Phone className="h-4 w-4" />
-              +370 6 4444 999
+            <a href="tel:+37062851439" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+              <Phone className="h-3 w-3 md:h-4 md:w-4" />
+              +370 628 51439
             </a>
             <div className="flex items-center gap-2 text-muted-foreground">
-              <MapPin className="h-4 w-4" />
-              Gariūnų g. 49, Vilnius
+              <MapPin className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Varduvos g. 2, Kaunas</span>
             </div>
           </div>
         </div>

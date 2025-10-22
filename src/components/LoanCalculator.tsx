@@ -25,11 +25,8 @@ const LoanCalculator = () => {
   const totalPayment = monthlyPayment * loanTerm + contractFee;
   const totalInterest = totalPayment - loanAmount;
   
-  // BVKMNN (APR) skaičiavimas - supaprastinta formulė
-  // APR = ((bendri mokesčiai / paskolos suma) / laikotarpis metais) * 100
-  const yearsOfLoan = loanTerm / 12;
-  const totalCosts = totalInterest + contractFee;
-  const bvkmnn = ((totalCosts / loanAmount) / yearsOfLoan) * 100;
+  // BVKMNN (APR) - Bendrosios vidutinės kredito kainos metinė norma
+  const bvkmnn = 8.32;
 
   const handleSubmit = () => {
     toast.success("Paraiška pateikta! Netrukus susisieksime su jumis.", {

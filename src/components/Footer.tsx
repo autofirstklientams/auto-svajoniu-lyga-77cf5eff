@@ -1,4 +1,5 @@
 import { Mail, Phone, MapPin } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import logo from "@/assets/autokopers-logo.jpeg";
 
 const Footer = () => {
@@ -64,8 +65,16 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border mt-8 pt-8 text-center text-muted-foreground">
-          <p>&copy; 2024 AutoKOPERS. Visos teisės saugomos.</p>
+        <div className="border-t border-border mt-8 pt-8">
+          <div className="flex flex-col items-center gap-4">
+            <Button 
+              onClick={() => window.location.href = '/partner-login'}
+              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+            >
+              Partnerio zona
+            </Button>
+            <p className="text-muted-foreground text-sm">&copy; 2024 AutoKOPERS. Visos teisės saugomos.</p>
+          </div>
         </div>
       </div>
     </footer>

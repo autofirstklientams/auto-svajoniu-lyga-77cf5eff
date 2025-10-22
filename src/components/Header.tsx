@@ -73,15 +73,6 @@ const Header = () => {
                 Kontaktai
               </a>
             </nav>
-
-            <div className="flex items-center gap-4">
-              <Button 
-                onClick={() => window.location.href = '/partner-login'}
-                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
-              >
-                Partnerio zona
-              </Button>
-            </div>
           </div>
         </div>
       </header>

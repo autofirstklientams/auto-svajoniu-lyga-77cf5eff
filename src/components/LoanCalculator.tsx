@@ -10,11 +10,26 @@ const LoanCalculator = () => {
   const [loanTerm, setLoanTerm] = useState(72);
   const [downPayment, setDownPayment] = useState(0);
 
-  const monthlyRate = 0.069 / 12; // 6.9% metinė palūkanų norma
+  // Kredito parametrai
+  const annualInterestRate = 0.069; // 6.9% metinė palūkanų norma
+  const monthlyAdminFee = 9.5; // Mėnesinis administravimo mokestis
+  const contractFee = 50; // Vienkartinis sutarties sudarymo mokestis
+  
+  const monthlyRate = annualInterestRate / 12;
   const monthlyPayment = loanAmount > 0 
     ? (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) / 
-      (Math.pow(1 + monthlyRate, loanTerm) - 1)
+      (Math.pow(1 + monthlyRate, loanTerm) - 1) + monthlyAdminFee
     : 0;
+  
+  // Bendros sumos skaičiavimas
+  const totalPayment = monthlyPayment * loanTerm + contractFee;
+  const totalInterest = totalPayment - loanAmount;
+  
+  // BVKMNN (APR) skaičiavimas - supaprastinta formulė
+  // APR = ((bendri mokesčiai / paskolos suma) / laikotarpis metais) * 100
+  const yearsOfLoan = loanTerm / 12;
+  const totalCosts = totalInterest + contractFee;
+  const bvkmnn = ((totalCosts / loanAmount) / yearsOfLoan) * 100;
 
   const handleSubmit = () => {
     toast.success("Paraiška pateikta! Netrukus susisieksime su jumis.", {
@@ -125,9 +140,39 @@ const LoanCalculator = () => {
                   </Button>
                 </div>
 
-                <p className="text-xs text-muted-foreground text-center">
-                  Jei sutartis sudaroma {loanTerm} mėn. sutartis, fiksuota metinė palūkanų norma - 6.9%, 
-                  mėnesinis administravimo mokestis - 9.5 Eur
+                <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+                  <h4 className="font-semibold text-foreground text-sm">Kredito informacija</h4>
+                  <div className="space-y-2 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Metinė palūkanų norma:</span>
+                      <span className="font-medium text-foreground">6.9%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Mėn. administravimo mokestis:</span>
+                      <span className="font-medium text-foreground">9.5 €</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Sutarties sudarymo mokestis:</span>
+                      <span className="font-medium text-foreground">50 €</span>
+                    </div>
+                    <div className="flex justify-between border-t border-border pt-2 mt-2">
+                      <span className="text-muted-foreground">Bendra mokėtina suma:</span>
+                      <span className="font-semibold text-foreground">{totalPayment.toFixed(2)} €</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Iš jų palūkanos ir mokesčiai:</span>
+                      <span className="font-medium text-foreground">{totalInterest.toFixed(2)} €</span>
+                    </div>
+                    <div className="flex justify-between border-t border-border pt-2 mt-2">
+                      <span className="text-muted-foreground font-semibold">BVKMNN:</span>
+                      <span className="font-bold text-primary">{bvkmnn.toFixed(2)}%</span>
+                    </div>
+                  </div>
+                </div>
+
+                <p className="text-xs text-muted-foreground text-center italic">
+                  BVKMNN (Bendrosios vidutinės kredito kainos metinė norma) - tai visi kredito kaštai, 
+                  išreikšti metine procentine norma nuo bendros kredito sumos.
                 </p>
               </div>
             </CardContent>

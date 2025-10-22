@@ -43,6 +43,12 @@ const LoanCalculator = () => {
               <h2 className="text-3xl font-bold mb-8 text-center text-foreground">
                 Automobilio paskolos skaičiuoklė
               </h2>
+              
+              <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
+                <p className="text-sm text-muted-foreground text-center">
+                  <span className="font-semibold text-foreground">Standartinis pavyzdys:</span> Palūkanos gali kisti pagal kredito reitingą
+                </p>
+              </div>
 
               <div className="space-y-6">
                 <div>

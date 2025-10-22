@@ -3,12 +3,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
+import LoanApplicationForm from "./LoanApplicationForm";
 
 const LoanCalculator = () => {
   const [loanAmount, setLoanAmount] = useState(7000);
   const [loanTerm, setLoanTerm] = useState(72);
   const [downPayment, setDownPayment] = useState(0);
+  const [isFormOpen, setIsFormOpen] = useState(false);
 
   // Kredito parametrai
   const annualInterestRate = 0.069; // 6.9% metinė palūkanų norma
@@ -29,14 +30,19 @@ const LoanCalculator = () => {
   const bvkmnn = 8.32;
 
   const handleSubmit = () => {
-    toast.success("Paraiška pateikta! Netrukus susisieksime su jumis.", {
-      description: `Paskolos suma: ${loanAmount}€, Terminas: ${loanTerm} mėn., Mėnesinė įmoka: ${monthlyPayment.toFixed(2)}€`
-    });
+    setIsFormOpen(true);
   };
 
   return (
     <section className="py-16 bg-gradient-to-b from-secondary to-background">
       <div className="container mx-auto px-4">
+        <LoanApplicationForm
+          open={isFormOpen}
+          onOpenChange={setIsFormOpen}
+          loanAmount={loanAmount}
+          loanTerm={loanTerm}
+          monthlyPayment={monthlyPayment}
+        />
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <Card className="shadow-xl">
             <CardContent className="p-8">

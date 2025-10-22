@@ -16,6 +16,9 @@ const LoanCalculator = () => {
   const monthlyAdminFee = 9.5; // Mėnesinis administravimo mokestis
   const contractFee = 50; // Vienkartinis sutarties sudarymo mokestis
   
+  // BVKMNN kinta pagal terminą: 144 mėn = 8.11%, 6 mėn = 9.11%
+  const bvkmnn = 9.11 - ((loanTerm - 6) / (144 - 6)) * (9.11 - 8.11);
+  
   const monthlyRate = annualInterestRate / 12;
   const monthlyPayment = loanAmount > 0 
     ? (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) / 
@@ -25,9 +28,6 @@ const LoanCalculator = () => {
   // Bendros sumos skaičiavimas
   const totalPayment = monthlyPayment * loanTerm + contractFee;
   const totalInterest = totalPayment - loanAmount;
-  
-  // BVKMNN (APR) - Bendrosios vidutinės kredito kainos metinė norma
-  const bvkmnn = 8.32;
 
   const handleSubmit = () => {
     setIsFormOpen(true);

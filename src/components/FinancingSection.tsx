@@ -15,13 +15,13 @@ const features = [
   },
   {
     icon: Clock,
-    title: "Greitas Patvirtinimas",
-    description: "Sprendimas per 24 valandas",
+    title: "Patvirtinimas per 24 val.",
+    description: "Greitas paraiškos nagrinėjimas ir atsakymas",
   },
   {
     icon: Shield,
-    title: "Saugi Tvarka",
-    description: "Skaidrus ir patikimas finansavimo procesas",
+    title: "Saugūs Sandoriai",
+    description: "Patikima ir skaidri finansavimo tvarka",
   },
 ];
 

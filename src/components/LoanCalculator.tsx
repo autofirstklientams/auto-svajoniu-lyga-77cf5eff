@@ -16,8 +16,16 @@ const LoanCalculator = () => {
   const monthlyAdminFee = 9.5; // Mėnesinis administravimo mokestis
   const contractFee = 50; // Vienkartinis sutarties sudarymo mokestis
   
-  // BVKMNN kinta pagal terminą: 144 mėn = 8.11%, 6 mėn = 9.11%
-  const bvkmnn = 9.11 - ((loanTerm - 6) / (144 - 6)) * (9.11 - 8.11);
+  // BVKMNN skaičiavimas pagal sumą ir terminą
+  // Bazinė BVKMNN pagal terminą: 144 mėn = 8.11%, 6 mėn = 9.11%
+  const termBasedRate = 9.11 - ((loanTerm - 6) / (144 - 6)) * (9.11 - 8.11);
+  
+  // Koregavimas pagal paskolos sumą: didesnė suma = mažesnė BVKMNN
+  // 1000€ = +0.5%, 30000€ = -0.3%
+  const amountAdjustment = 0.5 - ((loanAmount - 1000) / (30000 - 1000)) * (0.5 + 0.3);
+  
+  // Galutinė BVKMNN
+  const bvkmnn = termBasedRate + amountAdjustment;
   
   const monthlyRate = annualInterestRate / 12;
   const monthlyPayment = loanAmount > 0 

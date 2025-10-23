@@ -1,52 +1,84 @@
+import { useEffect, useState } from "react";
 import CarCard from "./CarCard";
-import car1 from "@/assets/car-1.jpg";
-import car2 from "@/assets/car-2.jpg";
-import car3 from "@/assets/car-3.jpg";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
-const cars = [
-  {
-    image: car1,
-    title: "BMW X5 M Sport",
-    price: "42,990 €",
-    year: 2022,
-    mileage: "35,000 km",
-    fuel: "Dyzelinas",
-    featured: true,
-  },
-  {
-    image: car2,
-    title: "Mercedes-Benz E-Class",
-    price: "38,500 €",
-    year: 2021,
-    mileage: "42,000 km",
-    fuel: "Benzinas",
-    featured: false,
-  },
-  {
-    image: car3,
-    title: "Tesla Model Y",
-    price: "52,900 €",
-    year: 2023,
-    mileage: "18,000 km",
-    fuel: "Elektra",
-    featured: true,
-  },
-];
+interface Car {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  mileage: number | null;
+  image_url: string | null;
+}
 
 const FeaturedCars = () => {
-  return (
-    <section className="py-20 bg-secondary/30">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4 text-foreground">Rekomenduojami Automobiliai</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Atrinkti geriausių pasiūlymų automobiliai su lanksčiomis finansavimo sąlygomis
-          </p>
-        </div>
+  const [cars, setCars] = useState<Car[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {cars.map((car, index) => (
-            <CarCard key={index} {...car} />
+  useEffect(() => {
+    fetchCars();
+  }, []);
+
+  const fetchCars = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("cars")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(6);
+
+      if (error) throw error;
+      setCars(data || []);
+    } catch (error: any) {
+      toast.error("Klaida užkraunant automobilius");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
+            Kraunama...
+          </h2>
+        </div>
+      </section>
+    );
+  }
+
+  if (cars.length === 0) {
+    return (
+      <section className="py-16 bg-background">
+        <div className="container mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
+            Netrukus bus daugiau automobilių
+          </h2>
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="py-16 bg-background">
+      <div className="container mx-auto px-4">
+        <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
+          Rekomenduojami automobiliai
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {cars.map((car) => (
+            <CarCard
+              key={car.id}
+              title={`${car.make} ${car.model}`}
+              year={car.year}
+              price={`${car.price.toLocaleString()} €`}
+              mileage={`${car.mileage?.toLocaleString() || "N/A"} km`}
+              fuel={"-"}
+              image={car.image_url || "/placeholder.svg"}
+            />
           ))}
         </div>
       </div>

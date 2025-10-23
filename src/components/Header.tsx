@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Phone, Mail, MapPin } from "lucide-react";
 import logo from "@/assets/autokopers-logo.jpeg";
@@ -72,6 +73,11 @@ const Header = () => {
               >
                 Kontaktai
               </a>
+              <Link to="/partner-login">
+                <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
+                  Partnerio zona
+                </Button>
+              </Link>
             </nav>
           </div>
         </div>

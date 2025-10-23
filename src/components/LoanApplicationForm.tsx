@@ -5,6 +5,13 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+
+const formSchema = z.object({
+  name: z.string().trim().min(1, "Vardas privalomas").max(100, "Per ilgas vardas"),
+  email: z.string().trim().email("Neteisingas el. pašto formatas").max(255, "Per ilgas el. paštas"),
+  phone: z.string().trim().regex(/^\+?[0-9\s-]{8,15}$/, "Neteisingas telefono numerio formatas"),
+});
 
 interface LoanApplicationFormProps {
   open: boolean;
@@ -31,8 +38,11 @@ const LoanApplicationForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.phone) {
-      toast.error("Prašome užpildyti visus laukus");
+    const validation = formSchema.safeParse(formData);
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast.error(firstError.message);
       return;
     }
 

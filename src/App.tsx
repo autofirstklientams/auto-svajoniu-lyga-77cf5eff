@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import PartnerLogin from "./pages/PartnerLogin";
 import PartnerDashboard from "./pages/PartnerDashboard";
-import CreateListing from "./pages/CreateListing";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,7 +21,6 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/partner-login" element={<PartnerLogin />} />
           <Route path="/partner-dashboard" element={<PartnerDashboard />} />
-          <Route path="/create-listing" element={<CreateListing />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

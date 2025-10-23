@@ -1,149 +1,199 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, LogOut } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import logo from "@/assets/autokopers-logo.jpeg";
+import { User, Session } from "@supabase/supabase-js";
+import CreateListing from "./CreateListing";
+import { Pencil, Trash2 } from "lucide-react";
 
-// Mock duomenys
-const mockListings = [
-  {
-    id: 1,
-    title: "BMW X5 M Sport",
-    price: "42,990 €",
-    status: "Aktyvus",
-    views: 245,
-  },
-  {
-    id: 2,
-    title: "Audi A6 Quattro",
-    price: "35,500 €",
-    status: "Aktyvus",
-    views: 189,
-  },
-];
+interface Car {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  mileage: number | null;
+  fuel_type: string | null;
+  transmission: string | null;
+  description: string | null;
+  image_url: string | null;
+}
 
 const PartnerDashboard = () => {
   const navigate = useNavigate();
-  const [listings, setListings] = useState(mockListings);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [cars, setCars] = useState<Car[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingCar, setEditingCar] = useState<Car | null>(null);
 
   useEffect(() => {
-    // Patikrinti ar prisijungęs
-    const isLoggedIn = localStorage.getItem("partner_logged_in");
-    if (!isLoggedIn) {
-      navigate("/partner-login");
-    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/partner-login");
+        }
+      }
+    );
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user ?? null);
+      setIsLoading(false);
+      
+      if (!session) {
+        navigate("/partner-login");
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, [navigate]);
 
-  const handleLogout = () => {
-    localStorage.removeItem("partner_logged_in");
-    toast.success("Atsijungėte");
+  useEffect(() => {
+    if (user) {
+      fetchCars();
+    }
+  }, [user]);
+
+  const fetchCars = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("cars")
+        .select("*")
+        .eq("partner_id", user?.id)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setCars(data || []);
+    } catch (error: any) {
+      toast.error("Klaida užkraunant skelbimus");
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Ar tikrai norite ištrinti šį skelbimą?")) return;
+
+    try {
+      const { error } = await supabase.from("cars").delete().eq("id", id);
+      if (error) throw error;
+      
+      toast.success("Skelbimas ištrintas");
+      fetchCars();
+    } catch (error: any) {
+      toast.error("Klaida trinant skelbimą");
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate("/");
   };
 
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center">Kraunama...</div>;
+  }
+
+  if (!user) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-background">
-      <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center gap-4">
-              <img src={logo} alt="AutoKOPERS" className="h-10" />
-              <span className="ml-4 text-sm text-muted-foreground">Partnerio zona</span>
-            </div>
-
-            <Button
-              variant="outline"
-              onClick={handleLogout}
-              className="flex items-center gap-2"
-            >
-              <LogOut className="h-4 w-4" />
-              Atsijungti
-            </Button>
-          </div>
+      <header className="border-b border-border">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold">Partnerio dashboard</h1>
+          <Button variant="outline" onClick={handleLogout}>
+            Atsijungti
+          </Button>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-foreground">Partnerio skydelis</h1>
-          <p className="text-xl text-muted-foreground">
-            Valdykite savo skelbimus ir peržiūrėkite statistiką
-          </p>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Aktyvūs skelbimai</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-primary">{listings.length}</p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Iš viso peržiūrų</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-accent">
-                {listings.reduce((sum, l) => sum + l.views, 0)}
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Užklausos</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-4xl font-bold text-primary">12</p>
-            </CardContent>
-          </Card>
-        </div>
-
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-foreground">Mano skelbimai</h2>
-          <Button
-            onClick={() => navigate("/create-listing")}
-            className="bg-accent hover:bg-accent/90 text-accent-foreground flex items-center gap-2"
-          >
-            <Plus className="h-5 w-5" />
+          <h2 className="text-xl font-semibold">Mano skelbimai</h2>
+          <Button onClick={() => {
+            setEditingCar(null);
+            setShowCreateForm(true);
+          }}>
             Pridėti skelbimą
           </Button>
         </div>
 
-        <div className="grid gap-4">
-          {listings.map((listing) => (
-            <Card key={listing.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-bold mb-2 text-foreground">
-                      {listing.title}
-                    </h3>
-                    <p className="text-2xl font-bold text-primary mb-2">
-                      {listing.price}
-                    </p>
-                    <div className="flex gap-4 text-sm text-muted-foreground">
-                      <span>Statusas: {listing.status}</span>
-                      <span>Peržiūros: {listing.views}</span>
-                    </div>
-                  </div>
+        {showCreateForm && (
+          <CreateListing
+            car={editingCar}
+            onClose={() => {
+              setShowCreateForm(false);
+              setEditingCar(null);
+            }}
+            onSuccess={() => {
+              setShowCreateForm(false);
+              setEditingCar(null);
+              fetchCars();
+            }}
+          />
+        )}
+
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {cars.map((car) => (
+            <Card key={car.id}>
+              <CardHeader>
+                <CardTitle className="flex justify-between items-start">
+                  <span>{car.make} {car.model}</span>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm">
-                      Redaguoti
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => {
+                        setEditingCar(car);
+                        setShowCreateForm(true);
+                      }}
+                    >
+                      <Pencil className="h-4 w-4" />
                     </Button>
-                    <Button variant="outline" size="sm" className="text-destructive">
-                      Ištrinti
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleDelete(car.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {car.image_url && (
+                  <img
+                    src={car.image_url}
+                    alt={`${car.make} ${car.model}`}
+                    className="w-full h-48 object-cover rounded-lg mb-4"
+                  />
+                )}
+                <div className="space-y-2 text-sm">
+                  <p><strong>Metai:</strong> {car.year}</p>
+                  <p><strong>Kaina:</strong> {car.price.toLocaleString()} €</p>
+                  {car.mileage && <p><strong>Rida:</strong> {car.mileage.toLocaleString()} km</p>}
+                  {car.fuel_type && <p><strong>Kuras:</strong> {car.fuel_type}</p>}
+                  {car.transmission && <p><strong>Pavarų dėžė:</strong> {car.transmission}</p>}
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
+
+        {cars.length === 0 && (
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              Dar neturite skelbimų. Pradėkite nuo pirmo skelbimo sukūrimo!
+            </CardContent>
+          </Card>
+        )}
       </main>
     </div>
   );

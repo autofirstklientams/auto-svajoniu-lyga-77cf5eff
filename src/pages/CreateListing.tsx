@@ -1,230 +1,220 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, Upload } from "lucide-react";
 import { toast } from "sonner";
-import logo from "@/assets/autokopers-logo.jpeg";
+import { z } from "zod";
 
-const CreateListing = () => {
-  const navigate = useNavigate();
+const carSchema = z.object({
+  make: z.string().trim().min(1, "Markė privaloma"),
+  model: z.string().trim().min(1, "Modelis privalomas"),
+  year: z.number().min(1900, "Neteisingi metai").max(new Date().getFullYear() + 1),
+  price: z.number().min(0, "Kaina negali būti neigiama"),
+  mileage: z.number().min(0).optional(),
+  fuel_type: z.string().optional(),
+  transmission: z.string().optional(),
+  description: z.string().optional(),
+  image_url: z.string().url("Neteisingas nuotraukos URL").optional().or(z.literal("")),
+});
+
+interface CreateListingProps {
+  car?: any;
+  onClose: () => void;
+  onSuccess: () => void;
+}
+
+const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    const isLoggedIn = localStorage.getItem("partner_logged_in");
-    if (!isLoggedIn) {
-      navigate("/partner-login");
-    }
-  }, [navigate]);
+  const [formData, setFormData] = useState({
+    make: car?.make || "",
+    model: car?.model || "",
+    year: car?.year || new Date().getFullYear(),
+    price: car?.price || 0,
+    mileage: car?.mileage || 0,
+    fuel_type: car?.fuel_type || "",
+    transmission: car?.transmission || "",
+    description: car?.description || "",
+    image_url: car?.image_url || "",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    
+    const validation = carSchema.safeParse(formData);
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
 
-    setTimeout(() => {
-      toast.success("Skelbimas sėkmingai sukurtas!");
-      navigate("/partner-dashboard");
+    setIsLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Vartotojas neprisijungęs");
+
+      const carData = {
+        ...formData,
+        partner_id: user.id,
+        image_url: formData.image_url || null,
+        mileage: formData.mileage || null,
+        fuel_type: formData.fuel_type || null,
+        transmission: formData.transmission || null,
+        description: formData.description || null,
+      };
+
+      if (car) {
+        const { error } = await supabase
+          .from("cars")
+          .update(carData)
+          .eq("id", car.id);
+        if (error) throw error;
+        toast.success("Skelbimas atnaujintas!");
+      } else {
+        const { error } = await supabase.from("cars").insert(carData);
+        if (error) throw error;
+        toast.success("Skelbimas sukurtas!");
+      }
+
+      onSuccess();
+    } catch (error: any) {
+      toast.error(error.message || "Klaida saugant skelbimą");
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-20">
-            <div className="flex items-center">
-              <img src={logo} alt="AutoKOPERS" className="h-10" />
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="make">Markė *</Label>
+              <Input
+                id="make"
+                value={formData.make}
+                onChange={(e) => setFormData({ ...formData, make: e.target.value })}
+                required
+              />
             </div>
 
-            <Button
-              variant="ghost"
-              onClick={() => navigate("/partner-dashboard")}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Grįžti į skydelį
+            <div className="space-y-2">
+              <Label htmlFor="model">Modelis *</Label>
+              <Input
+                id="model"
+                value={formData.model}
+                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="year">Metai *</Label>
+              <Input
+                id="year"
+                type="number"
+                value={formData.year}
+                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="price">Kaina (€) *</Label>
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                value={formData.price}
+                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="mileage">Rida (km)</Label>
+              <Input
+                id="mileage"
+                type="number"
+                value={formData.mileage}
+                onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) })}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="fuel_type">Kuro tipas</Label>
+              <Select
+                value={formData.fuel_type}
+                onValueChange={(value) => setFormData({ ...formData, fuel_type: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pasirinkite" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Benzinas">Benzinas</SelectItem>
+                  <SelectItem value="Dyzelis">Dyzelis</SelectItem>
+                  <SelectItem value="Elektra">Elektra</SelectItem>
+                  <SelectItem value="Hibridinis">Hibridinis</SelectItem>
+                  <SelectItem value="Dujos">Dujos</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="transmission">Pavarų dėžė</Label>
+              <Select
+                value={formData.transmission}
+                onValueChange={(value) => setFormData({ ...formData, transmission: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Pasirinkite" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Mechaninė">Mechaninė</SelectItem>
+                  <SelectItem value="Automatinė">Automatinė</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="image_url">Nuotraukos URL</Label>
+              <Input
+                id="image_url"
+                type="url"
+                value={formData.image_url}
+                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+                placeholder="https://..."
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Aprašymas</Label>
+            <Textarea
+              id="description"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              rows={4}
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? "Saugoma..." : car ? "Atnaujinti" : "Sukurti"}
+            </Button>
+            <Button type="button" variant="outline" onClick={onClose}>
+              Atšaukti
             </Button>
           </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8 max-w-3xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-foreground">Naujas skelbimas</h1>
-          <p className="text-xl text-muted-foreground">
-            Užpildykite automobilio informaciją
-          </p>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Automobilio duomenys</CardTitle>
-            <CardDescription>
-              Visi laukai yra privalomi
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="make">Automobilio markė</Label>
-                  <Input
-                    id="make"
-                    placeholder="pvz. BMW, Audi, Mercedes-Benz"
-                    required
-                    minLength={2}
-                    maxLength={50}
-                    aria-label="Įveskite automobilio markę"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="model">Automobilio modelis</Label>
-                  <Input
-                    id="model"
-                    placeholder="pvz. X5, A6, E-Class"
-                    required
-                    minLength={1}
-                    maxLength={50}
-                    aria-label="Įveskite automobilio modelį"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="year">Pagaminimo metai</Label>
-                  <Input
-                    id="year"
-                    type="number"
-                    placeholder="pvz. 2022"
-                    required
-                    min={1990}
-                    max={new Date().getFullYear() + 1}
-                    aria-label="Įveskite automobilio pagaminimo metus"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="mileage">Rida (kilometrais)</Label>
-                  <Input
-                    id="mileage"
-                    type="number"
-                    placeholder="pvz. 35000"
-                    required
-                    min={0}
-                    max={999999}
-                    aria-label="Įveskite automobilio ridą kilometrais"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="price">Pardavimo kaina (eurais)</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    placeholder="pvz. 42990"
-                    required
-                    min={100}
-                    max={999999}
-                    aria-label="Įveskite automobilio kainą eurais"
-                  />
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fuel">Kuro tipas</Label>
-                  <Select required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pasirinkite" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="benzinas">Benzinas</SelectItem>
-                      <SelectItem value="dyzelinas">Dyzelinas</SelectItem>
-                      <SelectItem value="elektra">Elektra</SelectItem>
-                      <SelectItem value="hibridas">Hibridas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="transmission">Pavarų dėžė</Label>
-                  <Select required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pasirinkite" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="automatine">Automatinė</SelectItem>
-                      <SelectItem value="mechanine">Mechaninė</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="description">Detalus automobilio aprašymas</Label>
-                <Textarea
-                  id="description"
-                  placeholder="Aprašykite automobilio būklę, komplektaciją, papildomą įrangą, priežiūros istoriją ir kitus svarbius aspektus, kurie padės pirkėjui priimti sprendimą..."
-                  rows={6}
-                  required
-                  minLength={50}
-                  maxLength={2000}
-                  aria-label="Įveskite išsamų automobilio aprašymą (mažiausiai 50 simbolių)"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="photos">Automobilio nuotraukos</Label>
-                <div className="border-2 border-dashed border-input rounded-lg p-8 text-center hover:border-primary/50 transition-colors cursor-pointer bg-background">
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-sm text-foreground mb-2 font-medium">
-                    Įkelkite automobilio nuotraukas
-                  </p>
-                  <p className="text-xs text-muted-foreground mb-1">
-                    Spustelėkite čia arba nuvilkite failus
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Palaikomi formatai: PNG, JPG, JPEG (maks. 10MB kiekviena)
-                  </p>
-                  <Input
-                    id="photos"
-                    type="file"
-                    multiple
-                    accept="image/png,image/jpeg,image/jpg"
-                    className="hidden"
-                    aria-label="Pasirinkite automobilio nuotraukas"
-                  />
-                </div>
-              </div>
-
-              <div className="flex gap-4 pt-4">
-                <Button
-                  type="submit"
-                  className="flex-1"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Kuriamas skelbimas..." : "Paskelbti automobilį"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/partner-dashboard")}
-                  disabled={isLoading}
-                >
-                  Atšaukti
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </main>
-    </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 };
 

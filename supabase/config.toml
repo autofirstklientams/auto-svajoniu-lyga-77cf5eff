@@ -1,1 +1,4 @@
 project_id = "vjdzzaerrxfctkkiwkmn"
+
+[functions.send-loan-application]
+verify_jwt = false

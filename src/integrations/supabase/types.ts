@@ -14,7 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      cars: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          fuel_type: string | null
+          id: string
+          image_url: string | null
+          make: string
+          mileage: number | null
+          model: string
+          partner_id: string
+          price: number
+          transmission: string | null
+          updated_at: string | null
+          year: number
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          fuel_type?: string | null
+          id?: string
+          image_url?: string | null
+          make: string
+          mileage?: number | null
+          model: string
+          partner_id: string
+          price: number
+          transmission?: string | null
+          updated_at?: string | null
+          year: number
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          fuel_type?: string | null
+          id?: string
+          image_url?: string | null
+          make?: string
+          mileage?: number | null
+          model?: string
+          partner_id?: string
+          price?: number
+          transmission?: string | null
+          updated_at?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cars_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          company_name: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

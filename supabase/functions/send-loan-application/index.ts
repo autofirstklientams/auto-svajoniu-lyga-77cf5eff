@@ -49,10 +49,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Customer email sent:", customerEmail);
 
-    // Send notification email to admin (you can change this email)
+    // Send notification email to admin
     const adminEmail = await resend.emails.send({
       from: "AutoKopers <onboarding@resend.dev>",
-      to: ["admin@example.com"], // Replace with your admin email
+      to: ["autofirstklientams@gmail.com"],
       subject: `Nauja paskolos paraiška - ${name}`,
       html: `
         <h1>Nauja paskolos paraiška</h1>

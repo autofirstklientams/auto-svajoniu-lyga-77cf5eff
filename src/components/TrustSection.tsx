@@ -3,12 +3,12 @@ import { Shield, Award, Users, Clock } from "lucide-react";
 const features = [
   {
     icon: Shield,
-    title: "Patikima Garantija",
+    title: "Patikima",
     description: "Visi automobiliai su garantija ir draudimu",
   },
   {
     icon: Award,
-    title: "15+ Metų Patirtis",
+    title: "10+ Metų Patirtis",
     description: "Ilgametė patirtis automobilių rinkoje",
   },
   {
@@ -19,7 +19,7 @@ const features = [
   {
     icon: Clock,
     title: "Greitas Procesas",
-    description: "Finansavimas per 24 valandas",
+    description: "Finansavimas per 30 min",
   },
 ];
 

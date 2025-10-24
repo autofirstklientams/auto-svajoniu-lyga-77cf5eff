@@ -16,8 +16,11 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="max-w-2xl text-white">
+          <p className="text-xl md:text-2xl mb-3 text-white/90 font-medium">
+            Sumanių sprendimų finansavimas
+          </p>
           <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            Greitas Automobilio Finansavimas be Stresų
+            Greitas Automobilio Finansavimas be Streso
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-white/90">
             Platus naudotų automobilių pasirinkimas – patikima garantija ir paprasti sprendimai

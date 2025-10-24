@@ -1,9 +1,11 @@
 import { Mail, Phone, MapPin } from "lucide-react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import TrustSection from "@/components/TrustSection";
 import LoanCalculator from "@/components/LoanCalculator";
 import FeaturedCars from "@/components/FeaturedCars";
 import FinancingSection from "@/components/FinancingSection";
+import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -12,13 +14,15 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <div id="financing">
-          <LoanCalculator />
-        </div>
+        <TrustSection />
         <div id="featured-cars">
           <FeaturedCars />
         </div>
+        <div id="financing">
+          <LoanCalculator />
+        </div>
         <FinancingSection />
+        <Testimonials />
         <section id="contact" className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">

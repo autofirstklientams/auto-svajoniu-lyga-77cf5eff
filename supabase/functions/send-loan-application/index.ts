@@ -35,15 +35,20 @@ const handler = async (req: Request): Promise<Response> => {
       to: [email],
       subject: "Jūsų paskolos paraiška gauta",
       html: `
-        <h1>Sveiki, ${name}!</h1>
-        <p>Gavome jūsų automobilio paskolos paraišką su šiais duomenimis:</p>
-        <ul>
-          <li><strong>Paskolos suma:</strong> ${loanAmount} €</li>
-          <li><strong>Terminas:</strong> ${loanTerm} mėn.</li>
-          <li><strong>Planuojama mėnesinė įmoka:</strong> ${monthlyPayment} €</li>
-        </ul>
-        <p>Mūsų specialistai susisieks su jumis artimiausiu metu el. paštu <strong>${email}</strong> arba telefonu <strong>${phone}</strong>.</p>
-        <p>Geros dienos,<br>AutoKopers komanda</p>
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+          <h1 style="color: #333;">Sveiki, ${name}!</h1>
+          <p>Gavome jūsų automobilio paskolos paraišką su šiais duomenimis:</p>
+          <ul>
+            <li><strong>Paskolos suma:</strong> ${loanAmount} €</li>
+            <li><strong>Terminas:</strong> ${loanTerm} mėn.</li>
+            <li><strong>Planuojama mėnesinė įmoka:</strong> ${monthlyPayment} €</li>
+          </ul>
+          <p>Mūsų specialistai susisieks su jumis artimiausiu metu el. paštu <strong>labas@autokopers.lt</strong> arba telefonu <strong>+370 628 51439</strong>.</p>
+          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
+            <p style="color: #666; font-size: 14px;">Geros dienos,<br>AutoKopers komanda</p>
+            <img src="https://www.autokopers.lt/autokopers-social.jpg" alt="AutoKopers" style="max-width: 200px; margin-top: 20px;" />
+          </div>
+        </div>
       `,
     });
 
@@ -52,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send notification email to admin
     const adminEmail = await resend.emails.send({
       from: "AutoKopers <onboarding@resend.dev>",
-      to: ["autofirstklientams@gmail.com"],
+      to: ["labas@autokopers.lt"],
       subject: `Nauja paskolos paraiška - ${name}`,
       html: `
         <h1>Nauja paskolos paraiška</h1>

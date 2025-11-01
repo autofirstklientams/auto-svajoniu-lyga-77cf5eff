@@ -33,26 +33,18 @@ const Header = () => {
             </div>
 
             <nav className="hidden md:flex items-center gap-8">
-              <a 
-                href="#featured-cars" 
-                className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('featured-cars')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+              <Link 
+                to="/car-purchase" 
+                className="text-foreground hover:text-primary font-medium transition-colors"
               >
                 Auto supirkimas
-              </a>
-              <a 
-                href="#featured-cars" 
-                className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('featured-cars')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+              </Link>
+              <Link 
+                to="/car-search" 
+                className="text-foreground hover:text-primary font-medium transition-colors"
               >
                 Auto paieška
-              </a>
+              </Link>
               <a 
                 href="#financing" 
                 className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"

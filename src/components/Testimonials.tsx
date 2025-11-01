@@ -24,7 +24,7 @@ const Testimonials = () => {
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Mūsų Klientai Sako</h2>
+          <h2 className="text-4xl font-bold mb-4">Mūsų klientai sako</h2>
           <p className="text-xl text-muted-foreground">
             Tūkstančiai patenkintų klientų jau rado savo automobilį
           </p>

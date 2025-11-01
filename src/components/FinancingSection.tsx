@@ -48,7 +48,7 @@ const FinancingSection = () => {
             size="lg"
             className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8 shadow-lg"
           >
-            Apskaičiuoti Mėnesinę Įmoką
+            Apskaičiuoti mėnesinę įmoką
           </Button>
         </div>
       </div>

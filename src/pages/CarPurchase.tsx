@@ -1,5 +1,7 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import CarPurchaseForm from "@/components/CarPurchaseForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Car, Euro, Clock, Shield, CheckCircle, Phone } from "lucide-react";
@@ -46,9 +48,12 @@ const steps = [
 ];
 
 const CarPurchase = () => {
+  const [isFormOpen, setIsFormOpen] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
+      <CarPurchaseForm open={isFormOpen} onOpenChange={setIsFormOpen} />
       <main>
         <section className="relative min-h-[400px] flex items-center overflow-hidden bg-gradient-to-r from-primary to-primary/90">
           <div className="container mx-auto px-4 relative z-10">
@@ -142,9 +147,9 @@ const CarPurchase = () => {
                     <Button 
                       size="lg"
                       className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8"
-                      onClick={() => window.location.href = '/#contact'}
+                      onClick={() => setIsFormOpen(true)}
                     >
-                      Susisiekti dabar
+                      Pateikti užklausą
                     </Button>
                   </div>
                 </CardContent>

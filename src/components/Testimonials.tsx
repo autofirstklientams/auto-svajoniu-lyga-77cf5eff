@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Jonas Petraitis",
+    name: "Tomas Pauliukaitis",
     text: "Labai greitas ir profesionalus aptarnavimas. Per kelias dienas gavau finansavimą ir savo svajonių automobilį!",
     rating: 5,
   },
@@ -13,7 +13,7 @@ const testimonials = [
     rating: 5,
   },
   {
-    name: "Mindaugas Jonaitis",
+    name: "Rimvydas Silnevič",
     text: "Puiki patirtis! Padėjo išsirinkti automobilį ir sutvarkė visus finansavimo dokumentus be jokio streso.",
     rating: 5,
   },

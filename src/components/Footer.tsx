@@ -30,8 +30,8 @@ const Footer = () => {
                 </a>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  Apie Mus
+                <a href="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                  Apie mus
                 </a>
               </li>
             </ul>
@@ -73,7 +73,7 @@ const Footer = () => {
             >
               Partnerio zona
             </Button>
-            <p className="text-muted-foreground text-sm">&copy; 2024 AutoKOPERS. Visos teisės saugomos.</p>
+            <p className="text-muted-foreground text-sm">&copy; 2025 AutoKOPERS. Visos teisės saugomos.</p>
           </div>
         </div>
       </div>

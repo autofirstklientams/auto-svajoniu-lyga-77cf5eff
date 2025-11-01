@@ -63,6 +63,12 @@ const Header = () => {
               >
                 Lizingas
               </a>
+              <Link 
+                to="/about" 
+                className="text-foreground hover:text-primary font-medium transition-colors"
+              >
+                Apie mus
+              </Link>
               <a 
                 href="#contact" 
                 className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"

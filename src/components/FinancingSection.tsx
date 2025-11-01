@@ -15,13 +15,8 @@ const features = [
   },
   {
     icon: Clock,
-    title: "Patvirtinimas per 24 val.",
+    title: "Patvirtinimas per 1 val",
     description: "Greitas paraiškos nagrinėjimas ir atsakymas",
-  },
-  {
-    icon: Shield,
-    title: "Saugūs Sandoriai",
-    description: "Patikima ir skaidri finansavimo tvarka",
   },
 ];
 
@@ -36,7 +31,7 @@ const FinancingSection = () => {
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="grid md:grid-cols-3 gap-8 mb-12">
           {features.map((feature, index) => (
             <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all">
               <CardContent className="p-6 text-center">

@@ -13,8 +13,8 @@ const features = [
   },
   {
     icon: Users,
-    title: "5000+ Klientų",
-    description: "Tūkstančiai patenkintų klientų visoje Lietuvoje",
+    title: "Žemos Palūkanos",
+    description: "Konkurencingos palūkanų normos nuo 3.9% metinių",
   },
   {
     icon: Clock,

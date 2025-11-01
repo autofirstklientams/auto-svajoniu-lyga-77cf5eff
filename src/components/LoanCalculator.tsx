@@ -153,7 +153,7 @@ const LoanCalculator = () => {
                     onClick={handleSubmit}
                     className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
                   >
-                    Pateikti paraišką
+                    Gauti pasiūlymą
                   </Button>
                 </div>
 

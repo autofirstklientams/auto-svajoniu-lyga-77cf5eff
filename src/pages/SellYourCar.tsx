@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import CarPurchaseForm from "@/components/CarPurchaseForm";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import hero from "@/assets/hero-car.jpg";
 
 const setMeta = (name: string, content: string) => {
@@ -37,6 +39,7 @@ export default function SellYourCar() {
 
   return (
     <>
+      <Header />
       <header className="bg-gradient-to-b from-background to-muted/40">
         <div className="container mx-auto px-4 py-12 md:py-20">
           <div className="grid md:grid-cols-2 gap-10 items-center">
@@ -96,6 +99,7 @@ export default function SellYourCar() {
         </section>
       </main>
 
+      <Footer />
       <CarPurchaseForm open={open} onOpenChange={setOpen} />
     </>
   );

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Phone } from "lucide-react";
 import CarPurchaseForm from "@/components/CarPurchaseForm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -60,14 +61,24 @@ export default function SellYourCar() {
                 </ul>
               </div>
               <div className="flex flex-wrap gap-3">
-                <Button onClick={() => setOpen(true)} size="lg" className="bg-white text-primary hover:bg-white/90 font-semibold">
+                <Button 
+                  onClick={() => setOpen(true)} 
+                  size="lg" 
+                  className="bg-white text-primary hover:bg-white/90 font-semibold"
+                >
                   Pateikti užklausą
                 </Button>
-                <a href="tel:+37062851439">
-                  <Button variant="outline" size="lg" className="border-white text-white hover:bg-white/10 font-semibold">
+                <Button 
+                  asChild
+                  variant="outline" 
+                  size="lg" 
+                  className="border-white bg-white/10 text-white hover:bg-white/20 hover:text-white font-semibold backdrop-blur-sm"
+                >
+                  <a href="tel:+37062851439" className="flex items-center gap-2">
+                    <Phone className="h-5 w-5" />
                     +370 628 51439
-                  </Button>
-                </a>
+                  </a>
+                </Button>
               </div>
             </div>
           </div>

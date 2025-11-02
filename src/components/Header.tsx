@@ -29,9 +29,9 @@ const Header = () => {
       <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-20">
-            <div className="flex items-center">
-              <img src={logo} alt="AutoKOPERS" className="h-12" />
-            </div>
+            <Link to="/" className="flex items-center">
+              <img src={logo} alt="AutoKOPERS logotipas" className="h-12" />
+            </Link>
 
             {/* Desktop navigation */}
             <nav className="hidden md:flex items-center gap-8">

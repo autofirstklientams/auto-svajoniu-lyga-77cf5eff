@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Phone, Mail, MapPin } from "lucide-react";
+import { Phone, Mail, MapPin, Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/autokopers-logo.jpeg";
 
 const Header = () => {
@@ -32,6 +33,7 @@ const Header = () => {
               <img src={logo} alt="AutoKOPERS" className="h-12" />
             </div>
 
+            {/* Desktop navigation */}
             <nav className="hidden md:flex items-center gap-8">
               <Link 
                 to="/car-purchase" 
@@ -44,6 +46,12 @@ const Header = () => {
                 className="text-foreground hover:text-primary font-medium transition-colors"
               >
                 Auto paieška
+              </Link>
+              <Link 
+                to="/sell-your-car" 
+                className="text-foreground hover:text-primary font-medium transition-colors"
+              >
+                Parduosime tavo automobilį
               </Link>
               <a 
                 href="#financing" 
@@ -77,6 +85,49 @@ const Header = () => {
                 </Button>
               </Link>
             </nav>
+
+            {/* Mobile navigation */}
+            <div className="md:hidden">
+              <Sheet>
+                <SheetTrigger asChild>
+                  <Button variant="outline" size="icon" aria-label="Atidaryti meniu">
+                    <Menu className="h-5 w-5" />
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="right" className="w-72">
+                  <div className="flex flex-col gap-4 mt-8">
+                    <Link to="/car-purchase" className="text-foreground hover:text-primary font-medium">Auto supirkimas</Link>
+                    <Link to="/car-search" className="text-foreground hover:text-primary font-medium">Auto paieška</Link>
+                    <Link to="/sell-your-car" className="text-foreground hover:text-primary font-medium">Parduosime tavo automobilį</Link>
+                    <a 
+                      href="#financing" 
+                      className="text-foreground hover:text-primary font-medium"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById('financing')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
+                      Lizingas
+                    </a>
+                    <Link to="/about" className="text-foreground hover:text-primary font-medium">Apie mus</Link>
+                    <a 
+                      href="#contact" 
+                      className="text-foreground hover:text-primary font-medium"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                    >
+                      Kontaktai
+                    </a>
+                    <Link to="/partner-login">
+                      <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">Partnerio zona</Button>
+                    </Link>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+
           </div>
         </div>
       </header>

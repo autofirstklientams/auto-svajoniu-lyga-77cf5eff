@@ -55,9 +55,6 @@ const FeaturedCars = () => {
     return (
       <section className="py-16 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
-            Netrukus bus daugiau automobilių
-          </h2>
           <ExternalCarPlatforms />
         </div>
       </section>

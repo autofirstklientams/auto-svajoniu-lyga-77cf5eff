@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send confirmation email to customer
     const customerEmail = await resend.emails.send({
       from: "AutoKopers <onboarding@resend.dev>",
-      to: ["autofirstklientams@gmail.com"],
+      to: [email],
       subject: "Jūsų automobilio pardavimo užklausa gauta",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

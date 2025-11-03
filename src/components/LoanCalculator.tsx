@@ -42,7 +42,7 @@ const LoanCalculator = () => {
   };
 
   return (
-    <section className="py-16 bg-gradient-to-b from-secondary to-background">
+    <section className="py-8 bg-gradient-to-b from-secondary to-background">
       <div className="container mx-auto px-4">
         <LoanApplicationForm
           open={isFormOpen}

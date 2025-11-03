@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
-import autopliusLogo from "@/assets/autoplius-logo.svg";
-import autogidasLogo from "@/assets/autogidas-logo.png";
+import autopliusLogo from "@/assets/autoplius-logo-new.jpg";
+import autogidasLogo from "@/assets/autogidas-logo-new.png";
 
 const ExternalCarPlatforms = () => {
   return (

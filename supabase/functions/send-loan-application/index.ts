@@ -57,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
     // Send notification email to admin
     const adminEmail = await resend.emails.send({
       from: "AutoKopers <onboarding@resend.dev>",
-      to: ["labas@autokopers.lt"],
+      to: ["autofirstklientams@gmail.com"],
       subject: `Nauja paskolos paraiška - ${name}`,
       html: `
         <h1>Nauja paskolos paraiška</h1>

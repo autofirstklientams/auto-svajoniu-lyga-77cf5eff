@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import CarCard from "./CarCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import ExternalCarPlatforms from "./ExternalCarPlatforms";
 
 interface Car {
   id: string;
@@ -57,6 +58,7 @@ const FeaturedCars = () => {
           <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
             Netrukus bus daugiau automobilių
           </h2>
+          <ExternalCarPlatforms />
         </div>
       </section>
     );
@@ -81,6 +83,7 @@ const FeaturedCars = () => {
             />
           ))}
         </div>
+        <ExternalCarPlatforms />
       </div>
     </section>
   );

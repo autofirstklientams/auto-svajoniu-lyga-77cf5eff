@@ -34,6 +34,8 @@ const handler = async (req: Request): Promise<Response> => {
       from: "AutoKopers <onboarding@resend.dev>",
       to: [email],
       subject: "Jūsų paskolos paraiška gauta",
+      replyTo: "labas@autokopers.lt",
+      text: `Sveiki, ${name}!\n\nGavome jūsų automobilio paskolos paraišką.\n\nSuma: ${loanAmount} €\nTerminas: ${loanTerm} mėn.\nMėnesinė įmoka: ${monthlyPayment} €.\n\nNetrukus susisieksime.\nAutoKopers komanda`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #333;">Sveiki, ${name}!</h1>
@@ -59,6 +61,8 @@ const handler = async (req: Request): Promise<Response> => {
       from: "AutoKopers <onboarding@resend.dev>",
       to: ["autofirstklientams@gmail.com"],
       subject: `Nauja paskolos paraiška - ${name}`,
+      replyTo: email,
+      text: `Nauja paskolos paraiška. Vardas: ${name}. El. paštas: ${email}. Tel.: ${phone}. Suma: ${loanAmount} €. Terminas: ${loanTerm} mėn. Mėnesinė įmoka: ${monthlyPayment} €`,
       html: `
         <h1>Nauja paskolos paraiška</h1>
         <h2>Kliento informacija:</h2>
@@ -90,6 +94,8 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error("Error in send-loan-application function:", error);
+    // Surface Resend API error details if available
+    const message = error?.message || (typeof error === 'string' ? error : 'Unknown error');
     return new Response(
       JSON.stringify({ error: error.message }),
       {

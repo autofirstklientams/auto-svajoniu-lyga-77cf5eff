@@ -24,12 +24,13 @@ const About = () => {
               <div className="prose prose-lg max-w-none">
                 <h2 className="text-3xl font-bold mb-6 text-foreground">Kas mes esame?</h2>
                 <p className="text-muted-foreground text-lg mb-6">
-                  AutoKOPERS – tai automobilių pardavimo ir finansavimo bendrovė, teikianti patikimus sprendimus jau daugiau nei 10 metų. 
-                  Mūsų tikslas – padėti kiekvienam rasti savo svajonių automobilį su lankstaus finansavimo galimybėmis.
+                  Esame komanda, kuri rūpinasi ne tik pardavimu, bet ir visu procesu – nuo poreikių įvertinimo ir automobilio paieškos
+                  iki sklandaus finansavimo bei dokumentų sutvarkymo. Mums svarbiausia – skaidrumas ir aiški komunikacija, todėl viską
+                  paaiškiname paprastai ir be paslėptų sąlygų.
                 </p>
                 <p className="text-muted-foreground text-lg mb-6">
-                  Mes siūlome platų naudotų automobilių pasirinkimą, garantijuojame jų kokybę ir teikiame visapusišką pagalbą 
-                  visose pirkimo stadijose – nuo automobilio pasirinkimo iki finansavimo sutarties sudarymo.
+                  Turime patikrintų partnerių tinklą Lietuvoje ir užsienyje, todėl galime pasiūlyti tiek čia esančius automobilius,
+                  tiek individualią paiešką visoje Europoje. Kiekvieną automobilį tikriname atsakingai, o sprendimus pritaikome pagal kliento situaciją.
                 </p>
               </div>
 

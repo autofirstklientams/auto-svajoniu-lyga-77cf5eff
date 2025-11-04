@@ -22,16 +22,33 @@ const CarSearch = () => {
           </div>
         </section>
 
+        {/* Pagal užsakymą sekcija – prioritetas */}
+        <section className="py-16 bg-muted/30">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto mb-12 text-center">
+              <h2 className="text-3xl font-bold mb-6 text-foreground">Automobilių paieška pagal užsakymą (Europa)</h2>
+              <p className="text-muted-foreground text-lg mb-6">
+                Pateikite savo poreikius – rasime tinkamiausią automobilį visoje Europoje, patikrinsime jo istoriją ir parvešime iki jūsų durų.
+                Jei reikia, pasirūpinsime ir finansavimu.
+              </p>
+              <div className="flex justify-center">
+                <a href="/#contact" className="inline-flex items-center justify-center h-11 rounded-md px-8 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-colors">
+                  Pateikti užklausą
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Lietuvoje turimi automobiliai */}
         <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto mb-12">
-              <h2 className="text-3xl font-bold mb-6 text-foreground">Mūsų automobiliai</h2>
+              <h2 className="text-3xl font-bold mb-6 text-foreground">Automobiliai Lietuvoje</h2>
               <p className="text-muted-foreground text-lg">
-                Siūlome platų naudotų automobilių pasirinkimą su garantija ir galimybe gauti finansavimą. 
-                Visi automobiliai yra kruopščiai patikrinti ir paruošti pardavimui.
+                Turime atrinktų naudotų automobilių su garantija ir galimybe gauti finansavimą. Visi automobiliai kruopščiai patikrinti ir paruošti pardavimui.
               </p>
             </div>
-            
             <FeaturedCars />
           </div>
         </section>

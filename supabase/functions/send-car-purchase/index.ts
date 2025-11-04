@@ -36,6 +36,8 @@ const handler = async (req: Request): Promise<Response> => {
       from: "AutoKopers <onboarding@resend.dev>",
       to: [email],
       subject: "Jūsų automobilio pardavimo užklausa gauta",
+      replyTo: "labas@autokopers.lt",
+      text: `Sveiki, ${name}!\n\nGavome jūsų automobilio pardavimo užklausą.\nMarkė: ${carMake}\nModelis: ${carModel}\nMetai: ${carYear}\nRida: ${mileage} km\n${additionalInfo ? `Papildoma informacija: ${additionalInfo}` : ''}\n\nNetrukus susisieksime.\nAutoKopers komanda`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #333;">Sveiki, ${name}!</h1>
@@ -64,6 +66,8 @@ const handler = async (req: Request): Promise<Response> => {
       from: "AutoKopers <onboarding@resend.dev>",
       to: ["autofirstklientams@gmail.com"],
       subject: `Nauja automobilio supirkimo užklausa - ${carMake} ${carModel}`,
+      replyTo: email,
+      text: `Nauja užklausa. Vardas: ${name}. El. paštas: ${email}. Tel.: ${phone}. Markė: ${carMake}. Modelis: ${carModel}. Metai: ${carYear}. Rida: ${mileage} km. ${additionalInfo ? `Papildoma informacija: ${additionalInfo}` : ''}`,
       html: `
         <h1>Nauja automobilio supirkimo užklausa</h1>
         <h2>Kliento informacija:</h2>
@@ -97,6 +101,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error("Error in send-car-purchase function:", error);
+    const message = error?.message || (typeof error === 'string' ? error : 'Unknown error');
     return new Response(
       JSON.stringify({ error: error.message }),
       {

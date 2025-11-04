@@ -53,32 +53,24 @@ const Header = () => {
               >
                 Parduosime tavo automobilį
               </Link>
-              <a 
-                href="#financing" 
-                className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('financing')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+              <Link 
+                to="/#financing" 
+                className="text-foreground hover:text-primary font-medium transition-colors"
               >
                 Lizingas
-              </a>
+              </Link>
               <Link 
                 to="/about" 
                 className="text-foreground hover:text-primary font-medium transition-colors"
               >
                 Apie mus
               </Link>
-              <a 
-                href="#contact" 
-                className="text-foreground hover:text-primary font-medium transition-colors cursor-pointer"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+              <Link 
+                to="/#contact" 
+                className="text-foreground hover:text-primary font-medium transition-colors"
               >
                 Kontaktai
-              </a>
+              </Link>
               <Link to="/partner-login">
                 <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
                   Partnerio zona
@@ -99,27 +91,19 @@ const Header = () => {
                     <Link to="/car-purchase" className="text-foreground hover:text-primary font-medium">Auto supirkimas</Link>
                     <Link to="/car-search" className="text-foreground hover:text-primary font-medium">Auto paieška</Link>
                     <Link to="/sell-your-car" className="text-foreground hover:text-primary font-medium">Parduosime tavo automobilį</Link>
-                    <a 
-                      href="#financing" 
+                    <Link 
+                      to="/#financing" 
                       className="text-foreground hover:text-primary font-medium"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById('financing')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
                     >
                       Lizingas
-                    </a>
+                    </Link>
                     <Link to="/about" className="text-foreground hover:text-primary font-medium">Apie mus</Link>
-                    <a 
-                      href="#contact" 
+                    <Link 
+                      to="/#contact" 
                       className="text-foreground hover:text-primary font-medium"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
                     >
                       Kontaktai
-                    </a>
+                    </Link>
                     <Link to="/partner-login">
                       <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">Partnerio zona</Button>
                     </Link>

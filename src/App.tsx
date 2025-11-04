@@ -9,6 +9,7 @@ import CarSearch from "./pages/CarSearch";
 import CarPurchase from "./pages/CarPurchase";
 import PartnerLogin from "./pages/PartnerLogin";
 import PartnerDashboard from "./pages/PartnerDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import SellYourCar from "./pages/SellYourCar";
 
 import NotFound from "./pages/NotFound";
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/sell-your-car" element={<SellYourCar />} />
           <Route path="/partner-login" element={<PartnerLogin />} />
           <Route path="/partner-dashboard" element={<PartnerDashboard />} />
+          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

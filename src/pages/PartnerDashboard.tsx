@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
 import { User, Session } from "@supabase/supabase-js";
 import CreateListing from "./CreateListing";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, LogOut } from "lucide-react";
 
 interface Car {
   id: string;
@@ -25,6 +25,7 @@ const PartnerDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [cars, setCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -38,6 +39,10 @@ const PartnerDashboard = () => {
         
         if (!session) {
           navigate("/partner-login");
+        } else {
+          setTimeout(() => {
+            checkUserRole(session.user.id);
+          }, 0);
         }
       }
     );
@@ -49,11 +54,27 @@ const PartnerDashboard = () => {
       
       if (!session) {
         navigate("/partner-login");
+      } else {
+        checkUserRole(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  const checkUserRole = async (userId: string) => {
+    try {
+      const { data: roles } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+      
+      const hasAdminRole = roles?.some(r => r.role === "admin");
+      setIsAdmin(hasAdminRole || false);
+    } catch (error) {
+      console.error("Error checking user role:", error);
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -108,21 +129,40 @@ const PartnerDashboard = () => {
       <header className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold">Partnerio dashboard</h1>
-          <Button variant="outline" onClick={handleLogout}>
-            Atsijungti
-          </Button>
+          <div className="flex gap-2">
+            {isAdmin && (
+              <Button 
+                onClick={() => navigate("/admin-dashboard")}
+                variant="outline"
+              >
+                Administratoriaus zona
+              </Button>
+            )}
+            <Button variant="outline" onClick={handleLogout}>
+              <LogOut className="h-4 w-4 mr-2" />
+              Atsijungti
+            </Button>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-xl font-semibold">Mano skelbimai</h2>
-          <Button onClick={() => {
-            setEditingCar(null);
-            setShowCreateForm(true);
-          }}>
-            Pridėti skelbimą
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              onClick={() => window.open(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`, '_blank')}
+              variant="outline"
+            >
+              Atsisiųsti Autoplius XML
+            </Button>
+            <Button onClick={() => {
+              setEditingCar(null);
+              setShowCreateForm(true);
+            }}>
+              Pridėti skelbimą
+            </Button>
+          </div>
         </div>
 
         {showCreateForm && (

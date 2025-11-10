@@ -14,6 +14,38 @@ export type Database = {
   }
   public: {
     Tables: {
+      car_images: {
+        Row: {
+          car_id: string
+          created_at: string | null
+          display_order: number
+          id: string
+          image_url: string
+        }
+        Insert: {
+          car_id: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          image_url: string
+        }
+        Update: {
+          car_id?: string
+          created_at?: string | null
+          display_order?: number
+          id?: string
+          image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "car_images_car_id_fkey"
+            columns: ["car_id"]
+            isOneToOne: false
+            referencedRelation: "cars"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cars: {
         Row: {
           created_at: string | null

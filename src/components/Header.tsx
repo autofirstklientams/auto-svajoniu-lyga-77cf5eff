@@ -1,10 +1,27 @@
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Phone, Mail, MapPin, Menu } from "lucide-react";
+import { Phone, Mail, MapPin, Menu, LogIn, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/autokopers-logo.jpeg";
+import { supabase } from "@/integrations/supabase/client";
 
 const Header = () => {
+  const [user, setUser] = useState<any>(null);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return (
     <>
       <div className="bg-muted/50 border-b border-border">
@@ -71,11 +88,24 @@ const Header = () => {
               >
                 Kontaktai
               </Link>
-              <Link to="/partner-login">
-                <Button variant="outline" className="border-primary text-primary hover:bg-primary/10">
-                  Partnerio zona
+              {user ? (
+                <Button 
+                  onClick={() => navigate("/partner-dashboard")}
+                  className="border-primary text-primary-foreground"
+                >
+                  <User className="h-4 w-4 mr-2" />
+                  Mano zona
                 </Button>
-              </Link>
+              ) : (
+                <Button 
+                  onClick={() => navigate("/partner-login")}
+                  variant="outline" 
+                  className="border-primary text-primary hover:bg-primary/10"
+                >
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Prisijungti
+                </Button>
+              )}
             </nav>
 
             {/* Mobile navigation */}
@@ -104,9 +134,24 @@ const Header = () => {
                     >
                       Kontaktai
                     </Link>
-                    <Link to="/partner-login">
-                      <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary/10">Partnerio zona</Button>
-                    </Link>
+                    {user ? (
+                      <Button 
+                        onClick={() => navigate("/partner-dashboard")}
+                        className="w-full"
+                      >
+                        <User className="h-4 w-4 mr-2" />
+                        Mano zona
+                      </Button>
+                    ) : (
+                      <Button 
+                        onClick={() => navigate("/partner-login")}
+                        variant="outline" 
+                        className="w-full border-primary text-primary hover:bg-primary/10"
+                      >
+                        <LogIn className="h-4 w-4 mr-2" />
+                        Prisijungti
+                      </Button>
+                    )}
                   </div>
                 </SheetContent>
               </Sheet>

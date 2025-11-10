@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
+import { Upload, X } from "lucide-react";
 
 const carSchema = z.object({
   make: z.string().trim().min(1, "Markė privaloma"),
@@ -18,7 +19,6 @@ const carSchema = z.object({
   fuel_type: z.string().optional(),
   transmission: z.string().optional(),
   description: z.string().optional(),
-  image_url: z.string().url("Neteisingas nuotraukos URL").optional().or(z.literal("")),
 });
 
 interface CreateListingProps {
@@ -29,6 +29,8 @@ interface CreateListingProps {
 
 const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(car?.image_url || "");
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
@@ -38,8 +40,28 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
     fuel_type: car?.fuel_type || "",
     transmission: car?.transmission || "",
     description: car?.description || "",
-    image_url: car?.image_url || "",
   });
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Nuotrauka per didelė. Maksimalus dydis: 5MB");
+        return;
+      }
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,10 +77,30 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Vartotojas neprisijungęs");
 
+      let imageUrl = car?.image_url || null;
+
+      // Upload image if there's a new file
+      if (imageFile) {
+        const fileExt = imageFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        
+        const { error: uploadError, data: uploadData } = await supabase.storage
+          .from('car-images')
+          .upload(fileName, imageFile);
+
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('car-images')
+          .getPublicUrl(fileName);
+
+        imageUrl = publicUrl;
+      }
+
       const carData = {
         ...formData,
         partner_id: user.id,
-        image_url: formData.image_url || null,
+        image_url: imageUrl,
         mileage: formData.mileage || null,
         fuel_type: formData.fuel_type || null,
         transmission: formData.transmission || null,
@@ -183,14 +225,43 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image_url">Nuotraukos URL</Label>
-              <Input
-                id="image_url"
-                type="url"
-                value={formData.image_url}
-                onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
-                placeholder="https://..."
-              />
+              <Label htmlFor="image">Nuotrauka *</Label>
+              <div className="space-y-4">
+                {imagePreview ? (
+                  <div className="relative">
+                    <img 
+                      src={imagePreview} 
+                      alt="Preview" 
+                      className="w-full h-64 object-cover rounded-lg"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2"
+                      onClick={handleRemoveImage}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ) : (
+                  <label 
+                    htmlFor="image" 
+                    className="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                  >
+                    <Upload className="h-12 w-12 text-muted-foreground mb-2" />
+                    <span className="text-sm text-muted-foreground">Įkelkite nuotrauką</span>
+                    <span className="text-xs text-muted-foreground mt-1">Max 5MB</span>
+                  </label>
+                )}
+                <Input
+                  id="image"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </div>
             </div>
           </div>
 

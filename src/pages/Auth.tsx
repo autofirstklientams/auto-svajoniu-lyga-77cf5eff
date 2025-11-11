@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { z } from "zod";
+import logo from "@/assets/autokopers-logo.jpeg";
 
 const authSchema = z.object({
   email: z.string().trim().email("Neteisingas el. pašto formatas"),
@@ -87,7 +88,11 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-secondary to-background p-4">
-      <Card className="w-full max-w-md">
+      <div className="w-full max-w-md space-y-6">
+        <Link to="/" className="flex justify-center">
+          <img src={logo} alt="AutoKOPERS logotipas" className="h-16" />
+        </Link>
+        <Card className="w-full">
         <CardHeader>
           <CardTitle className="text-2xl text-center">Partnerio zona</CardTitle>
         </CardHeader>
@@ -165,6 +170,7 @@ const Auth = () => {
           </Tabs>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 };

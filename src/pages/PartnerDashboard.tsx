@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { User, Session } from "@supabase/supabase-js";
 import CreateListing from "./CreateListing";
 import { Pencil, Trash2, LogOut } from "lucide-react";
+import logo from "@/assets/autokopers-logo.jpeg";
 
 interface Car {
   id: string;
@@ -128,7 +129,9 @@ const PartnerDashboard = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b border-border">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Partnerio dashboard</h1>
+          <Link to="/" className="flex items-center">
+            <img src={logo} alt="AutoKOPERS logotipas" className="h-12" />
+          </Link>
           <div className="flex gap-2">
             {isAdmin && (
               <Button 

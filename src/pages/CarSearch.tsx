@@ -1,6 +1,7 @@
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FeaturedCars from "@/components/FeaturedCars";
+import CarSearchForm from "@/components/CarSearchForm";
 import { Search } from "lucide-react";
 
 const CarSearch = () => {
@@ -25,18 +26,13 @@ const CarSearch = () => {
         {/* Pagal užsakymą sekcija – prioritetas */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
-            <div className="max-w-4xl mx-auto mb-12 text-center">
-              <h2 className="text-3xl font-bold mb-6 text-foreground">Automobilių paieška pagal užsakymą (Europa)</h2>
-              <p className="text-muted-foreground text-lg mb-6">
+            <div className="mb-12 text-center">
+              <h2 className="text-3xl font-bold mb-4 text-foreground">Automobilių paieška pagal užsakymą (Europa)</h2>
+              <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
                 Pateikite savo poreikius – rasime tinkamiausią automobilį visoje Europoje, patikrinsime jo istoriją ir parvešime iki jūsų durų.
-                Jei reikia, pasirūpinsime ir finansavimu.
               </p>
-              <div className="flex justify-center">
-                <a href="/#contact" className="inline-flex items-center justify-center h-11 rounded-md px-8 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-colors">
-                  Pateikti užklausą
-                </a>
-              </div>
             </div>
+            <CarSearchForm />
           </div>
         </section>
 

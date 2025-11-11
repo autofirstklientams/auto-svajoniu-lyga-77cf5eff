@@ -103,7 +103,7 @@ const Header = () => {
                   className="border-primary text-primary hover:bg-primary/10"
                 >
                   <LogIn className="h-4 w-4 mr-2" />
-                  Prisijungti
+                  Partnerio zona
                 </Button>
               )}
             </nav>
@@ -149,7 +149,7 @@ const Header = () => {
                         className="w-full border-primary text-primary hover:bg-primary/10"
                       >
                         <LogIn className="h-4 w-4 mr-2" />
-                        Prisijungti
+                        Partnerio zona
                       </Button>
                     )}
                   </div>

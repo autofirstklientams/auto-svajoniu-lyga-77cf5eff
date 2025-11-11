@@ -48,8 +48,14 @@ export type Database = {
       }
       cars: {
         Row: {
+          body_type: string | null
+          color: string | null
+          condition: string | null
           created_at: string | null
+          defects: string | null
           description: string | null
+          doors: number | null
+          engine_capacity: number | null
           fuel_type: string | null
           id: string
           image_url: string | null
@@ -57,14 +63,24 @@ export type Database = {
           mileage: number | null
           model: string
           partner_id: string
+          power_kw: number | null
           price: number
+          seats: number | null
+          steering_wheel: string | null
           transmission: string | null
           updated_at: string | null
+          vin: string | null
           year: number
         }
         Insert: {
+          body_type?: string | null
+          color?: string | null
+          condition?: string | null
           created_at?: string | null
+          defects?: string | null
           description?: string | null
+          doors?: number | null
+          engine_capacity?: number | null
           fuel_type?: string | null
           id?: string
           image_url?: string | null
@@ -72,14 +88,24 @@ export type Database = {
           mileage?: number | null
           model: string
           partner_id: string
+          power_kw?: number | null
           price: number
+          seats?: number | null
+          steering_wheel?: string | null
           transmission?: string | null
           updated_at?: string | null
+          vin?: string | null
           year: number
         }
         Update: {
+          body_type?: string | null
+          color?: string | null
+          condition?: string | null
           created_at?: string | null
+          defects?: string | null
           description?: string | null
+          doors?: number | null
+          engine_capacity?: number | null
           fuel_type?: string | null
           id?: string
           image_url?: string | null
@@ -87,9 +113,13 @@ export type Database = {
           mileage?: number | null
           model?: string
           partner_id?: string
+          power_kw?: number | null
           price?: number
+          seats?: number | null
+          steering_wheel?: string | null
           transmission?: string | null
           updated_at?: string | null
+          vin?: string | null
           year?: number
         }
         Relationships: [

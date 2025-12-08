@@ -25,7 +25,7 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <div id="financing">
+        <div id="loan-details">
           <LoanCalculator />
         </div>
         <TrustSection />

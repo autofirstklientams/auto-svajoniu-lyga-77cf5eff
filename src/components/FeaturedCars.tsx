@@ -41,11 +41,11 @@ const FeaturedCars = () => {
 
   if (isLoading) {
     return (
-      <section className="py-16 bg-background">
+      <section id="featured-cars" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
-            Kraunama...
-          </h2>
+          <div className="flex items-center justify-center min-h-[200px]">
+            <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+          </div>
         </div>
       </section>
     );
@@ -53,7 +53,7 @@ const FeaturedCars = () => {
 
   if (cars.length === 0) {
     return (
-      <section className="py-16 bg-background">
+      <section id="featured-cars" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
           <ExternalCarPlatforms />
         </div>
@@ -62,22 +62,32 @@ const FeaturedCars = () => {
   }
 
   return (
-    <section className="py-16 bg-background">
+    <section id="featured-cars" className="py-20 bg-muted/30">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
-          Rekomenduojami automobiliai
-        </h2>
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            Rekomenduojami automobiliai
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Atrinkti automobiliai su patikrinta istorija ir konkurencinga kaina
+          </p>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {cars.map((car) => (
-            <CarCard
-              key={car.id}
-              title={`${car.make} ${car.model}`}
-              year={car.year}
-              price={`${car.price.toLocaleString()} €`}
-              mileage={`${car.mileage?.toLocaleString() || "N/A"} km`}
-              fuel={"-"}
-              image={car.image_url || "/placeholder.svg"}
-            />
+          {cars.map((car, index) => (
+            <div 
+              key={car.id} 
+              className="animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <CarCard
+                title={`${car.make} ${car.model}`}
+                year={car.year}
+                price={`${car.price.toLocaleString()} €`}
+                mileage={`${car.mileage?.toLocaleString() || "N/A"} km`}
+                fuel={"-"}
+                image={car.image_url || "/placeholder.svg"}
+              />
+            </div>
           ))}
         </div>
         <ExternalCarPlatforms />

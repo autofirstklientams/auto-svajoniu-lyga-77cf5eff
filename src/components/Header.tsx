@@ -94,7 +94,7 @@ const Header = () => {
                   className="border-primary text-primary-foreground"
                 >
                   <User className="h-4 w-4 mr-2" />
-                  Mano zona
+                  Partnerio zona
                 </Button>
               ) : (
                 <Button 
@@ -140,7 +140,7 @@ const Header = () => {
                         className="w-full"
                       >
                         <User className="h-4 w-4 mr-2" />
-                        Mano zona
+                        Partnerio zona
                       </Button>
                     ) : (
                       <Button 

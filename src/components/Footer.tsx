@@ -1,6 +1,7 @@
-import { Mail, Phone, MapPin } from "lucide-react";
+import { Mail, Phone, MapPin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/autokopers-logo.jpeg";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -8,45 +9,67 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <div className="flex items-center mb-4">
+            <Link to="/" className="flex items-center mb-4">
               <img src={logo} alt="AutoKOPERS" className="h-10" />
-            </div>
-            <p className="text-muted-foreground">
+            </Link>
+            <p className="text-muted-foreground mb-4">
               Patikimas automobilių pardavimas ir finansavimas Lietuvoje
             </p>
+            <div className="flex gap-3">
+              <a 
+                href="https://facebook.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
+                <Facebook className="h-5 w-5" />
+              </a>
+              <a 
+                href="https://instagram.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-10 h-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
+                <Instagram className="h-5 w-5" />
+              </a>
+            </div>
           </div>
 
           <div>
             <h3 className="font-bold text-lg mb-4 text-foreground">Nuorodos</h3>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
                   Automobiliai
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                  Finansavimas
-                </a>
+                <Link to="/car-search" className="text-muted-foreground hover:text-primary transition-colors">
+                  Paieška
+                </Link>
               </li>
               <li>
-                <a href="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
                   Apie mus
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-bold text-lg mb-4 text-foreground">Kontaktai</h3>
-            <ul className="space-y-2 text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                +370 628 51439
+            <ul className="space-y-3 text-muted-foreground">
+              <li>
+                <a href="tel:+37062851439" className="flex items-center gap-2 hover:text-primary transition-colors">
+                  <Phone className="h-4 w-4" />
+                  +370 628 51439
+                </a>
               </li>
-              <li className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                labas@autokopers.lt
+              <li>
+                <a href="mailto:labas@autokopers.lt" className="flex items-center gap-2 hover:text-primary transition-colors">
+                  <Mail className="h-4 w-4" />
+                  labas@autokopers.lt
+                </a>
               </li>
               <li className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
@@ -58,22 +81,32 @@ const Footer = () => {
           <div>
             <h3 className="font-bold text-lg mb-4 text-foreground">Darbo laikas</h3>
             <ul className="space-y-2 text-muted-foreground">
-              <li>Pr-Pt: 9:00 - 18:00</li>
-              <li>Št: 10:00 - 16:00</li>
-              <li>Sk: Išeiginė</li>
+              <li className="flex justify-between">
+                <span>Pr-Pt:</span>
+                <span>9:00 - 18:00</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Št:</span>
+                <span>10:00 - 16:00</span>
+              </li>
+              <li className="flex justify-between">
+                <span>Sk:</span>
+                <span>Išeiginė</span>
+              </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-border mt-8 pt-8">
-          <div className="flex flex-col items-center gap-4">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-muted-foreground text-sm">&copy; 2025 AutoKOPERS. Visos teisės saugomos.</p>
             <Button 
               onClick={() => window.location.href = '/partner-login'}
-              className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+              variant="outline"
+              size="sm"
             >
               Partnerio zona
             </Button>
-            <p className="text-muted-foreground text-sm">&copy; 2025 AutoKOPERS. Visos teisės saugomos.</p>
           </div>
         </div>
       </div>

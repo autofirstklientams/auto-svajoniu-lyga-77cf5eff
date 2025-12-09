@@ -71,7 +71,7 @@ const Header = () => {
                 Parduosime tavo automobilį
               </Link>
               <Link 
-                to="/#financing" 
+                to="/leasing" 
                 className="text-foreground hover:text-primary font-medium transition-colors"
               >
                 Lizingas
@@ -122,7 +122,7 @@ const Header = () => {
                     <Link to="/car-search" className="text-foreground hover:text-primary font-medium">Auto paieška</Link>
                     <Link to="/sell-your-car" className="text-foreground hover:text-primary font-medium">Parduosime tavo automobilį</Link>
                     <Link 
-                      to="/#financing" 
+                      to="/leasing" 
                       className="text-foreground hover:text-primary font-medium"
                     >
                       Lizingas

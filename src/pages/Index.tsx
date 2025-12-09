@@ -2,7 +2,6 @@ import { Mail, Phone, MapPin } from "lucide-react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import TrustSection from "@/components/TrustSection";
-import LoanCalculator from "@/components/LoanCalculator";
 import FeaturedCars from "@/components/FeaturedCars";
 import FinancingSection from "@/components/FinancingSection";
 import Testimonials from "@/components/Testimonials";
@@ -25,9 +24,6 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <div id="loan-details">
-          <LoanCalculator />
-        </div>
         <TrustSection />
         <div id="featured-cars">
           <FeaturedCars />

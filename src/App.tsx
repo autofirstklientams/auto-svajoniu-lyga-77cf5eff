@@ -11,6 +11,7 @@ import PartnerLogin from "./pages/PartnerLogin";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import SellYourCar from "./pages/SellYourCar";
+import Leasing from "./pages/Leasing";
 import CookieConsent from "./components/CookieConsent";
 import NotFound from "./pages/NotFound";
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/car-search" element={<CarSearch />} />
           <Route path="/car-purchase" element={<CarPurchase />} />
           <Route path="/sell-your-car" element={<SellYourCar />} />
+          <Route path="/leasing" element={<Leasing />} />
           <Route path="/partner-login" element={<PartnerLogin />} />
           <Route path="/partner-dashboard" element={<PartnerDashboard />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />

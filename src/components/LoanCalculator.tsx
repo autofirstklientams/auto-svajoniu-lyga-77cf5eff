@@ -1,9 +1,15 @@
 import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Calculator, ChevronRight, Info, Clock, FileCheck, CreditCard, CheckCircle2 } from "lucide-react";
 import LoanApplicationForm from "./LoanApplicationForm";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface LoanCalculatorProps {
   showCalculator?: boolean;
@@ -12,17 +18,11 @@ interface LoanCalculatorProps {
 const LoanCalculator = ({ showCalculator = true }: LoanCalculatorProps) => {
   const [loanAmount, setLoanAmount] = useState(7000);
   const [loanTerm, setLoanTerm] = useState(72);
-  const [downPayment, setDownPayment] = useState(0);
   const [isFormOpen, setIsFormOpen] = useState(false);
 
-  // Kredito parametrai
   const annualInterestRate = 0.069;
   const monthlyAdminFee = 9.5;
   const contractFee = 50;
-  
-  const termBasedRate = 9.11 - ((loanTerm - 6) / (144 - 6)) * (9.11 - 8.11);
-  const amountAdjustment = 0.5 - ((loanAmount - 1000) / (30000 - 1000)) * (0.5 + 0.3);
-  const bvkmnn = termBasedRate + amountAdjustment;
   
   const monthlyRate = annualInterestRate / 12;
   const monthlyPayment = loanAmount > 0 
@@ -31,11 +31,17 @@ const LoanCalculator = ({ showCalculator = true }: LoanCalculatorProps) => {
     : 0;
   
   const totalPayment = monthlyPayment * loanTerm + contractFee;
-  const totalInterest = totalPayment - loanAmount;
 
   const handleSubmit = () => {
     setIsFormOpen(true);
   };
+
+  const steps = [
+    { icon: FileCheck, title: "Užpildykite paraišką", desc: "Nurodykite paskolos sumą ir terminą" },
+    { icon: Clock, title: "Gaukite pasiūlymą", desc: "Atsakymas per 24 val." },
+    { icon: CreditCard, title: "Pasirašykite sutartį", desc: "Patogiai internetu" },
+    { icon: CheckCircle2, title: "Gaukite pinigus", desc: "Tiesiogiai į sąskaitą" },
+  ];
 
   return (
     <section className="py-16 bg-gradient-to-b from-muted/50 to-background">
@@ -57,105 +63,157 @@ const LoanCalculator = ({ showCalculator = true }: LoanCalculatorProps) => {
           </p>
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* How it works section */}
-          <div className="space-y-6">
-            <div className="flex gap-4 p-4 rounded-xl bg-background border border-border hover:shadow-md transition-shadow">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-bold text-xl">
-                1
+        {/* Steps - horizontal on desktop */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
+          {steps.map((step, index) => (
+            <div 
+              key={index}
+              className="flex flex-col items-center text-center p-4 rounded-xl bg-background border border-border hover:shadow-md hover:border-primary/30 transition-all"
+            >
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${
+                index === steps.length - 1 
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-accent text-accent-foreground'
+              }`}>
+                <step.icon className="h-5 w-5" />
               </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1 text-foreground">Užpildykite paraišką</h3>
-                <p className="text-muted-foreground">
-                  Nurodykite norimą paskolos sumą, terminą ir savo asmens duomenis
-                </p>
-              </div>
+              <h3 className="font-semibold text-sm mb-1 text-foreground">{step.title}</h3>
+              <p className="text-xs text-muted-foreground">{step.desc}</p>
             </div>
-
-            <div className="flex gap-4 p-4 rounded-xl bg-background border border-border hover:shadow-md transition-shadow">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-bold text-xl">
-                2
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1 text-foreground">Gaukite pasiūlymą</h3>
-                <p className="text-muted-foreground">
-                  Finansinis partneris pateiks asmeninį paskolos pasiūlymą per 24 val.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4 p-4 rounded-xl bg-background border border-border hover:shadow-md transition-shadow">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-accent text-accent-foreground flex items-center justify-center font-bold text-xl">
-                3
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1 text-foreground">Pasirašykite sutartį</h3>
-                <p className="text-muted-foreground">
-                  Peržiūrėkite pasiūlymą ir sudarykite paskolos sutartį patogiai internetu
-                </p>
-              </div>
-            </div>
-
-            <div className="flex gap-4 p-4 rounded-xl bg-primary/5 border border-primary/20 hover:shadow-md transition-shadow">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-xl">
-                ✓
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1 text-foreground">Gaukite paskolą</h3>
-                <p className="text-muted-foreground">
-                  Paskolos pinigai bus pervesti į jūsų banko sąskaitą
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Credit info card */}
-          <Card className="shadow-lg">
-            <CardContent className="p-6 lg:p-8">
-              <h3 className="text-xl font-bold mb-6 text-foreground">Kredito sąlygos</h3>
-              
-              <div className="space-y-4">
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">Metinė palūkanų norma</span>
-                  <span className="font-semibold text-foreground text-lg">6.9%</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">Paskolos suma</span>
-                  <span className="font-semibold text-foreground">1 000 € – 30 000 €</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">Terminas</span>
-                  <span className="font-semibold text-foreground">6 – 144 mėn.</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">Mėn. administravimo mokestis</span>
-                  <span className="font-semibold text-foreground">9.50 €</span>
-                </div>
-                <div className="flex justify-between items-center py-3 border-b border-border">
-                  <span className="text-muted-foreground">Sutarties sudarymo mokestis</span>
-                  <span className="font-semibold text-foreground">50 €</span>
-                </div>
-                <div className="flex justify-between items-center py-3 bg-primary/5 rounded-lg px-4 -mx-4">
-                  <span className="font-semibold text-foreground">BVKMNN nuo</span>
-                  <span className="font-bold text-primary text-xl">8.11%</span>
-                </div>
-              </div>
-
-              <p className="text-xs text-muted-foreground mt-6 italic">
-                BVKMNN (Bendrosios vidutinės kredito kainos metinė norma) – visi kredito kaštai, 
-                išreikšti metine procentine norma.
-              </p>
-
-              <Button 
-                onClick={handleSubmit}
-                className="w-full mt-6 bg-accent hover:bg-accent/90 text-accent-foreground"
-                size="lg"
-              >
-                Pateikti paraišką
-              </Button>
-            </CardContent>
-          </Card>
+          ))}
         </div>
+
+        {/* Calculator Card - full width, compact */}
+        <Card className="shadow-xl border-0 max-w-4xl mx-auto overflow-hidden">
+          <CardContent className="p-0">
+            <div className="grid md:grid-cols-2">
+              {/* Calculator side */}
+              <div className="p-6 lg:p-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Calculator className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold text-foreground">Paskolos skaičiuoklė</h3>
+                </div>
+
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <label className="text-sm font-medium text-foreground">Paskolos suma</label>
+                      <span className="text-lg font-bold text-primary">{loanAmount.toLocaleString()} €</span>
+                    </div>
+                    <Slider
+                      value={[loanAmount]}
+                      onValueChange={(value) => setLoanAmount(value[0])}
+                      min={1000}
+                      max={30000}
+                      step={100}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>1 000 €</span>
+                      <span>30 000 €</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-3">
+                      <label className="text-sm font-medium text-foreground">Terminas</label>
+                      <span className="text-lg font-bold text-primary">{loanTerm} mėn.</span>
+                    </div>
+                    <Slider
+                      value={[loanTerm]}
+                      onValueChange={(value) => setLoanTerm(value[0])}
+                      min={6}
+                      max={144}
+                      step={6}
+                    />
+                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                      <span>6 mėn.</span>
+                      <span>144 mėn.</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-primary/5 rounded-xl p-4">
+                    <div className="flex justify-between items-center mb-1">
+                      <div className="flex items-center gap-1">
+                        <span className="text-sm text-muted-foreground">Mėnesio įmoka nuo</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger>
+                              <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <p>Skaičiuojama su 6.9% metinėmis palūkanomis + 9.50 € mėn. mokestis. Galutinė suma priklauso nuo kredito reitingo.</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </div>
+                    <div className="text-4xl font-bold text-primary">
+                      {monthlyPayment.toFixed(0)} <span className="text-xl">€/mėn.</span>
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Bendra grąžintina suma: {totalPayment.toFixed(0)} €
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Conditions side */}
+              <div className="bg-muted/30 p-6 lg:p-8 flex flex-col">
+                <h4 className="font-semibold text-foreground mb-4">Kredito sąlygos</h4>
+                
+                <div className="space-y-3 flex-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Metinė palūkanų norma</span>
+                    <span className="font-semibold text-foreground">6.9%</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Paskolos suma</span>
+                    <span className="font-semibold text-foreground">1 000 € – 30 000 €</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Terminas</span>
+                    <span className="font-semibold text-foreground">6 – 144 mėn.</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Mėn. administravimo mokestis</span>
+                    <span className="font-semibold text-foreground">9.50 €</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Sutarties mokestis</span>
+                    <span className="font-semibold text-foreground">50 €</span>
+                  </div>
+                  <div className="flex justify-between text-sm pt-2 border-t border-border">
+                    <div className="flex items-center gap-1">
+                      <span className="font-medium text-foreground">BVKMNN nuo</span>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger>
+                            <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                          </TooltipTrigger>
+                          <TooltipContent className="max-w-xs">
+                            <p>Bendrosios vidutinės kredito kainos metinė norma – visi kredito kaštai, išreikšti metine procentine norma.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </div>
+                    <span className="font-bold text-primary">8.11%</span>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={handleSubmit}
+                  className="w-full mt-6 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                  size="lg"
+                >
+                  Pateikti paraišką
+                  <ChevronRight className="ml-1 h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </section>
   );

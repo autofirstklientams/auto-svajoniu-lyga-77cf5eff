@@ -19,12 +19,15 @@ const Hero = () => {
 
   const annualInterestRate = 0.069;
   const monthlyAdminFee = 9.5;
+  const contractFee = 50;
   
   const monthlyRate = annualInterestRate / 12;
   const monthlyPayment = loanAmount > 0 
     ? (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) / 
       (Math.pow(1 + monthlyRate, loanTerm) - 1) + monthlyAdminFee
     : 0;
+  
+  const totalPayment = monthlyPayment * loanTerm + contractFee;
 
   return (
     <section className="relative min-h-[700px] flex items-center overflow-hidden py-12 lg:py-0">
@@ -71,14 +74,6 @@ const Hero = () => {
                 Peržiūrėti Automobilius
                 <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline"
-                className="bg-white/10 hover:bg-white/20 text-white border-white/30 backdrop-blur-sm font-semibold text-lg px-8"
-                onClick={() => document.getElementById('loan-details')?.scrollIntoView({ behavior: 'smooth' })}
-              >
-                Sužinoti daugiau
-              </Button>
             </div>
 
             {/* Trust badges */}
@@ -100,89 +95,139 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right side - Calculator */}
+          {/* Right side - Calculator with conditions */}
           <div className="order-1 lg:order-2 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-            <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
-              <CardContent className="p-6 lg:p-8">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Calculator className="h-5 w-5 text-primary" />
-                  </div>
-                  <h2 className="text-xl font-bold text-foreground">
-                    Paskolos skaičiuoklė
-                  </h2>
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <div className="flex justify-between items-center mb-3">
-                      <label className="text-sm font-medium text-foreground">
-                        Paskolos suma
-                      </label>
-                      <span className="text-lg font-bold text-primary">{loanAmount.toLocaleString()} €</span>
+            <Card className="shadow-2xl border-0 bg-white/95 backdrop-blur-sm overflow-hidden">
+              <CardContent className="p-0">
+                <div className="grid md:grid-cols-2">
+                  {/* Calculator side */}
+                  <div className="p-5 lg:p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Calculator className="h-4 w-4 text-primary" />
+                      </div>
+                      <h2 className="text-lg font-bold text-foreground">
+                        Paskolos skaičiuoklė
+                      </h2>
                     </div>
-                    <Slider
-                      value={[loanAmount]}
-                      onValueChange={(value) => setLoanAmount(value[0])}
-                      min={1000}
-                      max={30000}
-                      step={100}
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span>1 000 €</span>
-                      <span>30 000 €</span>
-                    </div>
-                  </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-sm font-medium text-foreground">
+                            Paskolos suma
+                          </label>
+                          <span className="text-base font-bold text-primary">{loanAmount.toLocaleString()} €</span>
+                        </div>
+                        <Slider
+                          value={[loanAmount]}
+                          onValueChange={(value) => setLoanAmount(value[0])}
+                          min={1000}
+                          max={30000}
+                          step={100}
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>1 000 €</span>
+                          <span>30 000 €</span>
+                        </div>
+                      </div>
 
-                  <div>
-                    <div className="flex justify-between items-center mb-3">
-                      <label className="text-sm font-medium text-foreground">
-                        Terminas
-                      </label>
-                      <span className="text-lg font-bold text-primary">{loanTerm} mėn.</span>
-                    </div>
-                    <Slider
-                      value={[loanTerm]}
-                      onValueChange={(value) => setLoanTerm(value[0])}
-                      min={6}
-                      max={144}
-                      step={6}
-                    />
-                    <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                      <span>6 mėn.</span>
-                      <span>144 mėn.</span>
-                    </div>
-                  </div>
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <label className="text-sm font-medium text-foreground">
+                            Terminas
+                          </label>
+                          <span className="text-base font-bold text-primary">{loanTerm} mėn.</span>
+                        </div>
+                        <Slider
+                          value={[loanTerm]}
+                          onValueChange={(value) => setLoanTerm(value[0])}
+                          min={6}
+                          max={144}
+                          step={6}
+                        />
+                        <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                          <span>6 mėn.</span>
+                          <span>144 mėn.</span>
+                        </div>
+                      </div>
 
-                  <div className="bg-primary/5 rounded-xl p-4">
-                    <div className="flex justify-between items-center mb-1">
-                      <div className="flex items-center gap-1">
-                        <span className="text-sm text-muted-foreground">Mėnesio įmoka nuo</span>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger>
-                              <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              <p>Skaičiuojama su 6.9% metinėmis palūkanomis + 9.50 € mėn. mokestis. Galutinė suma priklauso nuo kredito reitingo.</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
+                      <div className="bg-primary/5 rounded-lg p-3">
+                        <div className="flex items-center gap-1 mb-1">
+                          <span className="text-xs text-muted-foreground">Mėnesio įmoka nuo</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Info className="h-3 w-3 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p>Skaičiuojama su 6.9% metinėmis palūkanomis + 9.50 € mėn. mokestis.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <div className="text-3xl font-bold text-primary">
+                          {monthlyPayment.toFixed(0)} <span className="text-lg">€/mėn.</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">
+                          Bendra suma: {totalPayment.toFixed(0)} €
+                        </div>
                       </div>
                     </div>
-                    <div className="text-4xl font-bold text-primary">
-                      {monthlyPayment.toFixed(0)} <span className="text-2xl">€/mėn.</span>
-                    </div>
                   </div>
 
-                  <Button 
-                    onClick={() => setIsFormOpen(true)}
-                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-12 text-base"
-                    size="lg"
-                  >
-                    Gauti pasiūlymą
-                    <ChevronRight className="ml-1 h-4 w-4" />
-                  </Button>
+                  {/* Conditions side */}
+                  <div className="bg-muted/40 p-5 lg:p-6 flex flex-col">
+                    <h4 className="font-semibold text-foreground mb-3 text-sm">Kredito sąlygos</h4>
+                    
+                    <div className="space-y-2 flex-1 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Metinė palūkanų norma</span>
+                        <span className="font-semibold text-foreground">6.9%</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Paskolos suma</span>
+                        <span className="font-semibold text-foreground">1 000 – 30 000 €</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Terminas</span>
+                        <span className="font-semibold text-foreground">6 – 144 mėn.</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Mėn. mokestis</span>
+                        <span className="font-semibold text-foreground">9.50 €</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Sutarties mokestis</span>
+                        <span className="font-semibold text-foreground">50 €</span>
+                      </div>
+                      <div className="flex justify-between pt-2 border-t border-border">
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium text-foreground">BVKMNN nuo</span>
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger>
+                                <Info className="h-3 w-3 text-muted-foreground" />
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                <p>Bendrosios vidutinės kredito kainos metinė norma.</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        </div>
+                        <span className="font-bold text-primary">8.11%</span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      onClick={() => setIsFormOpen(true)}
+                      className="w-full mt-4 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                      size="default"
+                    >
+                      Gauti pasiūlymą
+                      <ChevronRight className="ml-1 h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

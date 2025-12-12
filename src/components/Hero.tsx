@@ -52,7 +52,7 @@ const Hero = () => {
           <div className="text-white order-2 lg:order-1 animate-fade-in">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-white/20">
               <Calculator className="h-4 w-4 text-accent" />
-              <span className="text-sm font-medium">Finansavimas nuo 6.9% metinių palūkanų</span>
+              <span className="text-sm font-medium">Paskolos nuo 6.9% metinių palūkanų</span>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
@@ -61,7 +61,7 @@ const Hero = () => {
             </h1>
             
             <p className="text-lg md:text-xl mb-8 text-white/85 leading-relaxed max-w-xl">
-              Paskolos automobiliams, technikai ir kitoms reikmėms. Platus naudotų automobilių pasirinkimas – patikima garantija ir paprasti sprendimai.
+              Platus naudotų automobilių pasirinkimas su finansavimu. Taip pat teikiame paskolas kitoms reikmėms – technikai, remontui ir kt.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">

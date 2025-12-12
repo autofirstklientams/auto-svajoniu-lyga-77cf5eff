@@ -56,12 +56,12 @@ const Hero = () => {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Greitas Automobilio 
+              Greitas 
               <span className="text-accent"> Finansavimas</span> be Streso
             </h1>
             
             <p className="text-lg md:text-xl mb-8 text-white/85 leading-relaxed max-w-xl">
-              Platus naudotų automobilių pasirinkimas – patikima garantija ir paprasti sprendimai. Gaukite pasiūlymą per 5 minutes.
+              Paskolos automobiliams, technikai ir kitoms reikmėms. Platus naudotų automobilių pasirinkimas – patikima garantija ir paprasti sprendimai.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">

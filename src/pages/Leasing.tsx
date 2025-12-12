@@ -69,10 +69,10 @@ const Leasing = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Automobilio Finansavimas
+                Finansavimas Jūsų Poreikiams
               </h1>
               <p className="text-xl text-white/90 mb-8">
-                Paprastas ir greitas procesas – gaukite finansavimą per 24 valandas su žemiausiomis palūkanomis rinkoje
+                Paskolos automobiliams, technikai ir kitoms reikmėms – gaukite finansavimą per 24 valandas su žemiausiomis palūkanomis rinkoje
               </p>
             </div>
           </div>

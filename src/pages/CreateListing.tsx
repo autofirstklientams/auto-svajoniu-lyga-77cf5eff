@@ -19,6 +19,16 @@ const carSchema = z.object({
   fuel_type: z.string().optional(),
   transmission: z.string().optional(),
   description: z.string().optional(),
+  body_type: z.string().optional(),
+  engine_capacity: z.number().min(0).optional(),
+  power_kw: z.number().min(0).optional(),
+  doors: z.number().min(2).max(5).optional(),
+  seats: z.number().min(1).max(9).optional(),
+  color: z.string().optional(),
+  steering_wheel: z.string().optional(),
+  condition: z.string().optional(),
+  vin: z.string().optional(),
+  defects: z.string().optional(),
 });
 
 interface CreateListingProps {
@@ -41,6 +51,16 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
     fuel_type: car?.fuel_type || "",
     transmission: car?.transmission || "",
     description: car?.description || "",
+    body_type: car?.body_type || "",
+    engine_capacity: car?.engine_capacity || 0,
+    power_kw: car?.power_kw || 0,
+    doors: car?.doors || 4,
+    seats: car?.seats || 5,
+    color: car?.color || "",
+    steering_wheel: car?.steering_wheel || "",
+    condition: car?.condition || "",
+    vin: car?.vin || "",
+    defects: car?.defects || "",
   });
 
   useEffect(() => {
@@ -125,7 +145,6 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
       if (!user) throw new Error("Vartotojas neprisijungęs");
 
       let carId = car?.id;
-      let imageUrl = car?.image_url || null;
 
       const carData = {
         ...formData,
@@ -134,6 +153,16 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         fuel_type: formData.fuel_type || null,
         transmission: formData.transmission || null,
         description: formData.description || null,
+        body_type: formData.body_type || null,
+        engine_capacity: formData.engine_capacity || null,
+        power_kw: formData.power_kw || null,
+        doors: formData.doors || null,
+        seats: formData.seats || null,
+        color: formData.color || null,
+        steering_wheel: formData.steering_wheel || null,
+        condition: formData.condition || null,
+        vin: formData.vin || null,
+        defects: formData.defects || null,
       };
 
       // Create or update car
@@ -211,181 +240,359 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="make">Markė *</Label>
-              <Input
-                id="make"
-                value={formData.make}
-                onChange={(e) => setFormData({ ...formData, make: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="model">Modelis *</Label>
-              <Input
-                id="model"
-                value={formData.model}
-                onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="year">Metai *</Label>
-              <Input
-                id="year"
-                type="number"
-                value={formData.year}
-                onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="price">Kaina (€) *</Label>
-              <Input
-                id="price"
-                type="number"
-                step="0.01"
-                value={formData.price}
-                onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="mileage">Rida (km)</Label>
-              <Input
-                id="mileage"
-                type="number"
-                value={formData.mileage}
-                onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) })}
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="fuel_type">Kuro tipas</Label>
-              <Select
-                value={formData.fuel_type}
-                onValueChange={(value) => setFormData({ ...formData, fuel_type: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pasirinkite" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Benzinas">Benzinas</SelectItem>
-                  <SelectItem value="Dyzelis">Dyzelis</SelectItem>
-                  <SelectItem value="Elektra">Elektra</SelectItem>
-                  <SelectItem value="Hibridinis">Hibridinis</SelectItem>
-                  <SelectItem value="Dujos">Dujos</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="transmission">Pavarų dėžė</Label>
-              <Select
-                value={formData.transmission}
-                onValueChange={(value) => setFormData({ ...formData, transmission: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Pasirinkite" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Mechaninė">Mechaninė</SelectItem>
-                  <SelectItem value="Automatinė">Automatinė</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="md:col-span-2 space-y-2">
-              <Label>Nuotraukos</Label>
-              <div className="space-y-4">
-                <label 
-                  htmlFor="image" 
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
-                >
-                  <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                  <span className="text-sm text-muted-foreground">Įkelkite nuotraukas (galima kelias)</span>
-                  <span className="text-xs text-muted-foreground mt-1">Max 5MB kiekviena</span>
-                </label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Basic Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Pagrindinė informacija</h3>
+            <div className="grid md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="make">Markė *</Label>
                 <Input
-                  id="image"
-                  type="file"
-                  accept="image/*"
-                  multiple
-                  className="hidden"
-                  onChange={handleImageChange}
+                  id="make"
+                  value={formData.make}
+                  onChange={(e) => setFormData({ ...formData, make: e.target.value })}
+                  required
                 />
+              </div>
 
-                {/* Existing images */}
-                {existingImages.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium mb-2">Esamos nuotraukos:</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {existingImages.map((img) => (
-                        <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border">
-                          <img
-                            src={img.url}
-                            alt={`Existing ${img.order}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6"
-                            onClick={() => handleRemoveExistingImage(img.id)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <div className="space-y-2">
+                <Label htmlFor="model">Modelis *</Label>
+                <Input
+                  id="model"
+                  value={formData.model}
+                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                  required
+                />
+              </div>
 
-                {/* New images preview */}
-                {imagePreviews.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium mb-2">Naujos nuotraukos:</p>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {imagePreviews.map((preview, index) => (
-                        <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
-                          <img
-                            src={preview}
-                            alt={`Preview ${index}`}
-                            className="w-full h-full object-cover"
-                          />
-                          <Button
-                            type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6"
-                            onClick={() => handleRemoveNewImage(index)}
-                          >
-                            <X className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+              <div className="space-y-2">
+                <Label htmlFor="year">Metai *</Label>
+                <Input
+                  id="year"
+                  type="number"
+                  value={formData.year}
+                  onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="price">Kaina (€) *</Label>
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="vin">VIN kodas</Label>
+                <Input
+                  id="vin"
+                  value={formData.vin}
+                  onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
+                  placeholder="Pvz.: WVWZZZ3CZWE123456"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="condition">Būklė</Label>
+                <Select
+                  value={formData.condition}
+                  onValueChange={(value) => setFormData({ ...formData, condition: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Naujas">Naujas</SelectItem>
+                    <SelectItem value="Naudotas">Naudotas</SelectItem>
+                    <SelectItem value="Daužtas">Daužtas</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Aprašymas</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={4}
-            />
+          {/* Technical Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Techniniai duomenys</h3>
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="body_type">Kėbulo tipas</Label>
+                <Select
+                  value={formData.body_type}
+                  onValueChange={(value) => setFormData({ ...formData, body_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Sedanas">Sedanas</SelectItem>
+                    <SelectItem value="Hečbekas">Hečbekas</SelectItem>
+                    <SelectItem value="Universalas">Universalas</SelectItem>
+                    <SelectItem value="Visureigis">Visureigis</SelectItem>
+                    <SelectItem value="Kupė">Kupė</SelectItem>
+                    <SelectItem value="Kabrioletas">Kabrioletas</SelectItem>
+                    <SelectItem value="Vienatūris">Vienatūris</SelectItem>
+                    <SelectItem value="Pikapas">Pikapas</SelectItem>
+                    <SelectItem value="Komercinis">Komercinis</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fuel_type">Kuro tipas</Label>
+                <Select
+                  value={formData.fuel_type}
+                  onValueChange={(value) => setFormData({ ...formData, fuel_type: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Benzinas">Benzinas</SelectItem>
+                    <SelectItem value="Dyzelinas">Dyzelinas</SelectItem>
+                    <SelectItem value="Elektra">Elektra</SelectItem>
+                    <SelectItem value="Hibridinis">Hibridinis</SelectItem>
+                    <SelectItem value="Dujos">Dujos</SelectItem>
+                    <SelectItem value="Benzinas/Dujos">Benzinas/Dujos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="transmission">Pavarų dėžė</Label>
+                <Select
+                  value={formData.transmission}
+                  onValueChange={(value) => setFormData({ ...formData, transmission: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Mechaninė">Mechaninė</SelectItem>
+                    <SelectItem value="Automatinė">Automatinė</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="steering_wheel">Vairas</Label>
+                <Select
+                  value={formData.steering_wheel}
+                  onValueChange={(value) => setFormData({ ...formData, steering_wheel: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Kairė">Kairė</SelectItem>
+                    <SelectItem value="Dešinė">Dešinė</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="engine_capacity">Variklio tūris (cm³)</Label>
+                <Input
+                  id="engine_capacity"
+                  type="number"
+                  value={formData.engine_capacity || ""}
+                  onChange={(e) => setFormData({ ...formData, engine_capacity: parseInt(e.target.value) || 0 })}
+                  placeholder="Pvz.: 2000"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="power_kw">Galia (kW)</Label>
+                <Input
+                  id="power_kw"
+                  type="number"
+                  value={formData.power_kw || ""}
+                  onChange={(e) => setFormData({ ...formData, power_kw: parseInt(e.target.value) || 0 })}
+                  placeholder="Pvz.: 150"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mileage">Rida (km)</Label>
+                <Input
+                  id="mileage"
+                  type="number"
+                  value={formData.mileage || ""}
+                  onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) || 0 })}
+                  placeholder="Pvz.: 150000"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="color">Spalva</Label>
+                <Select
+                  value={formData.color}
+                  onValueChange={(value) => setFormData({ ...formData, color: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Balta">Balta</SelectItem>
+                    <SelectItem value="Juoda">Juoda</SelectItem>
+                    <SelectItem value="Pilka">Pilka</SelectItem>
+                    <SelectItem value="Sidabrinė">Sidabrinė</SelectItem>
+                    <SelectItem value="Mėlyna">Mėlyna</SelectItem>
+                    <SelectItem value="Raudona">Raudona</SelectItem>
+                    <SelectItem value="Žalia">Žalia</SelectItem>
+                    <SelectItem value="Geltona">Geltona</SelectItem>
+                    <SelectItem value="Oranžinė">Oranžinė</SelectItem>
+                    <SelectItem value="Ruda">Ruda</SelectItem>
+                    <SelectItem value="Violetinė">Violetinė</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="doors">Durų skaičius</Label>
+                <Select
+                  value={formData.doors?.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, doors: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2</SelectItem>
+                    <SelectItem value="3">3</SelectItem>
+                    <SelectItem value="4">4</SelectItem>
+                    <SelectItem value="5">5</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="seats">Vietų skaičius</Label>
+                <Select
+                  value={formData.seats?.toString()}
+                  onValueChange={(value) => setFormData({ ...formData, seats: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2</SelectItem>
+                    <SelectItem value="4">4</SelectItem>
+                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="7">7</SelectItem>
+                    <SelectItem value="9">9</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Images */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Nuotraukos</h3>
+            <div className="space-y-4">
+              <label 
+                htmlFor="image" 
+                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+              >
+                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                <span className="text-sm text-muted-foreground">Įkelkite nuotraukas (galima kelias)</span>
+                <span className="text-xs text-muted-foreground mt-1">Max 5MB kiekviena</span>
+              </label>
+              <Input
+                id="image"
+                type="file"
+                accept="image/*"
+                multiple
+                className="hidden"
+                onChange={handleImageChange}
+              />
+
+              {/* Existing images */}
+              {existingImages.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Esamos nuotraukos:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {existingImages.map((img) => (
+                      <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border">
+                        <img
+                          src={img.url}
+                          alt={`Existing ${img.order}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-6 w-6"
+                          onClick={() => handleRemoveExistingImage(img.id)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* New images preview */}
+              {imagePreviews.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Naujos nuotraukos:</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {imagePreviews.map((preview, index) => (
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
+                        <img
+                          src={preview}
+                          alt={`Preview ${index}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-6 w-6"
+                          onClick={() => handleRemoveNewImage(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Description & Defects */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="description">Aprašymas</Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={4}
+                placeholder="Automobilio aprašymas..."
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="defects">Defektai / Trūkumai</Label>
+              <Textarea
+                id="defects"
+                value={formData.defects}
+                onChange={(e) => setFormData({ ...formData, defects: e.target.value })}
+                rows={4}
+                placeholder="Jei yra defektų, nurodykite čia..."
+              />
+            </div>
           </div>
 
           <div className="flex gap-2">

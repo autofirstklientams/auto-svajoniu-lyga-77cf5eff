@@ -66,7 +66,7 @@ const Header = () => {
               </Link>
               <Link 
                 to="/leasing" 
-                className="text-foreground hover:text-primary font-medium transition-colors"
+                className="text-primary hover:text-primary/80 font-semibold transition-colors"
               >
                 Lizingas
               </Link>
@@ -116,7 +116,7 @@ const Header = () => {
                     <Link to="/sell-your-car" className="text-primary hover:text-primary/80 font-semibold transition-colors">Parduosime tavo automobilį</Link>
                     <Link 
                       to="/leasing" 
-                      className="text-foreground hover:text-primary font-medium"
+                      className="text-primary hover:text-primary/80 font-semibold transition-colors"
                     >
                       Lizingas
                     </Link>

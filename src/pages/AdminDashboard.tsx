@@ -158,6 +158,30 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (!confirm(`Ar tikrai norite ištrinti vartotoją ${userEmail}?`)) return;
+
+    try {
+      // Delete user's cars first
+      await supabase.from("cars").delete().eq("partner_id", userId);
+      
+      // Delete user roles
+      await supabase.from("user_roles").delete().eq("user_id", userId);
+      
+      // Delete profile
+      const { error } = await supabase.from("profiles").delete().eq("id", userId);
+      
+      if (error) throw error;
+      
+      toast.success("Vartotojas ištrintas");
+      await fetchPartners();
+      await fetchAllCars();
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      toast.error("Klaida trinant vartotoją");
+    }
+  };
+
   const handleDeleteCar = async (carId: string) => {
     if (!confirm("Ar tikrai norite ištrinti šį automobilį?")) return;
 
@@ -244,7 +268,7 @@ const AdminDashboard = () => {
                         </p>
                       </div>
                       
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2 flex-wrap">
                         {partner.role === "admin" ? (
                           <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                             Administratorius
@@ -277,6 +301,15 @@ const AdminDashboard = () => {
                               Suteikti teises
                             </Button>
                           </>
+                        )}
+                        {partner.role !== "admin" && (
+                          <Button
+                            onClick={() => handleDeleteUser(partner.id, partner.email)}
+                            variant="destructive"
+                            size="sm"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         )}
                       </div>
                     </div>

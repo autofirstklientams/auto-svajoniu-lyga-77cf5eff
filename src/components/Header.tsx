@@ -53,13 +53,7 @@ const Header = () => {
             {/* Desktop navigation */}
             <nav className="hidden md:flex items-center gap-8">
               <Link 
-                to="/car-purchase" 
-                className="text-foreground hover:text-primary font-medium transition-colors"
-              >
-                Auto supirkimas
-              </Link>
-              <Link 
-                to="/car-search" 
+                to="/car-search"
                 className="text-foreground hover:text-primary font-medium transition-colors"
               >
                 Auto paieška
@@ -118,7 +112,6 @@ const Header = () => {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-72">
                   <div className="flex flex-col gap-4 mt-8">
-                    <Link to="/car-purchase" className="text-foreground hover:text-primary font-medium">Auto supirkimas</Link>
                     <Link to="/car-search" className="text-foreground hover:text-primary font-medium">Auto paieška</Link>
                     <Link to="/sell-your-car" className="text-foreground hover:text-primary font-medium">Parduosime tavo automobilį</Link>
                     <Link 

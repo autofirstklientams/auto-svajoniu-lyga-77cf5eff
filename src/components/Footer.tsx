@@ -87,13 +87,16 @@ const Footer = () => {
               </li>
               <li className="flex justify-between">
                 <span>Št:</span>
-                <span>10:00 - 16:00</span>
+                <span>10:00 - 19:00</span>
               </li>
               <li className="flex justify-between">
                 <span>Sk:</span>
-                <span>Išeiginė</span>
+                <span>Individualiai</span>
               </li>
             </ul>
+            <p className="text-xs text-muted-foreground/70 mt-3">
+              Jeigu reikia – dirbame ir po darbo valandų
+            </p>
           </div>
         </div>
 

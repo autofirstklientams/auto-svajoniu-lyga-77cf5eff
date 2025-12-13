@@ -60,7 +60,7 @@ const Header = () => {
               </Link>
               <Link 
                 to="/sell-your-car" 
-                className="text-foreground hover:text-primary font-medium transition-colors"
+                className="bg-primary text-primary-foreground px-4 py-2 rounded-full font-semibold hover:bg-primary/90 transition-colors"
               >
                 Parduosime tavo automobilį
               </Link>
@@ -113,7 +113,7 @@ const Header = () => {
                 <SheetContent side="right" className="w-72">
                   <div className="flex flex-col gap-4 mt-8">
                     <Link to="/car-search" className="text-foreground hover:text-primary font-medium">Auto paieška</Link>
-                    <Link to="/sell-your-car" className="text-foreground hover:text-primary font-medium">Parduosime tavo automobilį</Link>
+                    <Link to="/sell-your-car" className="bg-primary text-primary-foreground px-4 py-2 rounded-full font-semibold hover:bg-primary/90 transition-colors inline-block">Parduosime tavo automobilį</Link>
                     <Link 
                       to="/leasing" 
                       className="text-foreground hover:text-primary font-medium"

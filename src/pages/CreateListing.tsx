@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, X } from "lucide-react";
+import { Upload, X, Link, Loader2 } from "lucide-react";
 
 const carSchema = z.object({
   make: z.string().trim().min(1, "Markė privaloma"),
@@ -39,9 +39,12 @@ interface CreateListingProps {
 
 const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [autopliusUrl, setAutopliusUrl] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<Array<{id: string, url: string, order: number}>>([]);
+  const [importedImageUrls, setImportedImageUrls] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
@@ -62,6 +65,70 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
     vin: car?.vin || "",
     defects: car?.defects || "",
   });
+
+  const handleImportFromAutoplius = async () => {
+    if (!autopliusUrl.trim()) {
+      toast.error("Įveskite Autoplius nuorodą");
+      return;
+    }
+
+    if (!autopliusUrl.includes('autoplius.lt')) {
+      toast.error("Nuoroda turi būti iš autoplius.lt");
+      return;
+    }
+
+    setIsImporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('scrape-autoplius', {
+        body: { url: autopliusUrl.trim() },
+      });
+
+      if (error) throw error;
+
+      if (!data.success) {
+        throw new Error(data.error || 'Nepavyko importuoti');
+      }
+
+      const carData = data.data;
+      
+      setFormData(prev => ({
+        ...prev,
+        make: carData.make || prev.make,
+        model: carData.model || prev.model,
+        year: carData.year || prev.year,
+        price: carData.price || prev.price,
+        mileage: carData.mileage || prev.mileage,
+        fuel_type: carData.fuel_type || prev.fuel_type,
+        transmission: carData.transmission || prev.transmission,
+        body_type: carData.body_type || prev.body_type,
+        engine_capacity: carData.engine_capacity || prev.engine_capacity,
+        power_kw: carData.power_kw || prev.power_kw,
+        doors: carData.doors || prev.doors,
+        color: carData.color || prev.color,
+        steering_wheel: carData.steering_wheel || prev.steering_wheel,
+        condition: carData.condition || prev.condition,
+        vin: carData.vin || prev.vin,
+        description: carData.description || prev.description,
+      }));
+
+      if (carData.images && carData.images.length > 0) {
+        setImportedImageUrls(carData.images);
+        toast.success(`Importuota ${carData.images.length} nuotraukų`);
+      }
+
+      toast.success("Skelbimas importuotas!");
+      setAutopliusUrl("");
+    } catch (error: any) {
+      console.error("Import error:", error);
+      toast.error(error.message || "Klaida importuojant skelbimą");
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  const handleRemoveImportedImage = (index: number) => {
+    setImportedImageUrls(prev => prev.filter((_, i) => i !== index));
+  };
 
   useEffect(() => {
     if (car?.id) {
@@ -225,6 +292,57 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         }
       }
 
+      // Handle imported images from Autoplius
+      if (importedImageUrls.length > 0 && carId) {
+        const startOrder = existingImages.length + imageFiles.length;
+        let firstImageUrl: string | null = null;
+
+        for (let i = 0; i < importedImageUrls.length; i++) {
+          try {
+            // Fetch the image from Autoplius
+            const imgResponse = await fetch(importedImageUrls[i]);
+            if (!imgResponse.ok) continue;
+            
+            const blob = await imgResponse.blob();
+            const fileName = `${user.id}/${Date.now()}_imported_${i}.jpg`;
+
+            const { error: uploadError } = await supabase.storage
+              .from('car-images')
+              .upload(fileName, blob, { contentType: 'image/jpeg' });
+
+            if (uploadError) {
+              console.error('Upload error:', uploadError);
+              continue;
+            }
+
+            const { data: { publicUrl } } = supabase.storage
+              .from('car-images')
+              .getPublicUrl(fileName);
+
+            if (i === 0 && !firstImageUrl) firstImageUrl = publicUrl;
+
+            // Save image reference to database
+            await supabase
+              .from("car_images")
+              .insert({
+                car_id: carId,
+                image_url: publicUrl,
+                display_order: startOrder + i,
+              });
+          } catch (imgError) {
+            console.error('Error processing imported image:', imgError);
+          }
+        }
+
+        // Update main car image_url if no images existed before
+        if (!car?.image_url && imageFiles.length === 0 && firstImageUrl) {
+          await supabase
+            .from("cars")
+            .update({ image_url: firstImageUrl })
+            .eq("id", carId);
+        }
+      }
+
       toast.success(car ? "Skelbimas atnaujintas!" : "Skelbimas sukurtas!");
       onSuccess();
     } catch (error: any) {
@@ -240,6 +358,42 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Autoplius Import Section */}
+        {!car && (
+          <div className="mb-6 p-4 bg-muted/50 rounded-lg border border-dashed border-primary/30">
+            <div className="flex items-center gap-2 mb-3">
+              <Link className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold text-foreground">Importuoti iš Autoplius</h3>
+            </div>
+            <p className="text-sm text-muted-foreground mb-3">
+              Įklijuokite skelbimo nuorodą iš autoplius.lt ir automatiškai užpildysime formą
+            </p>
+            <div className="flex gap-2">
+              <Input
+                value={autopliusUrl}
+                onChange={(e) => setAutopliusUrl(e.target.value)}
+                placeholder="https://autoplius.lt/skelbimai/..."
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                onClick={handleImportFromAutoplius}
+                disabled={isImporting}
+                variant="secondary"
+              >
+                {isImporting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Importuojama...
+                  </>
+                ) : (
+                  "Importuoti"
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
           <div>
@@ -559,6 +713,33 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
                           size="icon"
                           className="absolute top-1 right-1 h-6 w-6"
                           onClick={() => handleRemoveNewImage(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Imported images preview */}
+              {importedImageUrls.length > 0 && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Importuotos nuotraukos ({importedImageUrls.length}):</p>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {importedImageUrls.map((url, index) => (
+                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
+                        <img
+                          src={url}
+                          alt={`Imported ${index}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="icon"
+                          className="absolute top-1 right-1 h-6 w-6"
+                          onClick={() => handleRemoveImportedImage(index)}
                         >
                           <X className="h-3 w-3" />
                         </Button>

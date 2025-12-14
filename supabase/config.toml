@@ -5,3 +5,12 @@ verify_jwt = false
 
 [functions.scrape-autoplius]
 verify_jwt = true
+
+[functions.add-watermark]
+verify_jwt = true
+
+[functions.send-car-purchase]
+verify_jwt = false
+
+[functions.generate-autoplius-xml]
+verify_jwt = false

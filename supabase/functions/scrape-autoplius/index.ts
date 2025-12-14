@@ -46,23 +46,43 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Fetching Autoplius URL:', url);
-
-    // Fetch the page
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'lt-LT,lt;q=0.9,en-US;q=0.8,en;q=0.7',
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch page: ${response.status}`);
+    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+    if (!apiKey) {
+      console.error('FIRECRAWL_API_KEY not configured');
+      return new Response(
+        JSON.stringify({ success: false, error: 'Firecrawl API key not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
-    const html = await response.text();
-    console.log('Page fetched, parsing...');
+    console.log('Scraping Autoplius URL with Firecrawl:', url);
+
+    // Use Firecrawl to scrape the page
+    const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        url: url,
+        formats: ['html', 'markdown'],
+        onlyMainContent: false,
+        waitFor: 2000,
+      }),
+    });
+
+    if (!firecrawlResponse.ok) {
+      const errorData = await firecrawlResponse.json();
+      console.error('Firecrawl API error:', errorData);
+      throw new Error(errorData.error || `Firecrawl request failed with status ${firecrawlResponse.status}`);
+    }
+
+    const firecrawlData = await firecrawlResponse.json();
+    const html = firecrawlData.data?.html || firecrawlData.html || '';
+    const markdown = firecrawlData.data?.markdown || firecrawlData.markdown || '';
+    
+    console.log('Page fetched via Firecrawl, parsing...');
 
     const carData: CarData = {};
 
@@ -259,6 +279,8 @@ Deno.serve(async (req) => {
 
     // Extract images
     const images: string[] = [];
+    
+    // Try data-src attributes first
     const imgRegex = /data-src="([^"]*autoplius[^"]*\.jpg[^"]*)"/gi;
     let imgMatch;
     while ((imgMatch = imgRegex.exec(html)) !== null) {
@@ -274,6 +296,23 @@ Deno.serve(async (req) => {
       const imgUrl = imgMatch[1].replace(/\/s\d+x\d+\//, '/original/');
       if (!images.includes(imgUrl) && !imgUrl.includes('logo') && !imgUrl.includes('icon')) {
         images.push(imgUrl);
+      }
+    }
+
+    // Try to extract from img.photo-item patterns
+    const photoItemRegex = /img[^>]*class="[^"]*photo-item[^"]*"[^>]*src="([^"]+)"/gi;
+    while ((imgMatch = photoItemRegex.exec(html)) !== null) {
+      const imgUrl = imgMatch[1].replace(/\/s\d+x\d+\//, '/original/');
+      if (!images.includes(imgUrl)) {
+        images.push(imgUrl);
+      }
+    }
+
+    // Extract from gallery/slider patterns
+    const galleryRegex = /data-large-src="([^"]+)"/gi;
+    while ((imgMatch = galleryRegex.exec(html)) !== null) {
+      if (!images.includes(imgMatch[1])) {
+        images.push(imgMatch[1]);
       }
     }
 

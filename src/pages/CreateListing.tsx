@@ -292,32 +292,27 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         }
       }
 
-      // Handle imported images from Autoplius
+      // Handle imported images from Autoplius using edge function
       if (importedImageUrls.length > 0 && carId) {
         const startOrder = existingImages.length + imageFiles.length;
         let firstImageUrl: string | null = null;
 
         for (let i = 0; i < importedImageUrls.length; i++) {
           try {
-            // Fetch the image from Autoplius
-            const imgResponse = await fetch(importedImageUrls[i]);
-            if (!imgResponse.ok) continue;
-            
-            const blob = await imgResponse.blob();
-            const fileName = `${user.id}/${Date.now()}_imported_${i}.jpg`;
+            // Use edge function to fetch and upload image (avoids CORS issues)
+            const { data: uploadResult, error: uploadError } = await supabase.functions.invoke('add-watermark', {
+              body: { 
+                imageUrl: importedImageUrls[i],
+                carId: carId
+              },
+            });
 
-            const { error: uploadError } = await supabase.storage
-              .from('car-images')
-              .upload(fileName, blob, { contentType: 'image/jpeg' });
-
-            if (uploadError) {
-              console.error('Upload error:', uploadError);
+            if (uploadError || !uploadResult?.success) {
+              console.error('Upload error:', uploadError || uploadResult?.error);
               continue;
             }
 
-            const { data: { publicUrl } } = supabase.storage
-              .from('car-images')
-              .getPublicUrl(fileName);
+            const publicUrl = uploadResult.data.url;
 
             if (i === 0 && !firstImageUrl) firstImageUrl = publicUrl;
 

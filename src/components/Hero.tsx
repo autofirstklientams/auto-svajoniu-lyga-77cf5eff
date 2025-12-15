@@ -43,7 +43,7 @@ const Hero = () => {
       {/* Decorative elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-accent/10 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-white/10 rounded-full blur-3xl" />
       </div>
       
       <div className="container mx-auto px-4 relative z-10">
@@ -51,13 +51,13 @@ const Hero = () => {
           {/* Left side - Text content */}
           <div className="text-white order-2 lg:order-1 animate-fade-in">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-white/20">
-              <Calculator className="h-4 w-4 text-accent" />
+              <Calculator className="h-4 w-4 text-white" />
               <span className="text-sm font-medium">Paskolos nuo 6.9% metinių palūkanų</span>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               Greitas 
-              <span className="text-accent"> Finansavimas</span> be Streso
+              <span className="text-white/90"> Finansavimas</span> be Streso
             </h1>
             
             <p className="text-lg md:text-xl mb-8 text-white/85 leading-relaxed max-w-xl">
@@ -80,15 +80,15 @@ const Hero = () => {
             <div className="mt-10 pt-8 border-t border-white/20">
               <div className="flex flex-wrap gap-8">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-accent">500+</div>
+                  <div className="text-3xl font-bold text-white">500+</div>
                   <div className="text-sm text-white/70">Patenkintų klientų</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-accent">24h</div>
+                  <div className="text-3xl font-bold text-white">24h</div>
                   <div className="text-sm text-white/70">Sprendimas</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-accent">6.9%</div>
+                  <div className="text-3xl font-bold text-white">6.9%</div>
                   <div className="text-sm text-white/70">Palūkanos nuo</div>
                 </div>
               </div>

@@ -1,10 +1,18 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Trash2, FileText, Loader2, Upload, Download } from "lucide-react";
+import { Eye, Trash2, FileText, Loader2, Upload, Download, ExternalLink } from "lucide-react";
 import { SavedInvoice } from "@/hooks/useInvoices";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+
+interface UploadedInvoice {
+  id: string;
+  file_name: string;
+  file_url: string;
+  file_type: string;
+  created_at: string;
+}
 
 interface InvoiceHistoryProps {
   invoices: SavedInvoice[];
@@ -16,7 +24,29 @@ interface InvoiceHistoryProps {
 
 const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: InvoiceHistoryProps) => {
   const [uploading, setUploading] = useState(false);
+  const [uploadedInvoices, setUploadedInvoices] = useState<UploadedInvoice[]>([]);
+  const [loadingUploaded, setLoadingUploaded] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const fetchUploadedInvoices = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('uploaded_invoices')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUploadedInvoices(data || []);
+    } catch (error) {
+      console.error("Error fetching uploaded invoices:", error);
+    } finally {
+      setLoadingUploaded(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchUploadedInvoices();
+  }, []);
 
   const handleUploadClick = () => {
     fileInputRef.current?.click();
@@ -26,7 +56,6 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Accept PDF, images
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       toast.error("Netinkamas failo formatas. Leidžiami: PDF, JPG, PNG, WEBP");
@@ -41,25 +70,18 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
         return;
       }
 
-      // Generate unique filename
-      const fileExt = file.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}_${file.name}`;
 
-      // Upload to storage
       const { error: uploadError } = await supabase.storage
         .from('invoices')
         .upload(fileName, file);
 
-      if (uploadError) {
-        throw uploadError;
-      }
+      if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from('invoices')
         .getPublicUrl(fileName);
 
-      // Save reference to database
       const { error: dbError } = await supabase
         .from('uploaded_invoices')
         .insert({
@@ -69,11 +91,10 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
           file_type: file.type,
         });
 
-      if (dbError) {
-        throw dbError;
-      }
+      if (dbError) throw dbError;
 
       toast.success("Sąskaita įkelta sėkmingai!");
+      fetchUploadedInvoices();
       onRefresh?.();
     } catch (error: any) {
       console.error("Upload error:", error);
@@ -85,6 +106,32 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
       }
     }
   };
+
+  const handleDeleteUploaded = async (id: string, fileUrl: string) => {
+    if (!confirm("Ar tikrai norite ištrinti šią sąskaitą?")) return;
+    
+    try {
+      // Extract file path from URL
+      const urlParts = fileUrl.split('/invoices/');
+      if (urlParts.length > 1) {
+        await supabase.storage.from('invoices').remove([urlParts[1]]);
+      }
+
+      const { error } = await supabase
+        .from('uploaded_invoices')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success("Sąskaita ištrinta");
+      fetchUploadedInvoices();
+    } catch (error: any) {
+      console.error("Delete error:", error);
+      toast.error("Nepavyko ištrinti: " + (error.message || "Klaida"));
+    }
+  };
+
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("lt-LT");
@@ -108,7 +155,7 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
     }
   };
 
-  if (loading) {
+  if (loading || loadingUploaded) {
     return (
       <Card className="form-section">
         <CardContent className="flex items-center justify-center py-8">
@@ -119,9 +166,41 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
     );
   }
 
-  if (invoices.length === 0) {
+  const totalCount = invoices.length + uploadedInvoices.length;
+
+  if (totalCount === 0) {
     return (
       <Card className="form-section">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="w-5 h-5" />
+              Sąskaitų istorija
+            </CardTitle>
+            <div>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileUpload}
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleUploadClick}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4 mr-2" />
+                )}
+                Įkelti sąskaitą
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <FileText className="w-12 h-12 text-muted-foreground/50 mb-4" />
           <p className="text-muted-foreground">Dar nėra išsaugotų sąskaitų</p>
@@ -139,7 +218,7 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <FileText className="w-5 h-5" />
-            Sąskaitų istorija ({invoices.length})
+            Sąskaitų istorija ({totalCount})
           </CardTitle>
           <div>
             <input
@@ -167,6 +246,7 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
+          {/* Generated invoices */}
           {invoices.map((invoice) => (
             <div
               key={invoice.id}
@@ -175,7 +255,7 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-foreground">
-                    Nr. {invoice.invoice_number}
+                    Serija AK Nr. {invoice.invoice_number}
                   </span>
                   <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
                     {getTypeLabel(invoice.invoice_type)}
@@ -208,6 +288,49 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
                       onDelete(invoice.id);
                     }
                   }}
+                  title="Ištrinti"
+                >
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+            </div>
+          ))}
+
+          {/* Uploaded invoices */}
+          {uploadedInvoices.map((uploaded) => (
+            <div
+              key={uploaded.id}
+              className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
+            >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="font-semibold text-foreground truncate">
+                    {uploaded.file_name}
+                  </span>
+                  <span className="text-xs px-2 py-0.5 bg-muted-foreground/20 text-muted-foreground rounded-full">
+                    Įkelta
+                  </span>
+                </div>
+                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                  <span>{formatDate(uploaded.created_at)}</span>
+                  <span>{uploaded.file_type.split('/')[1]?.toUpperCase()}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 ml-4">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  asChild
+                  title="Atidaryti"
+                >
+                  <a href={uploaded.file_url} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleDeleteUploaded(uploaded.id, uploaded.file_url)}
                   title="Ištrinti"
                 >
                   <Trash2 className="w-4 h-4 text-destructive" />

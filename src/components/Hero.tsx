@@ -67,7 +67,7 @@ const Hero = () => {
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 size="lg" 
-                className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8 shadow-lg hover:shadow-xl transition-all group"
+                className="bg-white hover:bg-white/90 text-primary font-semibold text-lg px-8 shadow-lg hover:shadow-xl transition-all group"
                 onClick={() => document.getElementById('featured-cars')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <Search className="mr-2 h-5 w-5" />
@@ -221,7 +221,7 @@ const Hero = () => {
 
                     <Button 
                       onClick={() => setIsFormOpen(true)}
-                      className="w-full mt-4 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
+                      className="w-full mt-4 btn-gradient font-semibold"
                       size="default"
                     >
                       Gauti pasiūlymą

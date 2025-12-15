@@ -1,16 +1,90 @@
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Trash2, FileText, Loader2 } from "lucide-react";
+import { Eye, Trash2, FileText, Loader2, Upload, Download } from "lucide-react";
 import { SavedInvoice } from "@/hooks/useInvoices";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface InvoiceHistoryProps {
   invoices: SavedInvoice[];
   loading: boolean;
   onView: (invoice: SavedInvoice) => void;
   onDelete: (id: string) => void;
+  onRefresh?: () => void;
 }
 
-const InvoiceHistory = ({ invoices, loading, onView, onDelete }: InvoiceHistoryProps) => {
+const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: InvoiceHistoryProps) => {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Accept PDF, images
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Netinkamas failo formatas. Leidžiami: PDF, JPG, PNG, WEBP");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Prašome prisijungti");
+        return;
+      }
+
+      // Generate unique filename
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}_${file.name}`;
+
+      // Upload to storage
+      const { error: uploadError } = await supabase.storage
+        .from('invoices')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      // Get public URL
+      const { data: urlData } = supabase.storage
+        .from('invoices')
+        .getPublicUrl(fileName);
+
+      // Save reference to database
+      const { error: dbError } = await supabase
+        .from('uploaded_invoices')
+        .insert({
+          user_id: user.id,
+          file_name: file.name,
+          file_url: urlData.publicUrl,
+          file_type: file.type,
+        });
+
+      if (dbError) {
+        throw dbError;
+      }
+
+      toast.success("Sąskaita įkelta sėkmingai!");
+      onRefresh?.();
+    } catch (error: any) {
+      console.error("Upload error:", error);
+      toast.error("Nepavyko įkelti sąskaitos: " + (error.message || "Klaida"));
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
   const formatDate = (dateStr: string) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("lt-LT");
@@ -62,10 +136,34 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete }: InvoiceHistoryP
   return (
     <Card className="form-section">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <FileText className="w-5 h-5" />
-          Sąskaitų istorija ({invoices.length})
-        </CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Sąskaitų istorija ({invoices.length})
+          </CardTitle>
+          <div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleFileUpload}
+              accept=".pdf,.jpg,.jpeg,.png,.webp"
+              className="hidden"
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleUploadClick}
+              disabled={uploading}
+            >
+              {uploading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4 mr-2" />
+              )}
+              Įkelti sąskaitą
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="space-y-3">

@@ -13,6 +13,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import SellYourCar from "./pages/SellYourCar";
 import Leasing from "./pages/Leasing";
 import Invoice from "./pages/Invoice";
+import InvoiceAuth from "./pages/InvoiceAuth";
 import CookieConsent from "./components/CookieConsent";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
           <Route path="/invoice" element={<Invoice />} />
+          <Route path="/auth" element={<InvoiceAuth />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

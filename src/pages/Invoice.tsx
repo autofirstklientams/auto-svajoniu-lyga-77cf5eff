@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import InvoiceForm, { InvoiceData, InvoiceItem, InvoiceType, CarDetails } from "@/components/InvoiceForm";
 import InvoicePreview from "@/components/InvoicePreview";
@@ -8,6 +8,8 @@ import { useInvoices, SavedInvoice } from "@/hooks/useInvoices";
 import logo from "@/assets/logo.png";
 import { VatType } from "@/data/suppliers";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { ArrowLeft } from "lucide-react";
 
 const Invoice = () => {
   const navigate = useNavigate();
@@ -100,11 +102,18 @@ const Invoice = () => {
   return (
     <main className="min-h-screen bg-background py-8 px-4">
       <div className="max-w-4xl mx-auto">
-        <header className="mb-10 animate-fade-in print:hidden text-center">
-          <div className="flex items-center justify-center mb-6">
+        <header className="mb-10 animate-fade-in print:hidden">
+          <div className="flex items-center justify-between mb-6">
+            <Button variant="outline" asChild>
+              <Link to="/">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Grįžti
+              </Link>
+            </Button>
             <img src={logo} alt="Auto Kopers" className="h-10" />
+            <div className="w-24" /> {/* Spacer for centering */}
           </div>
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground text-center">
             Sąskaitų Generatorius
           </h1>
         </header>

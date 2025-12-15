@@ -12,6 +12,7 @@ import PartnerDashboard from "./pages/PartnerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import SellYourCar from "./pages/SellYourCar";
 import Leasing from "./pages/Leasing";
+import Invoice from "./pages/Invoice";
 import CookieConsent from "./components/CookieConsent";
 import NotFound from "./pages/NotFound";
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/partner-dashboard" element={<PartnerDashboard />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/invoice" element={<Invoice />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

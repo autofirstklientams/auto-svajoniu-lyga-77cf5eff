@@ -154,11 +154,24 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Jei automobilio pardavimas, sukuriame prekę iš automobilio duomenų
+    let finalItems = items;
+    if (invoiceType === "car_sale" && carDetails.make && carDetails.model) {
+      const carDescription = `Automobilis ${carDetails.make} ${carDetails.model}${carDetails.vin ? `, VIN: ${carDetails.vin}` : ""}${carDetails.plate ? `, Nr.: ${carDetails.plate}` : ""}${carDetails.mileage ? `, Rida: ${carDetails.mileage} km` : ""}`;
+      finalItems = [{
+        description: carDescription,
+        quantity: 1,
+        unit: "vnt.",
+        price: items[0]?.price || 0,
+        vatType: items[0]?.vatType || "vat_exempt",
+      }];
+    }
+    
     const data: InvoiceData = {
       invoiceNumber,
       date,
       buyer,
-      items,
+      items: finalItems,
       note,
       invoiceType,
       carDetails: invoiceType === "car_sale" ? carDetails : undefined,
@@ -417,75 +430,31 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
         </Card>
       )}
 
-      {/* Items */}
+      {/* Items - show price/VAT for car sale, full items for other types */}
       <Card className="form-section">
         <CardHeader>
-          <CardTitle>Prekės / Paslaugos</CardTitle>
+          <CardTitle>{invoiceType === "car_sale" ? "Kaina" : "Prekės / Paslaugos"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {items.map((item, index) => (
-            <div key={index} className="grid grid-cols-12 gap-2 items-end">
-              <div className="col-span-12 md:col-span-4 space-y-1">
-                <Label>Aprašymas</Label>
-                <div className="flex gap-2">
-                  <Input
-                    value={item.description}
-                    onChange={(e) => updateItem(index, "description", e.target.value)}
-                    className="input-elegant flex-1"
-                    required
-                  />
-                  {products.length > 0 && (
-                    <Select onValueChange={(v) => handleSelectProduct(v, index)}>
-                      <SelectTrigger className="w-10 p-0 justify-center">
-                        <span className="text-xs">📋</span>
-                      </SelectTrigger>
-                      <SelectContent>
-                        {products.map((p) => (
-                          <SelectItem key={p.id} value={p.id}>
-                            {p.description}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </div>
-              <div className="col-span-4 md:col-span-1 space-y-1">
-                <Label>Kiekis</Label>
-                <Input
-                  type="number"
-                  min="1"
-                  value={item.quantity}
-                  onChange={(e) => updateItem(index, "quantity", parseInt(e.target.value) || 1)}
-                  className="input-elegant"
-                  required
-                />
-              </div>
-              <div className="col-span-4 md:col-span-1 space-y-1">
-                <Label>Vnt.</Label>
-                <Input
-                  value={item.unit}
-                  onChange={(e) => updateItem(index, "unit", e.target.value)}
-                  className="input-elegant"
-                />
-              </div>
-              <div className="col-span-4 md:col-span-2 space-y-1">
+          {invoiceType === "car_sale" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label>Kaina €</Label>
                 <Input
                   type="number"
                   min="0"
                   step="0.01"
-                  value={item.price}
-                  onChange={(e) => updateItem(index, "price", parseFloat(e.target.value) || 0)}
+                  value={items[0]?.price || 0}
+                  onChange={(e) => updateItem(0, "price", parseFloat(e.target.value) || 0)}
                   className="input-elegant"
                   required
                 />
               </div>
-              <div className="col-span-10 md:col-span-3 space-y-1">
+              <div className="space-y-2">
                 <Label>PVM</Label>
                 <Select
-                  value={item.vatType}
-                  onValueChange={(v) => updateItem(index, "vatType", v as VatType)}
+                  value={items[0]?.vatType || "vat_exempt"}
+                  onValueChange={(v) => updateItem(0, "vatType", v as VatType)}
                 >
                   <SelectTrigger className="input-elegant">
                     <SelectValue />
@@ -499,33 +468,114 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="col-span-2 md:col-span-1 flex gap-1">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleSaveProduct(index)}
-                  title="Išsaugoti prekę"
-                >
-                  <Save className="w-4 h-4" />
-                </Button>
-                {items.length > 1 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeItem(index)}
-                  >
-                    <Trash2 className="w-4 h-4 text-destructive" />
-                  </Button>
-                )}
-              </div>
             </div>
-          ))}
-          <Button type="button" variant="outline" onClick={addItem}>
-            <Plus className="w-4 h-4 mr-2" />
-            Pridėti eilutę
-          </Button>
+          ) : (
+            <>
+              {items.map((item, index) => (
+                <div key={index} className="grid grid-cols-12 gap-2 items-end">
+                  <div className="col-span-12 md:col-span-4 space-y-1">
+                    <Label>Aprašymas</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={item.description}
+                        onChange={(e) => updateItem(index, "description", e.target.value)}
+                        className="input-elegant flex-1"
+                        required
+                      />
+                      {products.length > 0 && (
+                        <Select onValueChange={(v) => handleSelectProduct(v, index)}>
+                          <SelectTrigger className="w-10 p-0 justify-center">
+                            <span className="text-xs">📋</span>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products.map((p) => (
+                              <SelectItem key={p.id} value={p.id}>
+                                {p.description}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-span-4 md:col-span-1 space-y-1">
+                    <Label>Kiekis</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(index, "quantity", parseInt(e.target.value) || 1)}
+                      className="input-elegant"
+                      required
+                    />
+                  </div>
+                  <div className="col-span-4 md:col-span-1 space-y-1">
+                    <Label>Vnt.</Label>
+                    <Input
+                      value={item.unit}
+                      onChange={(e) => updateItem(index, "unit", e.target.value)}
+                      className="input-elegant"
+                    />
+                  </div>
+                  <div className="col-span-4 md:col-span-2 space-y-1">
+                    <Label>Kaina €</Label>
+                    <Input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={item.price}
+                      onChange={(e) => updateItem(index, "price", parseFloat(e.target.value) || 0)}
+                      className="input-elegant"
+                      required
+                    />
+                  </div>
+                  <div className="col-span-10 md:col-span-3 space-y-1">
+                    <Label>PVM</Label>
+                    <Select
+                      value={item.vatType}
+                      onValueChange={(v) => updateItem(index, "vatType", v as VatType)}
+                    >
+                      <SelectTrigger className="input-elegant">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(vatTypeLabels).map(([key, label]) => (
+                          <SelectItem key={key} value={key}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-2 md:col-span-1 flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleSaveProduct(index)}
+                      title="Išsaugoti prekę"
+                    >
+                      <Save className="w-4 h-4" />
+                    </Button>
+                    {items.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeItem(index)}
+                      >
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ))}
+              <Button type="button" variant="outline" onClick={addItem}>
+                <Plus className="w-4 h-4 mr-2" />
+                Pridėti eilutę
+              </Button>
+            </>
+          )}
         </CardContent>
       </Card>
 

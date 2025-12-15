@@ -148,13 +148,19 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
           </div>
         </div>
 
-        {/* Car Details */}
-        {data.invoiceType === "car_sale" && data.carDetails && (
+        {/* Car Details - shown as additional info, not replacing the item */}
+        {data.invoiceType === "car_sale" && data.carDetails && (data.carDetails.make || data.carDetails.model) && (
           <div className="mb-6 bg-accent/10 rounded-lg p-4">
             <h3 className="font-semibold text-muted-foreground uppercase text-sm tracking-wider mb-2">
               Automobilio duomenys
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+              {(data.carDetails.make || data.carDetails.model) && (
+                <div>
+                  <span className="text-muted-foreground">Automobilis:</span>{" "}
+                  <span className="font-medium">{data.carDetails.make} {data.carDetails.model}</span>
+                </div>
+              )}
               {data.carDetails.vin && (
                 <div>
                   <span className="text-muted-foreground">VIN:</span>{" "}
@@ -174,7 +180,7 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
                 </div>
               )}
               {data.carDetails.notes && (
-                <div>
+                <div className="col-span-2">
                   <span className="text-muted-foreground">Pastabos:</span>{" "}
                   <span className="font-medium">{data.carDetails.notes}</span>
                 </div>

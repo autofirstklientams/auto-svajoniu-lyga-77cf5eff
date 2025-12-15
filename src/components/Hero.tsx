@@ -57,7 +57,7 @@ const Hero = () => {
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               Greitas 
-              <span className="text-white/90"> Finansavimas</span> be Streso
+              <span className="bg-white/20 px-3 py-1 rounded-lg ml-1">Finansavimas</span> be Streso
             </h1>
             
             <p className="text-lg md:text-xl mb-8 text-white/85 leading-relaxed max-w-xl">

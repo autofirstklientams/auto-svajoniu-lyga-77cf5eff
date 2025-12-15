@@ -1,6 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calculator, TrendingDown, Clock, Shield } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const features = [
   {
@@ -21,6 +22,12 @@ const features = [
 ];
 
 const FinancingSection = () => {
+  const navigate = useNavigate();
+
+  const handleCalculate = () => {
+    navigate("/lizingas");
+  };
+
   return (
     <section className="py-20 bg-gradient-to-br from-primary to-primary/90 text-white">
       <div className="container mx-auto px-4">
@@ -35,7 +42,7 @@ const FinancingSection = () => {
           {features.map((feature, index) => (
             <Card key={index} className="bg-white/10 backdrop-blur-sm border-white/20 hover:bg-white/15 transition-all">
               <CardContent className="p-6 text-center">
-                <feature.icon className="h-12 w-12 mx-auto mb-4 text-accent" />
+                <feature.icon className="h-12 w-12 mx-auto mb-4 text-white" />
                 <h3 className="text-xl font-bold mb-2 text-white">{feature.title}</h3>
                 <p className="text-white/80">{feature.description}</p>
               </CardContent>
@@ -46,7 +53,8 @@ const FinancingSection = () => {
         <div className="text-center">
           <Button 
             size="lg"
-            className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8 shadow-lg"
+            className="bg-white hover:bg-white/90 text-primary font-semibold text-lg px-8 shadow-lg"
+            onClick={handleCalculate}
           >
             Apskaičiuoti mėnesinę įmoką
           </Button>

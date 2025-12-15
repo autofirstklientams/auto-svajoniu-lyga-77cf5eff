@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Calculator, TrendingDown, Clock, Shield } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Calculator, TrendingDown, Clock } from "lucide-react";
 
 const features = [
   {
@@ -22,10 +21,9 @@ const features = [
 ];
 
 const FinancingSection = () => {
-  const navigate = useNavigate();
-
   const handleCalculate = () => {
-    navigate("/lizingas");
+    // Scroll to calculator in Hero section
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (

@@ -19,7 +19,7 @@ export interface SavedProduct {
 
 export interface SavedNote {
   id: string;
-  text: string;
+  content: string;
 }
 
 export const useSavedData = () => {
@@ -41,7 +41,10 @@ export const useSavedData = () => {
         ...p,
         default_price: Number(p.default_price) || 0
       })));
-      if (notesRes.data) setNotes(notesRes.data);
+      if (notesRes.data) setNotes(notesRes.data.map(n => ({
+        id: n.id,
+        content: n.content
+      })));
     } catch (error) {
       console.error("Error fetching saved data:", error);
     } finally {
@@ -51,7 +54,12 @@ export const useSavedData = () => {
 
   const addBuyer = async (buyer: Omit<SavedBuyer, "id">) => {
     try {
-      const { error } = await supabase.from("saved_buyers").insert([buyer]);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Turite būti prisijungęs!");
+        return false;
+      }
+      const { error } = await supabase.from("saved_buyers").insert([{ ...buyer, user_id: user.id }]);
       if (error) throw error;
       toast.success("Pirkėjas išsaugotas!");
       fetchAll();
@@ -77,8 +85,13 @@ export const useSavedData = () => {
 
   const addProduct = async (description: string, defaultPrice: number = 0) => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Turite būti prisijungęs!");
+        return false;
+      }
       const { error } = await supabase.from("saved_products").insert([
-        { description, default_price: defaultPrice }
+        { description, default_price: defaultPrice, user_id: user.id }
       ]);
       if (error) throw error;
       toast.success("Prekė/paslauga išsaugota!");
@@ -103,10 +116,15 @@ export const useSavedData = () => {
     }
   };
 
-  const addNote = async (text: string) => {
-    if (!text.trim()) return false;
+  const addNote = async (content: string) => {
+    if (!content.trim()) return false;
     try {
-      const { error } = await supabase.from("saved_notes").insert([{ text }]);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Turite būti prisijungęs!");
+        return false;
+      }
+      const { error } = await supabase.from("saved_notes").insert([{ content, user_id: user.id }]);
       if (error) {
         if (error.code === "23505") {
           toast.error("Tokia pastaba jau egzistuoja");

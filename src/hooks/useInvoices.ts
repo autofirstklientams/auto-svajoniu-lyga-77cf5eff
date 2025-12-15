@@ -83,6 +83,12 @@ export const useInvoices = () => {
 
   const saveInvoice = async (data: InvoiceData): Promise<boolean> => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error("Turite būti prisijungęs!");
+        return false;
+      }
+
       const total = data.items.reduce(
         (sum, item) => sum + item.quantity * item.price,
         0
@@ -90,6 +96,7 @@ export const useInvoices = () => {
 
       const { error } = await supabase.from("invoices").insert([
         {
+          user_id: user.id,
           invoice_number: data.invoiceNumber,
           invoice_date: data.date,
           buyer_name: data.buyer.name,

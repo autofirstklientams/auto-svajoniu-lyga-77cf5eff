@@ -132,6 +132,78 @@ export type Database = {
           },
         ]
       }
+      invoices: {
+        Row: {
+          attachments: string[] | null
+          buyer_address: string
+          buyer_company_code: string
+          buyer_is_company: boolean
+          buyer_name: string
+          buyer_vat_code: string | null
+          car_make: string | null
+          car_mileage: number | null
+          car_model: string | null
+          car_notes: string | null
+          car_plate: string | null
+          car_vin: string | null
+          created_at: string
+          id: string
+          invoice_date: string
+          invoice_number: string
+          invoice_type: string
+          items: Json
+          note: string | null
+          total_amount: number
+          user_id: string
+        }
+        Insert: {
+          attachments?: string[] | null
+          buyer_address: string
+          buyer_company_code: string
+          buyer_is_company?: boolean
+          buyer_name: string
+          buyer_vat_code?: string | null
+          car_make?: string | null
+          car_mileage?: number | null
+          car_model?: string | null
+          car_notes?: string | null
+          car_plate?: string | null
+          car_vin?: string | null
+          created_at?: string
+          id?: string
+          invoice_date: string
+          invoice_number: string
+          invoice_type?: string
+          items: Json
+          note?: string | null
+          total_amount: number
+          user_id: string
+        }
+        Update: {
+          attachments?: string[] | null
+          buyer_address?: string
+          buyer_company_code?: string
+          buyer_is_company?: boolean
+          buyer_name?: string
+          buyer_vat_code?: string | null
+          car_make?: string | null
+          car_mileage?: number | null
+          car_model?: string | null
+          car_notes?: string | null
+          car_plate?: string | null
+          car_vin?: string | null
+          created_at?: string
+          id?: string
+          invoice_date?: string
+          invoice_number?: string
+          invoice_type?: string
+          items?: Json
+          note?: string | null
+          total_amount?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           company_name: string | null
@@ -159,6 +231,84 @@ export type Database = {
           id?: string
           phone?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      saved_buyers: {
+        Row: {
+          address: string
+          company_code: string
+          created_at: string
+          id: string
+          is_company: boolean
+          name: string
+          user_id: string
+          vat_code: string | null
+        }
+        Insert: {
+          address: string
+          company_code: string
+          created_at?: string
+          id?: string
+          is_company?: boolean
+          name: string
+          user_id: string
+          vat_code?: string | null
+        }
+        Update: {
+          address?: string
+          company_code?: string
+          created_at?: string
+          id?: string
+          is_company?: boolean
+          name?: string
+          user_id?: string
+          vat_code?: string | null
+        }
+        Relationships: []
+      }
+      saved_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_products: {
+        Row: {
+          created_at: string
+          default_price: number
+          description: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_price?: number
+          description: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_price?: number
+          description?: string
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }

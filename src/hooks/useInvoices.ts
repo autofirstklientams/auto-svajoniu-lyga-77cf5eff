@@ -21,6 +21,8 @@ export interface SavedInvoice {
   car_plate: string | null;
   car_mileage: number | null;
   car_notes: string | null;
+  car_make: string | null;
+  car_model: string | null;
   attachments: string[];
 }
 
@@ -56,6 +58,8 @@ export const useInvoices = () => {
         car_plate: inv.car_plate as string | null,
         car_mileage: inv.car_mileage as number | null,
         car_notes: inv.car_notes as string | null,
+        car_make: inv.car_make as string | null,
+        car_model: inv.car_model as string | null,
         attachments: (inv.attachments as unknown as string[]) || [],
       }));
 
@@ -101,6 +105,8 @@ export const useInvoices = () => {
           car_plate: data.carDetails?.plate || null,
           car_mileage: data.carDetails?.mileage ? parseInt(data.carDetails.mileage) : null,
           car_notes: data.carDetails?.notes || null,
+          car_make: data.carDetails?.make || null,
+          car_model: data.carDetails?.model || null,
           attachments: data.attachments || [],
         },
       ]);

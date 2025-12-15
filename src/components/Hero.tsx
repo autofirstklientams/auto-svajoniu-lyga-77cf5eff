@@ -56,8 +56,17 @@ const Hero = () => {
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Greitas 
-              <span className="bg-white/20 px-3 py-1 rounded-lg ml-1">Finansavimas</span> be Streso
+              Greitas{" "}
+              <span
+                className="inline-block px-3 py-1 rounded-lg text-primary-foreground align-baseline"
+                style={{
+                  background:
+                    "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(205 85% 35%) 100%)",
+                }}
+              >
+                Finansavimas
+              </span>{" "}
+              be Streso
             </h1>
             
             <p className="text-lg md:text-xl mb-8 text-white/85 leading-relaxed max-w-xl">

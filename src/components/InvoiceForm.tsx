@@ -12,6 +12,8 @@ import { useSavedData, SavedBuyer, SavedProduct } from "@/hooks/useSavedData";
 export type InvoiceType = "commission" | "car_sale" | "service";
 
 export interface CarDetails {
+  make: string;
+  model: string;
   vin: string;
   plate: string;
   mileage: string;
@@ -74,6 +76,8 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
   const [note, setNote] = useState("");
   
   const [carDetails, setCarDetails] = useState<CarDetails>({
+    make: "",
+    model: "",
     vin: "",
     plate: "",
     mileage: "",
@@ -352,6 +356,26 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
+                <Label htmlFor="carMake">Markė</Label>
+                <Input
+                  id="carMake"
+                  value={carDetails.make}
+                  onChange={(e) => setCarDetails({ ...carDetails, make: e.target.value })}
+                  className="input-elegant"
+                  placeholder="pvz. BMW"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="carModel">Modelis</Label>
+                <Input
+                  id="carModel"
+                  value={carDetails.model}
+                  onChange={(e) => setCarDetails({ ...carDetails, model: e.target.value })}
+                  className="input-elegant"
+                  placeholder="pvz. 520d"
+                />
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="vin">VIN kodas</Label>
                 <Input
                   id="vin"
@@ -361,7 +385,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="plate">Valstybinis numeris</Label>
+                <Label htmlFor="plate">Valstybinis numeris/SDK</Label>
                 <Input
                   id="plate"
                   value={carDetails.plate}

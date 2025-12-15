@@ -102,7 +102,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-muted-foreground text-sm">&copy; 2025 AutoKOPERS. Visos teisės saugomos.</p>
+            <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. Visos teisės saugomos.</p>
             <Button 
               onClick={() => window.location.href = '/partner-login'}
               variant="outline"

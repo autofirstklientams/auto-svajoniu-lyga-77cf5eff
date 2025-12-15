@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye } from "lucide-react";
+import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -222,15 +222,21 @@ const AdminDashboard = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
           <div className="flex items-center gap-3">
             <Users className="h-8 w-8 text-primary" />
             <h1 className="text-3xl font-bold">Administratoriaus valdymas</h1>
           </div>
-          <Button onClick={handleLogout} variant="outline">
-            <LogOut className="h-4 w-4 mr-2" />
-            Atsijungti
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => navigate("/invoice")} variant="default">
+              <FileText className="h-4 w-4 mr-2" />
+              Sąskaitų generatorius
+            </Button>
+            <Button onClick={handleLogout} variant="outline">
+              <LogOut className="h-4 w-4 mr-2" />
+              Atsijungti
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="users" className="w-full">

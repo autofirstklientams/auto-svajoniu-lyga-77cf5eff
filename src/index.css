@@ -15,7 +15,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 220 25% 10%;
 
-    --primary: 220 70% 45%;
+    /* Brand (soft blue) */
+    --primary: 205 85% 45%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 210 15% 94%;
@@ -24,7 +25,8 @@
     --muted: 210 15% 96%;
     --muted-foreground: 220 10% 50%;
 
-    --accent: 35 100% 50%;
+    /* Accent is used for hover/focus across UI (must NOT be yellow) */
+    --accent: 205 85% 45%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
@@ -32,13 +34,13 @@
 
     --border: 220 15% 90%;
     --input: 220 15% 90%;
-    --ring: 220 70% 45%;
+    --ring: 205 85% 45%;
 
     --radius: 0.75rem;
 
     /* Custom tokens */
-    --invoice-header: 220 70% 45%;
-    --invoice-accent: 35 100% 50%;
+    --invoice-header: 205 85% 45%;
+    --invoice-accent: 205 85% 45%;
     --table-header: 220 25% 15%;
     --table-stripe: 210 20% 97%;
     --success: 145 65% 42%;
@@ -63,7 +65,7 @@
     --popover: 220 25% 12%;
     --popover-foreground: 210 20% 98%;
 
-    --primary: 220 70% 55%;
+    --primary: 205 85% 50%;
     --primary-foreground: 0 0% 100%;
 
     --secondary: 220 20% 18%;
@@ -72,7 +74,7 @@
     --muted: 220 20% 18%;
     --muted-foreground: 220 10% 60%;
 
-    --accent: 35 100% 55%;
+    --accent: 205 85% 50%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 62% 40%;
@@ -80,10 +82,10 @@
 
     --border: 220 20% 20%;
     --input: 220 20% 20%;
-    --ring: 220 70% 55%;
+    --ring: 205 85% 50%;
 
-    --invoice-header: 220 70% 55%;
-    --invoice-accent: 35 100% 55%;
+    --invoice-header: 205 85% 50%;
+    --invoice-accent: 205 85% 50%;
     --table-header: 220 25% 25%;
     --table-stripe: 220 25% 14%;
     --success: 145 65% 50%;
@@ -121,7 +123,7 @@
   }
 
   .invoice-header {
-    background: linear-gradient(135deg, hsl(var(--invoice-header)) 0%, hsl(220 70% 35%) 100%);
+    background: linear-gradient(135deg, hsl(var(--invoice-header)) 0%, hsl(205 85% 35%) 100%);
     @apply text-primary-foreground p-8;
   }
 
@@ -147,8 +149,8 @@
   }
 
   .btn-accent {
-    background: linear-gradient(135deg, hsl(var(--accent)) 0%, hsl(25 100% 45%) 100%);
-    @apply text-accent-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5;
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(205 85% 35%) 100%);
+    @apply text-primary-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5;
   }
 }
 

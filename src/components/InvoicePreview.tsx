@@ -104,7 +104,7 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
               <img src={logo} alt="Auto Kopers" className="h-12 mb-4 brightness-0 invert" />
               <h1 className="text-2xl font-bold">{getInvoiceTitle()}</h1>
               <p className="text-primary-foreground/80 mt-1">
-                Serija AK Nr. {data.invoiceNumber}
+                Nr. {data.invoiceNumber}
               </p>
             </div>
             <div className="text-right text-primary-foreground/90">

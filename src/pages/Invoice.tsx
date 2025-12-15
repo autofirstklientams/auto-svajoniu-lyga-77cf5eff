@@ -55,8 +55,10 @@ const Invoice = () => {
       vatType: (item.vatType as VatType) || "vat_exempt",
     }));
 
-    const carDetails: CarDetails | undefined = invoice.invoice_type === "car_sale" && (invoice.car_vin || invoice.car_plate || invoice.car_mileage || invoice.car_notes)
+    const carDetails: CarDetails | undefined = invoice.invoice_type === "car_sale" && (invoice.car_vin || invoice.car_plate || invoice.car_mileage || invoice.car_notes || invoice.car_make || invoice.car_model)
       ? {
+          make: invoice.car_make || "",
+          model: invoice.car_model || "",
           vin: invoice.car_vin || "",
           plate: invoice.car_plate || "",
           mileage: invoice.car_mileage?.toString() || "",

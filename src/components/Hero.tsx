@@ -57,9 +57,7 @@ const Hero = () => {
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
               Greitas{" "}
-              <span
-                className="bg-gradient-to-r from-white via-white/90 to-white/80 bg-clip-text text-transparent"
-              >
+              <span className="text-[hsl(205,85%,45%)]">
                 Finansavimas
               </span>{" "}
               be Streso

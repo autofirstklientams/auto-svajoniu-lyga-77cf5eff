@@ -34,12 +34,48 @@ interface SavedInvoice {
 }
 
 const BUYERS = [
-  { value: "inbank", label: "AS Inbank filialas" },
-  { value: "bigbank", label: "Bigbank AS filialas" },
-  { value: "seb", label: "SEB lizingas" },
-  { value: "swedbank", label: "Swedbank lizingas" },
-  { value: "silita", label: 'UAB "SILITA"' },
-  { value: "mokilizingas", label: "UAB Mokilizingas" },
+  { 
+    value: "inbank", 
+    label: "AS Inbank filialas",
+    address: "Ukmergės g. 369A, LT-14184 Vilnius",
+    companyCode: "304531323",
+    vatCode: "LT100011233017"
+  },
+  { 
+    value: "bigbank", 
+    label: "Bigbank AS Lietuvos filialas",
+    address: "Jogailos g. 9, LT-01116 Vilnius",
+    companyCode: "302629047",
+    vatCode: "LT100006020716"
+  },
+  { 
+    value: "seb", 
+    label: "SEB lizingas UAB",
+    address: "Gedimino pr. 12, LT-01103 Vilnius",
+    companyCode: "111675502",
+    vatCode: "LT116755011"
+  },
+  { 
+    value: "swedbank", 
+    label: "Swedbank lizingas UAB",
+    address: "Konstitucijos pr. 20A, LT-09321 Vilnius",
+    companyCode: "110085623",
+    vatCode: "LT100000574010"
+  },
+  { 
+    value: "silita", 
+    label: 'UAB "SILITA"',
+    address: "Pramonės g. 5, LT-51305 Kaunas",
+    companyCode: "135587558",
+    vatCode: "LT355875515"
+  },
+  { 
+    value: "mokilizingas", 
+    label: "UAB Mokilizingas",
+    address: "Gynėjų g. 14, LT-01109 Vilnius",
+    companyCode: "302826027",
+    vatCode: "LT100005920110"
+  },
 ];
 
 const QUICK_ITEMS = [
@@ -349,20 +385,40 @@ const Invoice = () => {
             </div>
 
             {!isCustomBuyer ? (
-              <div>
-                <Label>Pasirinkite pirkėją</Label>
-                <Select value={selectedBuyer} onValueChange={setSelectedBuyer}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite iš sąrašo arba įveskite patys" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {BUYERS.map((buyer) => (
-                      <SelectItem key={buyer.value} value={buyer.value}>
-                        {buyer.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="space-y-4">
+                <div>
+                  <Label>Pasirinkite pirkėją</Label>
+                  <Select value={selectedBuyer} onValueChange={setSelectedBuyer}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pasirinkite iš sąrašo arba įveskite patys" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {BUYERS.map((buyer) => (
+                        <SelectItem key={buyer.value} value={buyer.value}>
+                          {buyer.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {selectedBuyer && (
+                  <div className="p-4 bg-muted rounded-lg border border-border">
+                    <h4 className="font-medium text-foreground mb-2">Pirkėjo duomenys:</h4>
+                    {(() => {
+                      const buyer = BUYERS.find(b => b.value === selectedBuyer);
+                      if (!buyer) return null;
+                      return (
+                        <div className="text-sm text-muted-foreground space-y-1">
+                          <p><span className="font-medium text-foreground">Pavadinimas:</span> {buyer.label}</p>
+                          <p><span className="font-medium text-foreground">Adresas:</span> {buyer.address}</p>
+                          <p><span className="font-medium text-foreground">Įmonės kodas:</span> {buyer.companyCode}</p>
+                          <p><span className="font-medium text-foreground">PVM kodas:</span> {buyer.vatCode}</p>
+                        </div>
+                      );
+                    })()}
+                  </div>
+                )}
               </div>
             ) : (
               <div>
@@ -637,9 +693,22 @@ const Invoice = () => {
             </div>
             <div>
               <h3 className="font-bold text-gray-800 mb-2">Pirkėjas:</h3>
-              <p className="text-gray-600">
-                {isCustomBuyer ? customBuyer : BUYERS.find(b => b.value === selectedBuyer)?.label}
-              </p>
+              {isCustomBuyer ? (
+                <p className="text-gray-600 whitespace-pre-line">{customBuyer}</p>
+              ) : (
+                (() => {
+                  const buyer = BUYERS.find(b => b.value === selectedBuyer);
+                  if (!buyer) return null;
+                  return (
+                    <>
+                      <p className="text-gray-600">{buyer.label}</p>
+                      <p className="text-gray-600">Įmonės kodas: {buyer.companyCode}</p>
+                      <p className="text-gray-600">PVM kodas: {buyer.vatCode}</p>
+                      <p className="text-gray-600">Adresas: {buyer.address}</p>
+                    </>
+                  );
+                })()
+              )}
             </div>
           </div>
 

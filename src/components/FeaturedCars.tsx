@@ -27,6 +27,7 @@ const FeaturedCars = () => {
       const { data, error } = await supabase
         .from("cars")
         .select("*")
+        .eq("visible_web", true)
         .order("created_at", { ascending: false })
         .limit(6);
 
@@ -80,6 +81,7 @@ const FeaturedCars = () => {
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <CarCard
+                id={car.id}
                 title={`${car.make} ${car.model}`}
                 year={car.year}
                 price={`${car.price.toLocaleString()} €`}

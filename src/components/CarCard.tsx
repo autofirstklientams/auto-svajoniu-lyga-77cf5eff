@@ -2,8 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Gauge, Fuel, ChevronRight } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface CarCardProps {
+  id?: string;
   image: string;
   title: string;
   price: string;
@@ -13,9 +15,9 @@ interface CarCardProps {
   featured?: boolean;
 }
 
-const CarCard = ({ image, title, price, year, mileage, fuel, featured }: CarCardProps) => {
-  return (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-border/50">
+const CarCard = ({ id, image, title, price, year, mileage, fuel, featured }: CarCardProps) => {
+  const content = (
+    <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-border/50 h-full">
       <div className="relative overflow-hidden">
         {featured && (
           <Badge className="absolute top-4 left-4 z-10 bg-accent text-accent-foreground">
@@ -59,6 +61,12 @@ const CarCard = ({ image, title, price, year, mileage, fuel, featured }: CarCard
       </CardContent>
     </Card>
   );
+
+  if (id) {
+    return <Link to={`/car/${id}`}>{content}</Link>;
+  }
+
+  return content;
 };
 
 export default CarCard;

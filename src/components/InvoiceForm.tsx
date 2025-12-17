@@ -16,6 +16,7 @@ export interface CarDetails {
   model: string;
   vin: string;
   plate: string;
+  sdk: string;
   mileage: string;
   notes: string;
   isMarginScheme: boolean;
@@ -83,6 +84,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
     model: "",
     vin: "",
     plate: "",
+    sdk: "",
     mileage: "",
     notes: "",
     isMarginScheme: false,
@@ -178,7 +180,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
     // Jei automobilio pardavimas, sukuriame prekę iš automobilio duomenų
     let finalItems = items;
     if (invoiceType === "car_sale" && carDetails.make && carDetails.model) {
-      const carDescription = `Automobilis ${carDetails.make} ${carDetails.model}${carDetails.vin ? `, VIN: ${carDetails.vin}` : ""}${carDetails.plate ? `, Nr.: ${carDetails.plate}` : ""}${carDetails.mileage ? `, Rida: ${carDetails.mileage} km` : ""}`;
+      const carDescription = `Automobilis ${carDetails.make} ${carDetails.model}${carDetails.vin ? `, VIN: ${carDetails.vin}` : ""}${carDetails.plate ? `, Nr.: ${carDetails.plate}` : ""}${carDetails.sdk ? `, SDK: ${carDetails.sdk}` : ""}${carDetails.mileage ? `, Rida: ${carDetails.mileage} km` : ""}`;
       finalItems = [{
         description: carDescription,
         quantity: 1,
@@ -419,12 +421,23 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="plate">Valstybinis numeris/SDK</Label>
+                <Label htmlFor="plate">Valstybinis numeris</Label>
                 <Input
                   id="plate"
                   value={carDetails.plate}
                   onChange={(e) => setCarDetails({ ...carDetails, plate: e.target.value })}
                   className="input-elegant"
+                  placeholder="pvz. ABC123"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="sdk">SDK</Label>
+                <Input
+                  id="sdk"
+                  value={carDetails.sdk}
+                  onChange={(e) => setCarDetails({ ...carDetails, sdk: e.target.value })}
+                  className="input-elegant"
+                  placeholder="pvz. HFURJAO"
                 />
               </div>
               <div className="space-y-2">

@@ -24,6 +24,7 @@ export interface SavedInvoice {
   car_make: string | null;
   car_model: string | null;
   attachments: string[];
+  is_margin_scheme: boolean;
 }
 
 export const useInvoices = () => {
@@ -61,6 +62,7 @@ export const useInvoices = () => {
         car_make: inv.car_make as string | null,
         car_model: inv.car_model as string | null,
         attachments: (inv.attachments as unknown as string[]) || [],
+        is_margin_scheme: (inv.is_margin_scheme as boolean) ?? false,
       }));
 
       setInvoices(parsedInvoices);
@@ -115,6 +117,7 @@ export const useInvoices = () => {
           car_make: data.carDetails?.make || null,
           car_model: data.carDetails?.model || null,
           attachments: data.attachments || [],
+          is_margin_scheme: data.carDetails?.isMarginScheme || false,
         },
       ]);
 

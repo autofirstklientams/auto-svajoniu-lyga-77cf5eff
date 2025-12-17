@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, X, Link, Loader2 } from "lucide-react";
+import { Upload, X, Link, Loader2, Globe, ExternalLink } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 
 const carSchema = z.object({
@@ -49,6 +50,8 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   const [selectedFeatures, setSelectedFeatures] = useState<CarFeatures>(
     car?.features || {}
   );
+  const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? true);
+  const [visibleAutoplius, setVisibleAutoplius] = useState(car?.visible_autoplius ?? false);
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
@@ -235,6 +238,8 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         vin: formData.vin || null,
         defects: formData.defects || null,
         features: selectedFeatures as any,
+        visible_web: visibleWeb,
+        visible_autoplius: visibleAutoplius,
       };
 
       // Create or update car
@@ -781,6 +786,36 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
             selectedFeatures={selectedFeatures}
             onChange={setSelectedFeatures}
           />
+
+          {/* Visibility Options */}
+          <div className="border rounded-lg p-4 bg-muted/30">
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Publikavimo nustatymai</h3>
+            <p className="text-sm text-muted-foreground mb-4">
+              Pasirinkite kur norite publikuoti skelbimą
+            </p>
+            <div className="flex flex-wrap gap-6">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <Checkbox
+                  checked={visibleWeb}
+                  onCheckedChange={(checked) => setVisibleWeb(checked === true)}
+                />
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <span className="font-medium">AutoKOPERS svetainė</span>
+                </div>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <Checkbox
+                  checked={visibleAutoplius}
+                  onCheckedChange={(checked) => setVisibleAutoplius(checked === true)}
+                />
+                <div className="flex items-center gap-2">
+                  <ExternalLink className="h-4 w-4 text-blue-600" />
+                  <span className="font-medium">Autoplius.lt</span>
+                </div>
+              </label>
+            </div>
+          </div>
 
           <div className="flex gap-2">
             <Button type="submit" disabled={isLoading}>

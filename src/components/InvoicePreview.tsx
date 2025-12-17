@@ -45,26 +45,45 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
   const handleDownloadPDF = async () => {
     if (!invoiceRef.current) return;
 
-    const canvas = await html2canvas(invoiceRef.current, {
+    const el = invoiceRef.current;
+    const prevAnimation = el.style.animation;
+    const prevOpacity = el.style.opacity;
+    const prevTransform = el.style.transform;
+
+    // Ensure the capture is not affected by fade-in animations/transforms
+    el.style.animation = "none";
+    el.style.opacity = "1";
+    el.style.transform = "none";
+
+    // Let the browser apply the styles before rendering to canvas
+    await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+
+    const canvas = await html2canvas(el, {
       scale: 4,
       useCORS: true,
-      backgroundColor: '#ffffff',
+      backgroundColor: "#ffffff",
       logging: false,
       imageTimeout: 0,
       allowTaint: true,
     });
 
-    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    // Restore styles
+    el.style.animation = prevAnimation;
+    el.style.opacity = prevOpacity;
+    el.style.transform = prevTransform;
+
+    const imgData = canvas.toDataURL("image/png");
     const pdf = new jsPDF({
       orientation: "p",
       unit: "mm",
       format: "a4",
       compress: false,
     });
+
     const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight, undefined, "NONE");
+    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight, undefined, "NONE");
     pdf.save(`Saskaita-${data.invoiceNumber}.pdf`);
   };
 

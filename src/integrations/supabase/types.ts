@@ -56,6 +56,7 @@ export type Database = {
           description: string | null
           doors: number | null
           engine_capacity: number | null
+          features: Json | null
           fuel_type: string | null
           id: string
           image_url: string | null
@@ -81,6 +82,7 @@ export type Database = {
           description?: string | null
           doors?: number | null
           engine_capacity?: number | null
+          features?: Json | null
           fuel_type?: string | null
           id?: string
           image_url?: string | null
@@ -106,6 +108,7 @@ export type Database = {
           description?: string | null
           doors?: number | null
           engine_capacity?: number | null
+          features?: Json | null
           fuel_type?: string | null
           id?: string
           image_url?: string | null
@@ -264,6 +267,30 @@ export type Database = {
           name?: string
           user_id?: string
           vat_code?: string | null
+        }
+        Relationships: []
+      }
+      saved_car_features: {
+        Row: {
+          created_at: string
+          features: Json
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          features?: Json
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          features?: Json
+          id?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

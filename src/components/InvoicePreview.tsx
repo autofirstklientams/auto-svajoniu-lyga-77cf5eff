@@ -213,10 +213,16 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
 
         {/* Totals */}
         <div style={{ marginBottom: '24px', color: '#000000' }}>
-          {!data.carDetails?.isMarginScheme && (
-            <p style={{ margin: '4px 0', color: '#000000' }}>PVM 21% {formatCurrency(totalVat)}</p>
+          {!data.carDetails?.isMarginScheme && totalVat > 0 && (
+            <>
+              <p style={{ margin: '4px 0', color: '#000000' }}>Suma be PVM: {formatCurrency(subtotal)}</p>
+              <p style={{ margin: '4px 0', color: '#000000' }}>PVM 21%: {formatCurrency(totalVat)}</p>
+              <p style={{ fontWeight: 'bold', marginTop: '8px', color: '#000000' }}>Viso su PVM: {formatCurrency(total)}</p>
+            </>
           )}
-          <p style={{ fontWeight: 'bold', marginTop: '8px', color: '#000000' }}>Iš viso: {formatCurrency(total)}</p>
+          {(data.carDetails?.isMarginScheme || totalVat === 0) && (
+            <p style={{ fontWeight: 'bold', marginTop: '8px', color: '#000000' }}>Iš viso: {formatCurrency(total)}</p>
+          )}
         </div>
 
         {/* VAT Note */}

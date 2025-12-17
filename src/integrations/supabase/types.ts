@@ -200,6 +200,7 @@ export type Database = {
           invoice_number: string
           invoice_type: string
           is_margin_scheme: boolean
+          is_paid: boolean
           items: Json
           note: string | null
           total_amount: number
@@ -224,6 +225,7 @@ export type Database = {
           invoice_number: string
           invoice_type?: string
           is_margin_scheme?: boolean
+          is_paid?: boolean
           items: Json
           note?: string | null
           total_amount: number
@@ -248,6 +250,7 @@ export type Database = {
           invoice_number?: string
           invoice_type?: string
           is_margin_scheme?: boolean
+          is_paid?: boolean
           items?: Json
           note?: string | null
           total_amount?: number

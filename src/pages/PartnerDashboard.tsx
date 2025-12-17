@@ -47,22 +47,8 @@ const PartnerDashboard = () => {
   const [editingCar, setEditingCar] = useState<Car | null>(null);
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (!session) {
-          navigate("/partner-login");
-        } else {
-          setTimeout(() => {
-            checkUserRole(session.user.id);
-          }, 0);
-        }
-      }
-    );
-
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const initAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setUser(session?.user ?? null);
       setIsLoading(false);
@@ -72,22 +58,55 @@ const PartnerDashboard = () => {
       } else {
         checkUserRole(session.user.id);
       }
-    });
+    };
 
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    initAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (!session) {
+          navigate("/partner-login");
+        } else {
+          checkUserRole(session.user.id);
+        }
+      }
+    );
+
+    // Re-check role when page becomes visible (user returns to tab)
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && user) {
+        checkUserRole(user.id);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      subscription.unsubscribe();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [navigate, user]);
 
   const checkUserRole = async (userId: string) => {
     try {
-      const { data: roles } = await supabase
+      const { data: roles, error } = await supabase
         .from("user_roles")
         .select("role")
         .eq("user_id", userId);
+      
+      if (error) {
+        console.error("Error checking user role:", error);
+        setIsAdmin(false);
+        return;
+      }
       
       const hasAdminRole = roles?.some(r => r.role === "admin");
       setIsAdmin(hasAdminRole || false);
     } catch (error) {
       console.error("Error checking user role:", error);
+      setIsAdmin(false);
     }
   };
 

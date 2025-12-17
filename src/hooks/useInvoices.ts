@@ -25,6 +25,7 @@ export interface SavedInvoice {
   car_model: string | null;
   attachments: string[];
   is_margin_scheme: boolean;
+  is_paid: boolean;
 }
 
 export const useInvoices = () => {
@@ -63,6 +64,7 @@ export const useInvoices = () => {
         car_model: inv.car_model as string | null,
         attachments: (inv.attachments as unknown as string[]) || [],
         is_margin_scheme: (inv.is_margin_scheme as boolean) ?? false,
+        is_paid: (inv.is_paid as boolean) ?? false,
       }));
 
       setInvoices(parsedInvoices);
@@ -154,6 +156,23 @@ export const useInvoices = () => {
     }
   };
 
+  const togglePaid = async (id: string, isPaid: boolean) => {
+    try {
+      const { error } = await supabase
+        .from("invoices")
+        .update({ is_paid: isPaid })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast.success(isPaid ? "Sąskaita pažymėta kaip apmokėta" : "Sąskaita pažymėta kaip neapmokėta");
+      fetchInvoices();
+    } catch (error) {
+      console.error("Error updating invoice:", error);
+      toast.error("Klaida atnaujinant sąskaitą");
+    }
+  };
+
   useEffect(() => {
     fetchInvoices();
   }, []);
@@ -164,6 +183,7 @@ export const useInvoices = () => {
     lastInvoiceNumber,
     saveInvoice,
     deleteInvoice,
+    togglePaid,
     refetch: fetchInvoices,
   };
 };

@@ -17,7 +17,7 @@ const Invoice = () => {
   const [editingData, setEditingData] = useState<InvoiceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const { invoices, loading: invoicesLoading, lastInvoiceNumber, saveInvoice, deleteInvoice } =
+  const { invoices, loading: invoicesLoading, lastInvoiceNumber, saveInvoice, deleteInvoice, togglePaid } =
     useInvoices();
 
   useEffect(() => {
@@ -147,6 +147,7 @@ const Invoice = () => {
               loading={invoicesLoading}
               onView={handleViewSaved}
               onDelete={deleteInvoice}
+              onTogglePaid={togglePaid}
             />
           </div>
         )}

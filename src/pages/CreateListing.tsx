@@ -47,6 +47,7 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<Array<{id: string, url: string, order: number}>>([]);
   const [importedImageUrls, setImportedImageUrls] = useState<string[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState<CarFeatures>(
     car?.features || {}
   );
@@ -160,10 +161,12 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
     setExistingImages(data?.map(img => ({ id: img.id, url: img.image_url, order: img.display_order })) || []);
   };
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    
+  const processImageFiles = (files: File[]) => {
     const validFiles = files.filter(file => {
+      if (!file.type.startsWith('image/')) {
+        toast.error(`${file.name} nėra nuotrauka`);
+        return false;
+      }
       if (file.size > 5 * 1024 * 1024) {
         toast.error(`${file.name} per didelis. Maksimalus dydis: 5MB`);
         return false;
@@ -182,6 +185,32 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
       };
       reader.readAsDataURL(file);
     });
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    processImageFiles(files);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+    
+    const files = Array.from(e.dataTransfer.files);
+    processImageFiles(files);
   };
 
   const handleRemoveNewImage = (index: number) => {
@@ -658,10 +687,19 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
             <div className="space-y-4">
               <label 
                 htmlFor="image" 
-                className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border rounded-lg cursor-pointer hover:bg-accent/50 transition-colors"
+                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
+                  isDragging 
+                    ? 'border-primary bg-primary/10 scale-[1.02]' 
+                    : 'border-border hover:bg-accent/50'
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
               >
-                <Upload className="h-8 w-8 text-muted-foreground mb-2" />
-                <span className="text-sm text-muted-foreground">Įkelkite nuotraukas (galima kelias)</span>
+                <Upload className={`h-8 w-8 mb-2 transition-colors ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+                <span className={`text-sm transition-colors ${isDragging ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
+                  {isDragging ? 'Paleiskite nuotraukas čia' : 'Įkelkite arba užvilkite nuotraukas'}
+                </span>
                 <span className="text-xs text-muted-foreground mt-1">Max 5MB kiekviena</span>
               </label>
               <Input

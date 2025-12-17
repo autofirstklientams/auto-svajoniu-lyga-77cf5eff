@@ -17,28 +17,48 @@ const Invoice = () => {
   const [editingData, setEditingData] = useState<InvoiceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const { invoices, loading: invoicesLoading, lastInvoiceNumber, saveInvoice, deleteInvoice, togglePaid } =
     useInvoices();
 
   useEffect(() => {
     const checkAuth = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       if (!user) {
-        toast.error("Prašome prisijungti");
-        navigate("/auth");
+        toast.error("Prašome prisijungti per partnerio zoną");
+        navigate("/partner-login");
         return;
       }
 
+      const { data: roles, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+
+      if (error) {
+        toast.error("Nepavyko patikrinti teisių. Bandykite dar kartą.");
+        navigate("/partner-dashboard");
+        return;
+      }
+
+      const hasAdminRole = roles?.some((r) => r.role === "admin") ?? false;
+      if (!hasAdminRole) {
+        toast.error("Neturite prieigos prie sąskaitų generatoriaus");
+        navigate("/partner-dashboard");
+        return;
+      }
+
+      setIsAdmin(true);
       setIsAuthenticated(true);
       setIsLoading(false);
     };
 
     checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
-        navigate("/auth");
+        navigate("/partner-login");
       }
     });
 

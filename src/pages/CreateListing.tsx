@@ -54,6 +54,8 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? true);
   const [visibleAutoplius, setVisibleAutoplius] = useState(car?.visible_autoplius ?? false);
   const [isCompanyCar, setIsCompanyCar] = useState(car?.is_company_car ?? false);
+  const [isFeatured, setIsFeatured] = useState(car?.is_featured ?? false);
+  const [isRecommended, setIsRecommended] = useState(car?.is_recommended ?? false);
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
@@ -288,6 +290,8 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         visible_web: visibleWeb,
         visible_autoplius: visibleAutoplius,
         is_company_car: isCompanyCar,
+        is_featured: isFeatured,
+        is_recommended: isRecommended,
       };
 
       // Create or update car
@@ -1020,6 +1024,33 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
                   <p className="text-sm text-muted-foreground">Pažymėkite, jei šis automobilis priklauso AutoKOPERS įmonei</p>
                 </div>
               </label>
+            </div>
+
+            {/* Featured and Recommended options */}
+            <div className="mt-4 pt-4 border-t">
+              <h4 className="font-medium mb-3">Išskirtiniai nustatymai</h4>
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={isFeatured}
+                    onCheckedChange={(checked) => setIsFeatured(checked === true)}
+                  />
+                  <div>
+                    <span className="font-medium">Rodyti pagrindiniame puslapyje</span>
+                    <p className="text-sm text-muted-foreground">Automobilis bus matomas pagrindiniame puslapyje</p>
+                  </div>
+                </label>
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={isRecommended}
+                    onCheckedChange={(checked) => setIsRecommended(checked === true)}
+                  />
+                  <div>
+                    <span className="font-medium text-primary">✓ AUTOKOPERS rekomenduoja</span>
+                    <p className="text-sm text-muted-foreground">Ant nuotraukos bus rodomas "AUTOKOPERS rekomenduoja" ženkliukas</p>
+                  </div>
+                </label>
+              </div>
             </div>
           </div>
 

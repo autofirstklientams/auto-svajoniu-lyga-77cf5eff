@@ -34,6 +34,40 @@ interface CarImage {
   display_order: number;
 }
 
+// Autoplius make ID mapping (most common makes)
+const makeIdMapping: { [key: string]: string } = {
+  "Audi": "4",
+  "BMW": "9",
+  "Citroen": "18",
+  "Dacia": "20",
+  "Fiat": "26",
+  "Ford": "28",
+  "Honda": "35",
+  "Hyundai": "37",
+  "Jaguar": "39",
+  "Jeep": "40",
+  "Kia": "43",
+  "Land Rover": "48",
+  "Lexus": "49",
+  "Mazda": "53",
+  "Mercedes-Benz": "55",
+  "Mini": "58",
+  "Mitsubishi": "59",
+  "Nissan": "63",
+  "Opel": "65",
+  "Peugeot": "68",
+  "Porsche": "70",
+  "Renault": "75",
+  "Seat": "81",
+  "Skoda": "84",
+  "Subaru": "86",
+  "Suzuki": "87",
+  "Tesla": "89",
+  "Toyota": "91",
+  "Volkswagen": "99",
+  "Volvo": "100",
+};
+
 // Autoplius fuel type mapping
 const fuelTypeMapping: { [key: string]: string } = {
   "Benzinas": "34",
@@ -44,6 +78,8 @@ const fuelTypeMapping: { [key: string]: string } = {
   "Hibridinis": "37",
   "Dujos": "38",
   "Benzinas/Dujos": "39",
+  "Benzinas / elektra": "76",
+  "Dyzelis / elektra": "77",
 };
 
 // Autoplius transmission mapping
@@ -94,11 +130,14 @@ const steeringWheelMapping: { [key: string]: string } = {
   "Dešinė": "10923",
 };
 
-// Autoplius condition mapping
-const conditionMapping: { [key: string]: string } = {
-  "Naudotas": "10924",
-  "Naujas": "10925",
-  "Daužtas": "10926",
+// Autoplius has_damaged_id mapping (defects)
+// 254 = Be defektų, 255 = Su defektais
+const hasDamagedMapping: { [key: string]: string } = {
+  "Be defektų": "254",
+  "Su defektais": "255",
+  "Naudotas": "254",
+  "Naujas": "254",
+  "Daužtas": "255",
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -146,7 +185,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Found ${cars?.length || 0} cars`);
 
-    // Generate XML in Autoplius format
+    // Generate XML in Autoplius format for used cars (category_id=2)
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<autoplius xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance">\n';
     xml += '  <announcements>\n';
@@ -154,67 +193,130 @@ const handler = async (req: Request): Promise<Response> => {
     if (cars && cars.length > 0) {
       for (const car of cars as Car[]) {
         xml += '    <cars>\n';
+        
+        // Required: external_id
         xml += `      <external_id>${car.id}</external_id>\n`;
-        xml += `      <make_id>${escapeXml(car.make)}</make_id>\n`;
+        
+        // Required: make_id (Autoplius numeric ID)
+        const makeId = makeIdMapping[car.make] || car.make;
+        xml += `      <make_id>${escapeXml(makeId)}</make_id>\n`;
+        
+        // Required: model_id - using model name as we don't have full model mapping
+        // Autoplius will try to match it
         xml += `      <model_id>${escapeXml(car.model)}</model_id>\n`;
+        
+        // Required: sell_price
         xml += `      <sell_price>${car.price}</sell_price>\n`;
         
+        // Required: is_condition_new (0 = used, 1 = new)
+        xml += `      <is_condition_new>0</is_condition_new>\n`;
+        
+        // Required: contacts_phone
+        xml += `      <contacts_phone>+37062851439</contacts_phone>\n`;
+        
+        // Required: contacts_name
+        xml += `      <contacts_name>AutoKOPERS</contacts_name>\n`;
+        
+        // Required: contacts_email
+        xml += `      <contacts_email>labas@autokopers.lt</contacts_email>\n`;
+        
+        // Required: fk_place_countries_id (117 = Lithuania)
+        xml += `      <fk_place_countries_id>117</fk_place_countries_id>\n`;
+        
+        // Required: fk_place_cities_id (1 = Vilnius)
+        xml += `      <fk_place_cities_id>1</fk_place_cities_id>\n`;
+        
+        // Required: make_date (format YYYY-MM)
+        xml += `      <make_date>${car.year}-01</make_date>\n`;
+        
+        // Required: body_type_id
+        if (car.body_type && bodyTypeMapping[car.body_type]) {
+          xml += `      <body_type_id>${bodyTypeMapping[car.body_type]}</body_type_id>\n`;
+        } else {
+          // Default to Sedanas if not specified
+          xml += `      <body_type_id>1</body_type_id>\n`;
+        }
+        
+        // Required: fuel_id
+        if (car.fuel_type && fuelTypeMapping[car.fuel_type]) {
+          xml += `      <fuel_id>${fuelTypeMapping[car.fuel_type]}</fuel_id>\n`;
+        } else {
+          // Default to Benzinas
+          xml += `      <fuel_id>34</fuel_id>\n`;
+        }
+        
+        // Required: number_of_doors_id
+        if (car.doors && doorsMapping[car.doors]) {
+          xml += `      <number_of_doors_id>${doorsMapping[car.doors]}</number_of_doors_id>\n`;
+        } else {
+          // Default to 4 doors
+          xml += `      <number_of_doors_id>128</number_of_doors_id>\n`;
+        }
+        
+        // Required: color_id
+        if (car.color && colorMapping[car.color]) {
+          xml += `      <color_id>${colorMapping[car.color]}</color_id>\n`;
+        } else {
+          // Default to Pilka (gray)
+          xml += `      <color_id>27</color_id>\n`;
+        }
+        
+        // Required: gearbox_id
+        if (car.transmission && transmissionMapping[car.transmission]) {
+          xml += `      <gearbox_id>${transmissionMapping[car.transmission]}</gearbox_id>\n`;
+        } else {
+          // Default to Mechaninė
+          xml += `      <gearbox_id>38</gearbox_id>\n`;
+        }
+        
+        // Required: has_damaged_id (254 = no defects, 255 = with defects)
+        if (car.defects && car.defects.trim().length > 0) {
+          xml += `      <has_damaged_id>255</has_damaged_id>\n`;
+        } else if (car.condition && hasDamagedMapping[car.condition]) {
+          xml += `      <has_damaged_id>${hasDamagedMapping[car.condition]}</has_damaged_id>\n`;
+        } else {
+          xml += `      <has_damaged_id>254</has_damaged_id>\n`;
+        }
+        
+        // Required: steering_wheel_id
+        if (car.steering_wheel && steeringWheelMapping[car.steering_wheel]) {
+          xml += `      <steering_wheel_id>${steeringWheelMapping[car.steering_wheel]}</steering_wheel_id>\n`;
+        } else {
+          // Default to Kairė (left)
+          xml += `      <steering_wheel_id>10922</steering_wheel_id>\n`;
+        }
+        
+        // Optional: comments (description)
         if (car.description) {
           xml += `      <comments><![CDATA[${car.description}]]></comments>\n`;
         }
         
+        // Optional: engine_capacity
         if (car.engine_capacity) {
           xml += `      <engine_capacity>${car.engine_capacity}</engine_capacity>\n`;
         }
         
-        if (car.body_type && bodyTypeMapping[car.body_type]) {
-          xml += `      <body_type_id>${bodyTypeMapping[car.body_type]}</body_type_id>\n`;
-        }
-        
+        // Optional: kilometrage (mileage)
         if (car.mileage) {
           xml += `      <kilometrage>${car.mileage}</kilometrage>\n`;
         }
         
+        // Optional: power (kW)
         if (car.power_kw) {
           xml += `      <power>${car.power_kw}</power>\n`;
         }
         
-        if (car.fuel_type && fuelTypeMapping[car.fuel_type]) {
-          xml += `      <fuel_id>${fuelTypeMapping[car.fuel_type]}</fuel_id>\n`;
-        }
-        
-        if (car.doors && doorsMapping[car.doors]) {
-          xml += `      <number_of_doors_id>${doorsMapping[car.doors]}</number_of_doors_id>\n`;
-        }
-        
-        if (car.color && colorMapping[car.color]) {
-          xml += `      <color_id>${colorMapping[car.color]}</color_id>\n`;
-        }
-        
-        if (car.transmission && transmissionMapping[car.transmission]) {
-          xml += `      <gearbox_id>${transmissionMapping[car.transmission]}</gearbox_id>\n`;
-        }
-        
-        // Format year as YYYY-MM
-        xml += `      <make_date>${car.year}-01</make_date>\n`;
-        
-        if (car.condition && conditionMapping[car.condition]) {
-          xml += `      <has_damaged_id>${conditionMapping[car.condition]}</has_damaged_id>\n`;
-        }
-        
-        if (car.steering_wheel && steeringWheelMapping[car.steering_wheel]) {
-          xml += `      <steering_wheel_id>${steeringWheelMapping[car.steering_wheel]}</steering_wheel_id>\n`;
-        }
-
+        // Optional: number_of_seats_id
         if (car.seats) {
           xml += `      <number_of_seats_id>${car.seats}</number_of_seats_id>\n`;
         }
-
+        
+        // Optional: vin
         if (car.vin) {
           xml += `      <vin>${escapeXml(car.vin)}</vin>\n`;
         }
 
-        // Add photos
+        // Photos
         const carImages = imagesByCarId[car.id] || [];
         if (carImages.length > 0 || car.image_url) {
           xml += '      <photos>\n';

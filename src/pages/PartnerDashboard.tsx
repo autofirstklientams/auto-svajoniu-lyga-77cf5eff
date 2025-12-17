@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -46,13 +46,18 @@ const PartnerDashboard = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
 
+  const userIdRef = React.useRef<string | null>(null);
+  const lastCarsErrorAtRef = React.useRef<number>(0);
+  const roleRetryTimeoutRef = React.useRef<number | null>(null);
+
   useEffect(() => {
     const initAuth = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setSession(session);
       setUser(session?.user ?? null);
+      userIdRef.current = session?.user?.id ?? null;
       setIsLoading(false);
-      
+
       if (!session) {
         navigate("/partner-login");
       } else {
@@ -63,10 +68,11 @@ const PartnerDashboard = () => {
     initAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
+        userIdRef.current = session?.user?.id ?? null;
+
         if (!session) {
           navigate("/partner-login");
         } else {
@@ -75,19 +81,21 @@ const PartnerDashboard = () => {
       }
     );
 
-    // Re-check role when page becomes visible (user returns to tab)
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && user) {
-        checkUserRole(user.id);
+      if (document.visibilityState === "visible" && userIdRef.current) {
+        checkUserRole(userIdRef.current);
       }
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       subscription.unsubscribe();
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      if (roleRetryTimeoutRef.current) {
+        window.clearTimeout(roleRetryTimeoutRef.current);
+      }
     };
-  }, [navigate, user]);
+  }, [navigate]);
 
   const checkUserRole = async (userId: string) => {
     try {
@@ -95,19 +103,31 @@ const PartnerDashboard = () => {
         .from("user_roles")
         .select("role")
         .eq("user_id", userId);
-      
+
       if (error) {
+        // Nepanaikiname admin teisių dėl trumpalaikio tinklo/užklausos sutrikimo.
         console.error("Error checking user role:", error);
-        setIsAdmin(false);
+        scheduleRoleRetry(userId);
         return;
       }
-      
-      const hasAdminRole = roles?.some(r => r.role === "admin");
-      setIsAdmin(hasAdminRole || false);
+
+      const hasAdminRole = roles?.some((r) => r.role === "admin") ?? false;
+      setIsAdmin(hasAdminRole);
     } catch (error) {
+      // "Failed to fetch" būna laikinas (mirksėjimas). Paliekame esamą isAdmin ir bandom dar kartą.
       console.error("Error checking user role:", error);
-      setIsAdmin(false);
+      scheduleRoleRetry(userId);
     }
+  };
+
+  const scheduleRoleRetry = (userId: string) => {
+    if (roleRetryTimeoutRef.current) return;
+    roleRetryTimeoutRef.current = window.setTimeout(() => {
+      roleRetryTimeoutRef.current = null;
+      if (userIdRef.current === userId) {
+        checkUserRole(userId);
+      }
+    }, 1500);
   };
 
   useEffect(() => {
@@ -127,7 +147,12 @@ const PartnerDashboard = () => {
       if (error) throw error;
       setCars(data || []);
     } catch (error: any) {
-      toast.error("Klaida užkraunant skelbimus");
+      // Kad nemirksėtų / nesprogdintų toast'ų kas sekundę esant trumpalaikiam tinklo sutrikimui
+      const now = Date.now();
+      if (now - (lastCarsErrorAtRef.current || 0) > 4000) {
+        lastCarsErrorAtRef.current = now;
+        toast.error("Klaida užkraunant skelbimus");
+      }
     }
   };
 

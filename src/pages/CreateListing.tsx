@@ -53,6 +53,7 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   );
   const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? true);
   const [visibleAutoplius, setVisibleAutoplius] = useState(car?.visible_autoplius ?? false);
+  const [isCompanyCar, setIsCompanyCar] = useState(car?.is_company_car ?? false);
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
@@ -286,6 +287,7 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         features: selectedFeatures as any,
         visible_web: visibleWeb,
         visible_autoplius: visibleAutoplius,
+        is_company_car: isCompanyCar,
       };
 
       // Create or update car
@@ -1002,6 +1004,20 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
                 <div className="flex items-center gap-2">
                   <ExternalLink className="h-4 w-4 text-blue-600" />
                   <span className="font-medium">Autoplius.lt</span>
+                </div>
+              </label>
+            </div>
+            
+            {/* Company car option */}
+            <div className="mt-4 pt-4 border-t">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <Checkbox
+                  checked={isCompanyCar}
+                  onCheckedChange={(checked) => setIsCompanyCar(checked === true)}
+                />
+                <div>
+                  <span className="font-medium">AutoKOPERS įmonės automobilis</span>
+                  <p className="text-sm text-muted-foreground">Pažymėkite, jei šis automobilis priklauso AutoKOPERS įmonei</p>
                 </div>
               </label>
             </div>

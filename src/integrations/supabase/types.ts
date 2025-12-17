@@ -68,6 +68,7 @@ export type Database = {
           fuel_type: string | null
           id: string
           image_url: string | null
+          is_company_car: boolean
           make: string
           mileage: number | null
           model: string
@@ -108,6 +109,7 @@ export type Database = {
           fuel_type?: string | null
           id?: string
           image_url?: string | null
+          is_company_car?: boolean
           make: string
           mileage?: number | null
           model: string
@@ -148,6 +150,7 @@ export type Database = {
           fuel_type?: string | null
           id?: string
           image_url?: string | null
+          is_company_car?: boolean
           make?: string
           mileage?: number | null
           model?: string

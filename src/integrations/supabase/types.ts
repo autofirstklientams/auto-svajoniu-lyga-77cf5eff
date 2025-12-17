@@ -69,6 +69,8 @@ export type Database = {
           id: string
           image_url: string | null
           is_company_car: boolean
+          is_featured: boolean
+          is_recommended: boolean
           make: string
           mileage: number | null
           model: string
@@ -110,6 +112,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_company_car?: boolean
+          is_featured?: boolean
+          is_recommended?: boolean
           make: string
           mileage?: number | null
           model: string
@@ -151,6 +155,8 @@ export type Database = {
           id?: string
           image_url?: string | null
           is_company_car?: boolean
+          is_featured?: boolean
+          is_recommended?: boolean
           make?: string
           mileage?: number | null
           model?: string

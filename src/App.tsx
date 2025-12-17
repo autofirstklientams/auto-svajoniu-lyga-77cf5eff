@@ -8,6 +8,7 @@ import About from "./pages/About";
 import CarSearch from "./pages/CarSearch";
 import CarPurchase from "./pages/CarPurchase";
 import CarDetail from "./pages/CarDetail";
+import CarCatalog from "./pages/CarCatalog";
 import PartnerLogin from "./pages/PartnerLogin";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/sell-your-car" element={<SellYourCar />} />
           <Route path="/leasing" element={<Leasing />} />
           <Route path="/lizingas" element={<Leasing />} />
+          <Route path="/automobiliai" element={<CarCatalog />} />
           <Route path="/partner-login" element={<PartnerLogin />} />
           <Route path="/partner-dashboard" element={<PartnerDashboard />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />

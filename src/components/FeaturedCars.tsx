@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import CarCard from "./CarCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ExternalCarPlatforms from "./ExternalCarPlatforms";
+import { Button } from "@/components/ui/button";
+import { ChevronRight } from "lucide-react";
 
 interface Car {
   id: string;
@@ -12,6 +15,8 @@ interface Car {
   price: number;
   mileage: number | null;
   image_url: string | null;
+  fuel_type: string | null;
+  is_recommended: boolean;
 }
 
 const FeaturedCars = () => {
@@ -28,6 +33,8 @@ const FeaturedCars = () => {
         .from("cars")
         .select("*")
         .eq("visible_web", true)
+        .eq("is_featured", true)
+        .order("is_recommended", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(6);
 
@@ -86,12 +93,23 @@ const FeaturedCars = () => {
                 year={car.year}
                 price={`${car.price.toLocaleString()} €`}
                 mileage={`${car.mileage?.toLocaleString() || "N/A"} km`}
-                fuel={"-"}
+                fuel={car.fuel_type || "-"}
                 image={car.image_url || "/placeholder.svg"}
+                isRecommended={car.is_recommended}
               />
             </div>
           ))}
         </div>
+        
+        <div className="text-center mt-10">
+          <Button asChild size="lg" className="group">
+            <Link to="/automobiliai">
+              Visi automobiliai
+              <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </Button>
+        </div>
+        
         <ExternalCarPlatforms />
       </div>
     </section>

@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Gauge, Fuel, ChevronRight } from "lucide-react";
+import { Calendar, Gauge, Fuel, ChevronRight, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface CarCardProps {
@@ -13,13 +13,20 @@ interface CarCardProps {
   mileage: string;
   fuel: string;
   featured?: boolean;
+  isRecommended?: boolean;
 }
 
-const CarCard = ({ id, image, title, price, year, mileage, fuel, featured }: CarCardProps) => {
+const CarCard = ({ id, image, title, price, year, mileage, fuel, featured, isRecommended }: CarCardProps) => {
   const content = (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-border/50 h-full">
       <div className="relative overflow-hidden">
-        {featured && (
+        {isRecommended && (
+          <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-2 px-3 flex items-center justify-center gap-2 shadow-md">
+            <Award className="h-4 w-4" />
+            <span className="text-sm font-bold tracking-wide">AUTOKOPERS rekomenduoja</span>
+          </div>
+        )}
+        {featured && !isRecommended && (
           <Badge className="absolute top-4 left-4 z-10 bg-accent text-accent-foreground">
             Rekomenduojama
           </Badge>
@@ -27,7 +34,7 @@ const CarCard = ({ id, image, title, price, year, mileage, fuel, featured }: Car
         <img 
           src={image} 
           alt={title}
-          className="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105"
+          className={`w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>

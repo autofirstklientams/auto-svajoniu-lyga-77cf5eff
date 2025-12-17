@@ -10,9 +10,10 @@ import jsPDF from "jspdf";
 interface InvoicePreviewProps {
   data: InvoiceData;
   onBack: () => void;
+  onEdit?: () => void;
 }
 
-const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
+const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
 
   const formatDate = (dateStr: string) => {
@@ -95,6 +96,11 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Atgal
         </Button>
+        {onEdit && (
+          <Button variant="outline" onClick={onEdit}>
+            Redaguoti
+          </Button>
+        )}
         <Button variant="outline" onClick={handlePrint}>
           <Printer className="w-4 h-4 mr-2" />
           Spausdinti

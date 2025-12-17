@@ -213,7 +213,9 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
 
         {/* Totals */}
         <div style={{ marginBottom: '24px', color: '#000000' }}>
-          <p style={{ margin: '4px 0', color: '#000000' }}>PVM 21% {formatCurrency(totalVat)}</p>
+          {!data.carDetails?.isMarginScheme && (
+            <p style={{ margin: '4px 0', color: '#000000' }}>PVM 21% {formatCurrency(totalVat)}</p>
+          )}
           <p style={{ fontWeight: 'bold', marginTop: '8px', color: '#000000' }}>Iš viso: {formatCurrency(total)}</p>
         </div>
 

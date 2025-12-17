@@ -156,22 +156,6 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
           </div>
         </div>
 
-        {/* Car Details */}
-        {data.invoiceType === "car_sale" && data.carDetails && (data.carDetails.make || data.carDetails.model) && (
-          <div style={{ marginBottom: '24px' }}>
-            <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#000000' }}>AUTOMOBILIO DUOMENYS</p>
-            <div style={{ fontSize: '14px', color: '#000000' }}>
-              {(data.carDetails.make || data.carDetails.model) && (
-                <p style={{ margin: '2px 0', color: '#000000' }}>Automobilis: {data.carDetails.make} {data.carDetails.model}</p>
-              )}
-              {data.carDetails.vin && <p style={{ margin: '2px 0', color: '#000000' }}>VIN: {data.carDetails.vin}</p>}
-              {data.carDetails.plate && <p style={{ margin: '2px 0', color: '#000000' }}>Valst. numeris: {data.carDetails.plate}</p>}
-              {data.carDetails.mileage && <p style={{ margin: '2px 0', color: '#000000' }}>Rida: {data.carDetails.mileage} km</p>}
-              {data.carDetails.notes && <p style={{ margin: '2px 0', color: '#000000' }}>Pastabos: {data.carDetails.notes}</p>}
-            </div>
-          </div>
-        )}
-
         {/* Items Table - Closed with borders */}
         <div style={{ marginBottom: '24px' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000000' }}>
@@ -238,6 +222,13 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
         {data.invoiceType === "car_sale" && data.carDetails?.isMarginScheme && (
           <p style={{ marginBottom: '16px', fontSize: '14px', color: '#000000' }}>
             Taikomas LR PVM įstatymo 106 str. Apmokestinama taikant maržos schemą / Margin scheme.
+          </p>
+        )}
+
+        {/* Car Notes */}
+        {data.invoiceType === "car_sale" && data.carDetails?.notes && (
+          <p style={{ marginBottom: '16px', fontSize: '14px', color: '#000000' }}>
+            Pastabos: {data.carDetails.notes}
           </p>
         )}
 

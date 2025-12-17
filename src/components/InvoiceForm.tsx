@@ -428,18 +428,6 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
                 />
               </div>
             </div>
-            <div className="flex items-center space-x-2 mt-4">
-              <input
-                type="checkbox"
-                id="marginScheme"
-                checked={carDetails.isMarginScheme}
-                onChange={(e) => setCarDetails({ ...carDetails, isMarginScheme: e.target.checked })}
-                className="w-4 h-4 rounded border-border"
-              />
-              <Label htmlFor="marginScheme" className="cursor-pointer">
-                Maržinis automobilis (taikoma maržos schema)
-              </Label>
-            </div>
           </CardContent>
         </Card>
       )}
@@ -473,7 +461,15 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
                 <Label>PVM</Label>
                 <Select
                   value={items[0]?.vatType || "vat_exempt"}
-                  onValueChange={(v) => updateItem(0, "vatType", v as VatType)}
+                  onValueChange={(v) => {
+                    updateItem(0, "vatType", v as VatType);
+                    // Automatiškai nustatyti maržos schemą
+                    if (v === "margin_scheme") {
+                      setCarDetails({ ...carDetails, isMarginScheme: true });
+                    } else {
+                      setCarDetails({ ...carDetails, isMarginScheme: false });
+                    }
+                  }}
                 >
                   <SelectTrigger className="input-elegant">
                     <SelectValue />

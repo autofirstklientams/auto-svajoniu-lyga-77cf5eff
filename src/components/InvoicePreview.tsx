@@ -46,17 +46,25 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
     if (!invoiceRef.current) return;
 
     const canvas = await html2canvas(invoiceRef.current, {
-      scale: 2,
+      scale: 4,
       useCORS: true,
       backgroundColor: '#ffffff',
+      logging: false,
+      imageTimeout: 0,
+      allowTaint: true,
     });
 
-    const imgData = canvas.toDataURL("image/png");
-    const pdf = new jsPDF("p", "mm", "a4");
+    const imgData = canvas.toDataURL("image/jpeg", 1.0);
+    const pdf = new jsPDF({
+      orientation: "p",
+      unit: "mm",
+      format: "a4",
+      compress: false,
+    });
     const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+    pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight, undefined, "NONE");
     pdf.save(`Saskaita-${data.invoiceNumber}.pdf`);
   };
 

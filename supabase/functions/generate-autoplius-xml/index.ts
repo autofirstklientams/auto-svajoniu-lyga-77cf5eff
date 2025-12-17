@@ -152,9 +152,11 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Fetching cars from database...");
     
+    // Only fetch cars that are visible on Autoplius
     const { data: cars, error } = await supabase
       .from("cars")
       .select("*")
+      .eq("visible_autoplius", true)
       .order("created_at", { ascending: false });
 
     if (error) {

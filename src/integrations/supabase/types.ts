@@ -71,6 +71,8 @@ export type Database = {
           transmission: string | null
           updated_at: string | null
           vin: string | null
+          visible_autoplius: boolean
+          visible_web: boolean
           year: number
         }
         Insert: {
@@ -97,6 +99,8 @@ export type Database = {
           transmission?: string | null
           updated_at?: string | null
           vin?: string | null
+          visible_autoplius?: boolean
+          visible_web?: boolean
           year: number
         }
         Update: {
@@ -123,6 +127,8 @@ export type Database = {
           transmission?: string | null
           updated_at?: string | null
           vin?: string | null
+          visible_autoplius?: boolean
+          visible_web?: boolean
           year?: number
         }
         Relationships: [

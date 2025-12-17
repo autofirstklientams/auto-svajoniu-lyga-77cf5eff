@@ -6,8 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Save, Building2, User, FileText, Car } from "lucide-react";
-import { popularSuppliers, sellerInfo, VatType, vatTypeLabels, popularNotes, bankAccounts, BankAccount } from "@/data/suppliers";
+import { popularSuppliers, sellerInfo, VatType, vatTypeLabels, popularNotes, BankAccount } from "@/data/suppliers";
 import { useSavedData, SavedBuyer, SavedProduct } from "@/hooks/useSavedData";
+import { useBankAccounts } from "@/hooks/useBankAccounts";
 
 export type InvoiceType = "commission" | "car_sale" | "service";
 
@@ -60,6 +61,7 @@ interface InvoiceFormProps {
 
 const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitialData }: InvoiceFormProps) => {
   const { buyers, products, notes, addBuyer, addProduct, addNote, deleteBuyer, deleteProduct, deleteNote } = useSavedData();
+  const { bankAccounts, addBankAccount, deleteBankAccount } = useBankAccounts();
   
   const [invoiceNumber, setInvoiceNumber] = useState(nextInvoiceNumber.toString());
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
@@ -91,9 +93,18 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
     isMarginScheme: false,
   });
 
-  const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccount>(bankAccounts[0]);
+  const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccount | null>(null);
+  const [showAddBankAccount, setShowAddBankAccount] = useState(false);
+  const [newBankAccount, setNewBankAccount] = useState({ accountNumber: "", bankName: "" });
 
   const [showSaveBuyer, setShowSaveBuyer] = useState(false);
+
+  // Set default bank account when loaded
+  useEffect(() => {
+    if (bankAccounts.length > 0 && !selectedBankAccount) {
+      setSelectedBankAccount(bankAccounts[0]);
+    }
+  }, [bankAccounts, selectedBankAccount]);
 
   useEffect(() => {
     setInvoiceNumber(nextInvoiceNumber.toString());
@@ -204,7 +215,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
       note,
       invoiceType,
       carDetails: invoiceType === "car_sale" ? carDetails : undefined,
-      bankAccount: selectedBankAccount,
+      bankAccount: selectedBankAccount || bankAccounts[0],
     };
     
     onGenerate(data);
@@ -283,29 +294,108 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
       {/* Bank Account Selection */}
       <Card className="form-section">
         <CardHeader>
-          <CardTitle>Banko sąskaita</CardTitle>
+          <CardTitle className="flex items-center justify-between">
+            <span>Banko sąskaita</span>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowAddBankAccount(!showAddBankAccount)}
+            >
+              <Plus className="w-4 h-4 mr-1" />
+              Pridėti
+            </Button>
+          </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
+          {showAddBankAccount && (
+            <div className="p-4 border rounded-lg space-y-3 bg-muted/50">
+              <div className="space-y-2">
+                <Label>Sąskaitos numeris</Label>
+                <Input
+                  value={newBankAccount.accountNumber}
+                  onChange={(e) => setNewBankAccount({ ...newBankAccount, accountNumber: e.target.value })}
+                  placeholder="LT..."
+                  className="input-elegant"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Bankas</Label>
+                <Input
+                  value={newBankAccount.bankName}
+                  onChange={(e) => setNewBankAccount({ ...newBankAccount, bankName: e.target.value })}
+                  placeholder='pvz. AB "SEB"'
+                  className="input-elegant"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={() => {
+                    if (newBankAccount.accountNumber && newBankAccount.bankName) {
+                      const added = addBankAccount(newBankAccount);
+                      setSelectedBankAccount(added);
+                      setNewBankAccount({ accountNumber: "", bankName: "" });
+                      setShowAddBankAccount(false);
+                    }
+                  }}
+                  disabled={!newBankAccount.accountNumber || !newBankAccount.bankName}
+                >
+                  <Save className="w-4 h-4 mr-1" />
+                  Išsaugoti
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setShowAddBankAccount(false);
+                    setNewBankAccount({ accountNumber: "", bankName: "" });
+                  }}
+                >
+                  Atšaukti
+                </Button>
+              </div>
+            </div>
+          )}
+          
           <div className="space-y-2">
             <Label>Pasirinkti sąskaitą</Label>
-            <Select 
-              value={selectedBankAccount.id} 
-              onValueChange={(id) => {
-                const account = bankAccounts.find(b => b.id === id);
-                if (account) setSelectedBankAccount(account);
-              }}
-            >
-              <SelectTrigger className="input-elegant">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {bankAccounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.accountNumber} ({account.bankName})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-2">
+              <Select 
+                value={selectedBankAccount?.id || ""} 
+                onValueChange={(id) => {
+                  const account = bankAccounts.find(b => b.id === id);
+                  if (account) setSelectedBankAccount(account);
+                }}
+              >
+                <SelectTrigger className="input-elegant flex-1">
+                  <SelectValue placeholder="Pasirinkite sąskaitą" />
+                </SelectTrigger>
+                <SelectContent>
+                  {bankAccounts.map((account) => (
+                    <SelectItem key={account.id} value={account.id}>
+                      {account.accountNumber} ({account.bankName})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              {selectedBankAccount && bankAccounts.length > 1 && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => {
+                    deleteBankAccount(selectedBankAccount.id);
+                    setSelectedBankAccount(bankAccounts.find(a => a.id !== selectedBankAccount.id) || null);
+                  }}
+                  className="text-destructive hover:text-destructive"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

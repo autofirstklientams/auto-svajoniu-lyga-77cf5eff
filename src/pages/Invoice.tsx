@@ -6,7 +6,7 @@ import InvoicePreview from "@/components/InvoicePreview";
 import InvoiceHistory from "@/components/InvoiceHistory";
 import { useInvoices, SavedInvoice } from "@/hooks/useInvoices";
 import logo from "@/assets/logo.png";
-import { VatType } from "@/data/suppliers";
+import { VatType, bankAccounts } from "@/data/suppliers";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
@@ -87,6 +87,7 @@ const Invoice = () => {
       invoiceType: invoice.invoice_type || "commission",
       carDetails,
       attachments: invoice.attachments,
+      bankAccount: bankAccounts[0],
     });
   };
 

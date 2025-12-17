@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, Save, Building2, User, FileText, Car } from "lucide-react";
-import { popularSuppliers, sellerInfo, VatType, vatTypeLabels, popularNotes } from "@/data/suppliers";
+import { popularSuppliers, sellerInfo, VatType, vatTypeLabels, popularNotes, bankAccounts, BankAccount } from "@/data/suppliers";
 import { useSavedData, SavedBuyer, SavedProduct } from "@/hooks/useSavedData";
 
 export type InvoiceType = "commission" | "car_sale" | "service";
@@ -48,6 +48,7 @@ export interface InvoiceData {
   invoiceType: InvoiceType;
   carDetails?: CarDetails;
   attachments?: string[];
+  bankAccount: BankAccount;
 }
 
 interface InvoiceFormProps {
@@ -90,6 +91,8 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
     isMarginScheme: false,
   });
 
+  const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccount>(bankAccounts[0]);
+
   const [showSaveBuyer, setShowSaveBuyer] = useState(false);
 
   useEffect(() => {
@@ -107,6 +110,9 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
       setNote(initialData.note);
       if (initialData.carDetails) {
         setCarDetails(initialData.carDetails);
+      }
+      if (initialData.bankAccount) {
+        setSelectedBankAccount(initialData.bankAccount);
       }
       // Clear initial data after populating
       onClearInitialData?.();
@@ -198,6 +204,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
       note,
       invoiceType,
       carDetails: invoiceType === "car_sale" ? carDetails : undefined,
+      bankAccount: selectedBankAccount,
     };
     
     onGenerate(data);
@@ -269,6 +276,36 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Bank Account Selection */}
+      <Card className="form-section">
+        <CardHeader>
+          <CardTitle>Banko sąskaita</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            <Label>Pasirinkti sąskaitą</Label>
+            <Select 
+              value={selectedBankAccount.id} 
+              onValueChange={(id) => {
+                const account = bankAccounts.find(b => b.id === id);
+                if (account) setSelectedBankAccount(account);
+              }}
+            >
+              <SelectTrigger className="input-elegant">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {bankAccounts.map((account) => (
+                  <SelectItem key={account.id} value={account.id}>
+                    {account.accountNumber} ({account.bankName})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>

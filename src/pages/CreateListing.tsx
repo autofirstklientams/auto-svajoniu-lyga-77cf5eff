@@ -72,6 +72,15 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
     condition: car?.condition || "",
     vin: car?.vin || "",
     defects: car?.defects || "",
+    // New Autoplius fields
+    euro_standard: car?.euro_standard || "",
+    fuel_cons_urban: car?.fuel_cons_urban || 0,
+    fuel_cons_highway: car?.fuel_cons_highway || 0,
+    fuel_cons_combined: car?.fuel_cons_combined || 0,
+    origin_country: car?.origin_country || "",
+    wheel_drive: car?.wheel_drive || "",
+    co2_emission: car?.co2_emission || 0,
+    city: car?.city || "Vilnius",
   });
 
   const handleImportFromAutoplius = async () => {
@@ -266,6 +275,14 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         condition: formData.condition || null,
         vin: formData.vin || null,
         defects: formData.defects || null,
+        euro_standard: formData.euro_standard || null,
+        fuel_cons_urban: formData.fuel_cons_urban || null,
+        fuel_cons_highway: formData.fuel_cons_highway || null,
+        fuel_cons_combined: formData.fuel_cons_combined || null,
+        origin_country: formData.origin_country || null,
+        wheel_drive: formData.wheel_drive || null,
+        co2_emission: formData.co2_emission || null,
+        city: formData.city || "Vilnius",
         features: selectedFeatures as any,
         visible_web: visibleWeb,
         visible_autoplius: visibleAutoplius,
@@ -677,6 +694,141 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
                     <SelectItem value="9">9</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+            </div>
+          </div>
+
+          {/* Autoplius Extra Fields */}
+          <div>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Papildomi duomenys (Autoplius)</h3>
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">Miestas</Label>
+                <Select
+                  value={formData.city}
+                  onValueChange={(value) => setFormData({ ...formData, city: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Vilnius">Vilnius</SelectItem>
+                    <SelectItem value="Kaunas">Kaunas</SelectItem>
+                    <SelectItem value="Klaipėda">Klaipėda</SelectItem>
+                    <SelectItem value="Šiauliai">Šiauliai</SelectItem>
+                    <SelectItem value="Panevėžys">Panevėžys</SelectItem>
+                    <SelectItem value="Alytus">Alytus</SelectItem>
+                    <SelectItem value="Marijampolė">Marijampolė</SelectItem>
+                    <SelectItem value="Utena">Utena</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="euro_standard">Euro standartas</Label>
+                <Select
+                  value={formData.euro_standard}
+                  onValueChange={(value) => setFormData({ ...formData, euro_standard: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Euro 1">Euro 1</SelectItem>
+                    <SelectItem value="Euro 2">Euro 2</SelectItem>
+                    <SelectItem value="Euro 3">Euro 3</SelectItem>
+                    <SelectItem value="Euro 4">Euro 4</SelectItem>
+                    <SelectItem value="Euro 5">Euro 5</SelectItem>
+                    <SelectItem value="Euro 6">Euro 6</SelectItem>
+                    <SelectItem value="Euro 6d">Euro 6d</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="wheel_drive">Varantieji ratai</Label>
+                <Select
+                  value={formData.wheel_drive}
+                  onValueChange={(value) => setFormData({ ...formData, wheel_drive: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Priekiniai">Priekiniai</SelectItem>
+                    <SelectItem value="Galiniai">Galiniai</SelectItem>
+                    <SelectItem value="Visi">Visi (4x4)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="origin_country">Kilmės šalis</Label>
+                <Select
+                  value={formData.origin_country}
+                  onValueChange={(value) => setFormData({ ...formData, origin_country: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Lietuva">Lietuva</SelectItem>
+                    <SelectItem value="Vokietija">Vokietija</SelectItem>
+                    <SelectItem value="Lenkija">Lenkija</SelectItem>
+                    <SelectItem value="Prancūzija">Prancūzija</SelectItem>
+                    <SelectItem value="Italija">Italija</SelectItem>
+                    <SelectItem value="Nyderlandai">Nyderlandai</SelectItem>
+                    <SelectItem value="Belgija">Belgija</SelectItem>
+                    <SelectItem value="JAV">JAV</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="co2_emission">CO₂ emisija (g/km)</Label>
+                <Input
+                  id="co2_emission"
+                  type="number"
+                  value={formData.co2_emission || ""}
+                  onChange={(e) => setFormData({ ...formData, co2_emission: parseInt(e.target.value) || 0 })}
+                  placeholder="Pvz.: 120"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fuel_cons_urban">Kuro sąnaudos mieste (l/100km)</Label>
+                <Input
+                  id="fuel_cons_urban"
+                  type="number"
+                  step="0.1"
+                  value={formData.fuel_cons_urban || ""}
+                  onChange={(e) => setFormData({ ...formData, fuel_cons_urban: parseFloat(e.target.value) || 0 })}
+                  placeholder="Pvz.: 8.5"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fuel_cons_highway">Kuro sąnaudos užmiestyje (l/100km)</Label>
+                <Input
+                  id="fuel_cons_highway"
+                  type="number"
+                  step="0.1"
+                  value={formData.fuel_cons_highway || ""}
+                  onChange={(e) => setFormData({ ...formData, fuel_cons_highway: parseFloat(e.target.value) || 0 })}
+                  placeholder="Pvz.: 5.5"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="fuel_cons_combined">Kuro sąnaudos vidutinės (l/100km)</Label>
+                <Input
+                  id="fuel_cons_combined"
+                  type="number"
+                  step="0.1"
+                  value={formData.fuel_cons_combined || ""}
+                  onChange={(e) => setFormData({ ...formData, fuel_cons_combined: parseFloat(e.target.value) || 0 })}
+                  placeholder="Pvz.: 6.5"
+                />
               </div>
             </div>
           </div>

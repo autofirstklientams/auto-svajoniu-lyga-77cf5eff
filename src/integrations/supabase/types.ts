@@ -49,20 +49,30 @@ export type Database = {
       cars: {
         Row: {
           body_type: string | null
+          city: string | null
+          co2_emission: number | null
           color: string | null
           condition: string | null
+          country: string | null
           created_at: string | null
           defects: string | null
           description: string | null
           doors: number | null
           engine_capacity: number | null
+          euro_standard: string | null
           features: Json | null
+          first_reg_date: string | null
+          fuel_cons_combined: number | null
+          fuel_cons_highway: number | null
+          fuel_cons_urban: number | null
           fuel_type: string | null
           id: string
           image_url: string | null
           make: string
           mileage: number | null
           model: string
+          mot_date: string | null
+          origin_country: string | null
           partner_id: string
           power_kw: number | null
           price: number
@@ -73,24 +83,36 @@ export type Database = {
           vin: string | null
           visible_autoplius: boolean
           visible_web: boolean
+          wheel_drive: string | null
+          wheel_size: string | null
           year: number
         }
         Insert: {
           body_type?: string | null
+          city?: string | null
+          co2_emission?: number | null
           color?: string | null
           condition?: string | null
+          country?: string | null
           created_at?: string | null
           defects?: string | null
           description?: string | null
           doors?: number | null
           engine_capacity?: number | null
+          euro_standard?: string | null
           features?: Json | null
+          first_reg_date?: string | null
+          fuel_cons_combined?: number | null
+          fuel_cons_highway?: number | null
+          fuel_cons_urban?: number | null
           fuel_type?: string | null
           id?: string
           image_url?: string | null
           make: string
           mileage?: number | null
           model: string
+          mot_date?: string | null
+          origin_country?: string | null
           partner_id: string
           power_kw?: number | null
           price: number
@@ -101,24 +123,36 @@ export type Database = {
           vin?: string | null
           visible_autoplius?: boolean
           visible_web?: boolean
+          wheel_drive?: string | null
+          wheel_size?: string | null
           year: number
         }
         Update: {
           body_type?: string | null
+          city?: string | null
+          co2_emission?: number | null
           color?: string | null
           condition?: string | null
+          country?: string | null
           created_at?: string | null
           defects?: string | null
           description?: string | null
           doors?: number | null
           engine_capacity?: number | null
+          euro_standard?: string | null
           features?: Json | null
+          first_reg_date?: string | null
+          fuel_cons_combined?: number | null
+          fuel_cons_highway?: number | null
+          fuel_cons_urban?: number | null
           fuel_type?: string | null
           id?: string
           image_url?: string | null
           make?: string
           mileage?: number | null
           model?: string
+          mot_date?: string | null
+          origin_country?: string | null
           partner_id?: string
           power_kw?: number | null
           price?: number
@@ -129,6 +163,8 @@ export type Database = {
           vin?: string | null
           visible_autoplius?: boolean
           visible_web?: boolean
+          wheel_drive?: string | null
+          wheel_size?: string | null
           year?: number
         }
         Relationships: [

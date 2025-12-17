@@ -52,9 +52,11 @@ export interface InvoiceData {
 interface InvoiceFormProps {
   onGenerate: (data: InvoiceData) => void;
   nextInvoiceNumber: number;
+  initialData?: InvoiceData | null;
+  onClearInitialData?: () => void;
 }
 
-const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
+const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitialData }: InvoiceFormProps) => {
   const { buyers, products, notes, addBuyer, addProduct, addNote, deleteBuyer, deleteProduct, deleteNote } = useSavedData();
   
   const [invoiceNumber, setInvoiceNumber] = useState(nextInvoiceNumber.toString());
@@ -91,6 +93,23 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
   useEffect(() => {
     setInvoiceNumber(nextInvoiceNumber.toString());
   }, [nextInvoiceNumber]);
+
+  // Populate form with initial data when editing
+  useEffect(() => {
+    if (initialData) {
+      setInvoiceNumber(initialData.invoiceNumber);
+      setDate(initialData.date);
+      setInvoiceType(initialData.invoiceType);
+      setBuyer(initialData.buyer);
+      setItems(initialData.items);
+      setNote(initialData.note);
+      if (initialData.carDetails) {
+        setCarDetails(initialData.carDetails);
+      }
+      // Clear initial data after populating
+      onClearInitialData?.();
+    }
+  }, [initialData, onClearInitialData]);
 
   const handleSelectBuyer = (buyerId: string) => {
     if (buyerId === "new") {

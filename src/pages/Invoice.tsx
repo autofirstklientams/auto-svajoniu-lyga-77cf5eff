@@ -14,6 +14,7 @@ import { ArrowLeft } from "lucide-react";
 const Invoice = () => {
   const navigate = useNavigate();
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
+  const [editingData, setEditingData] = useState<InvoiceData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { invoices, loading: invoicesLoading, lastInvoiceNumber, saveInvoice, deleteInvoice } =
@@ -122,13 +123,22 @@ const Invoice = () => {
         {invoiceData ? (
           <InvoicePreview
             data={invoiceData}
-            onBack={() => setInvoiceData(null)}
+            onBack={() => {
+              setInvoiceData(null);
+              setEditingData(null);
+            }}
+            onEdit={() => {
+              setEditingData(invoiceData);
+              setInvoiceData(null);
+            }}
           />
         ) : (
           <div className="space-y-8">
             <InvoiceForm
               onGenerate={handleGenerate}
               nextInvoiceNumber={lastInvoiceNumber + 1}
+              initialData={editingData}
+              onClearInitialData={() => setEditingData(null)}
             />
             <InvoiceHistory
               invoices={invoices}

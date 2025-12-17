@@ -67,12 +67,13 @@ export const sellerInfo = {
   bankName: 'AB "SEB"',
 };
 
-export type VatType = "with_vat" | "no_vat" | "vat_exempt";
+export type VatType = "with_vat" | "no_vat" | "vat_exempt" | "margin_scheme";
 
 export const vatTypeLabels: Record<VatType, string> = {
   with_vat: "Su PVM (21%)",
   no_vat: "Be PVM",
   vat_exempt: "PVM neapmokestinama (28 str.)",
+  margin_scheme: "Maržos schema (106 str.)",
 };
 
 export const popularNotes = [

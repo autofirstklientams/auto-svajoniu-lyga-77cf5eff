@@ -58,13 +58,30 @@ export const popularSuppliers: Supplier[] = [
   },
 ];
 
+export interface BankAccount {
+  id: string;
+  accountNumber: string;
+  bankName: string;
+}
+
+export const bankAccounts: BankAccount[] = [
+  {
+    id: "seb1",
+    accountNumber: "LT567044090102112880",
+    bankName: 'AB "SEB"',
+  },
+  {
+    id: "seb2",
+    accountNumber: "LT257044090109492228",
+    bankName: 'AB "SEB"',
+  },
+];
+
 export const sellerInfo = {
   name: 'MB "Autodealeriai"',
   companyCode: "305825810",
   vatCode: "LT100015779014",
   address: "Apės g. 11, Kaunas",
-  bankAccount: "LT567044090102112880",
-  bankName: 'AB "SEB"',
 };
 
 export type VatType = "with_vat" | "no_vat" | "vat_exempt" | "margin_scheme";

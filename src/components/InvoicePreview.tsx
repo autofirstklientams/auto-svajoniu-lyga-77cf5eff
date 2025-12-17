@@ -145,8 +145,8 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
             <p style={{ color: '#000000', margin: '2px 0' }}>Įmonės kodas: {sellerInfo.companyCode}</p>
             <p style={{ color: '#000000', margin: '2px 0' }}>PVM mokėtojo kodas: {sellerInfo.vatCode}</p>
             <p style={{ color: '#000000', margin: '2px 0' }}>{sellerInfo.address}</p>
-            <p style={{ color: '#000000', margin: '2px 0' }}>Sąsk.nr: {sellerInfo.bankAccount}</p>
-            <p style={{ color: '#000000', margin: '2px 0' }}>{sellerInfo.bankName}</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>Sąsk.nr: {data.bankAccount.accountNumber}</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>{data.bankAccount.bankName}</p>
           </div>
 
           <div>

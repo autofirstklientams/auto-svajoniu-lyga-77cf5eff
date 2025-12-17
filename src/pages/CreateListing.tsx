@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { z } from "zod";
 import { Upload, X, Link, Loader2 } from "lucide-react";
+import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 
 const carSchema = z.object({
   make: z.string().trim().min(1, "Markė privaloma"),
@@ -45,6 +46,9 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [existingImages, setExistingImages] = useState<Array<{id: string, url: string, order: number}>>([]);
   const [importedImageUrls, setImportedImageUrls] = useState<string[]>([]);
+  const [selectedFeatures, setSelectedFeatures] = useState<CarFeatures>(
+    car?.features || {}
+  );
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
@@ -230,6 +234,7 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
         condition: formData.condition || null,
         vin: formData.vin || null,
         defects: formData.defects || null,
+        features: selectedFeatures as any,
       };
 
       // Create or update car
@@ -770,6 +775,12 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
               />
             </div>
           </div>
+
+          {/* Car Features */}
+          <CarFeaturesSelector
+            selectedFeatures={selectedFeatures}
+            onChange={setSelectedFeatures}
+          />
 
           <div className="flex gap-2">
             <Button type="submit" disabled={isLoading}>

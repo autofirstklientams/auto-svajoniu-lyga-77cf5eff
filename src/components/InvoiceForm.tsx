@@ -441,12 +441,17 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
               <div className="space-y-2">
                 <Label>Kaina €</Label>
                 <Input
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={items[0]?.price || 0}
-                  onChange={(e) => updateItem(0, "price", parseFloat(e.target.value) || 0)}
+                  type="text"
+                  inputMode="decimal"
+                  value={items[0]?.price === 0 ? "" : items[0]?.price}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                      updateItem(0, "price", val === "" ? 0 : parseFloat(val) || 0);
+                    }
+                  }}
                   className="input-elegant"
+                  placeholder="0.00"
                   required
                 />
               </div>
@@ -520,12 +525,17 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
                   <div className="col-span-4 md:col-span-2 space-y-1">
                     <Label>Kaina €</Label>
                     <Input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      value={item.price}
-                      onChange={(e) => updateItem(index, "price", parseFloat(e.target.value) || 0)}
+                      type="text"
+                      inputMode="decimal"
+                      value={item.price === 0 ? "" : item.price}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                          updateItem(index, "price", val === "" ? 0 : parseFloat(val) || 0);
+                        }
+                      }}
                       className="input-elegant"
+                      placeholder="0.00"
                       required
                     />
                   </div>

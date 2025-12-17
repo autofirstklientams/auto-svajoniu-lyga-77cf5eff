@@ -65,7 +65,7 @@ const Invoice = () => {
           plate: invoice.car_plate || "",
           mileage: invoice.car_mileage?.toString() || "",
           notes: invoice.car_notes || "",
-          isMarginScheme: false,
+          isMarginScheme: invoice.is_margin_scheme || false,
         }
       : undefined;
 

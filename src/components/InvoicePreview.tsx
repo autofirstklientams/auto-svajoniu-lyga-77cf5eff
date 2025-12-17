@@ -234,6 +234,13 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
           </p>
         )}
 
+        {/* Margin Scheme Note */}
+        {data.invoiceType === "car_sale" && data.carDetails?.isMarginScheme && (
+          <p style={{ marginBottom: '16px', fontSize: '14px', color: '#000000' }}>
+            Taikomas LR PVM įstatymo 106 str. Apmokestinama taikant maržos schemą / Margin scheme.
+          </p>
+        )}
+
         {/* Custom Note */}
         {data.note && (
           <p style={{ marginBottom: '24px', fontSize: '14px', color: '#000000' }}>

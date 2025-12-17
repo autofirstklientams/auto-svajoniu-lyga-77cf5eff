@@ -18,6 +18,7 @@ export interface CarDetails {
   plate: string;
   mileage: string;
   notes: string;
+  isMarginScheme: boolean;
 }
 
 export interface InvoiceItem {
@@ -82,6 +83,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
     plate: "",
     mileage: "",
     notes: "",
+    isMarginScheme: false,
   });
 
   const [showSaveBuyer, setShowSaveBuyer] = useState(false);
@@ -425,6 +427,18 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber }: InvoiceFormProps) => {
                   className="input-elegant"
                 />
               </div>
+            </div>
+            <div className="flex items-center space-x-2 mt-4">
+              <input
+                type="checkbox"
+                id="marginScheme"
+                checked={carDetails.isMarginScheme}
+                onChange={(e) => setCarDetails({ ...carDetails, isMarginScheme: e.target.checked })}
+                className="w-4 h-4 rounded border-border"
+              />
+              <Label htmlFor="marginScheme" className="cursor-pointer">
+                Maržinis automobilis (taikoma maržos schema)
+              </Label>
             </div>
           </CardContent>
         </Card>

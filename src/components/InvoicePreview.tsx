@@ -108,101 +108,88 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
       {/* Invoice */}
       <div 
         ref={invoiceRef} 
-        className="bg-white p-12 shadow-lg animate-fade-in"
+        className="bg-white p-12 shadow-lg"
         style={{ 
           fontFamily: 'Times New Roman, serif',
           color: '#000000',
           minHeight: '297mm',
           width: '210mm',
-          margin: '0 auto'
+          margin: '0 auto',
+          WebkitPrintColorAdjust: 'exact',
+          printColorAdjust: 'exact',
         }}
       >
         {/* Logo */}
-        <div className="mb-8">
-          <img src={logo} alt="Auto Kopers" className="h-14" />
+        <div style={{ marginBottom: '32px' }}>
+          <img src={logo} alt="Auto Kopers" style={{ height: '56px' }} />
         </div>
 
         {/* Title */}
-        <div className="text-center mb-8">
-          <h1 className="text-xl font-bold" style={{ color: '#000' }}>PVM SĄSKAITA FAKTŪRA</h1>
-          <p className="font-bold" style={{ color: '#000' }}>Nr. {data.invoiceNumber}</p>
-          <p style={{ color: '#000' }}>{formatDate(data.date)}</p>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '20px', fontWeight: 'bold', color: '#000000', margin: 0 }}>PVM SĄSKAITA FAKTŪRA</h1>
+          <p style={{ fontWeight: 'bold', color: '#000000', margin: '4px 0' }}>Nr. {data.invoiceNumber}</p>
+          <p style={{ color: '#000000', margin: 0 }}>{formatDate(data.date)}</p>
         </div>
 
         {/* Seller & Buyer Info */}
-        <div className="grid grid-cols-2 gap-12 mb-10">
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '48px', marginBottom: '40px' }}>
           <div>
-            <p className="font-bold mb-2" style={{ color: '#000' }}>PARDAVĖJAS</p>
-            <p style={{ color: '#000' }}>{sellerInfo.name}</p>
-            <p style={{ color: '#000' }}>Įmonės kodas: {sellerInfo.companyCode}</p>
-            <p style={{ color: '#000' }}>PVM mokėtojo kodas: {sellerInfo.vatCode}</p>
-            <p style={{ color: '#000' }}>{sellerInfo.address}</p>
-            <p style={{ color: '#000' }}>Sąsk.nr: {sellerInfo.bankAccount}</p>
-            <p style={{ color: '#000' }}>{sellerInfo.bankName}</p>
+            <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#000000' }}>PARDAVĖJAS</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>{sellerInfo.name}</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>Įmonės kodas: {sellerInfo.companyCode}</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>PVM mokėtojo kodas: {sellerInfo.vatCode}</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>{sellerInfo.address}</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>Sąsk.nr: {sellerInfo.bankAccount}</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>{sellerInfo.bankName}</p>
           </div>
 
           <div>
-            <p className="font-bold mb-2" style={{ color: '#000' }}>PIRKĖJAS</p>
-            <p style={{ color: '#000' }}>{data.buyer.name},</p>
-            <p style={{ color: '#000' }}>
+            <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#000000' }}>PIRKĖJAS</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>{data.buyer.name},</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>
               {data.buyer.isCompany ? "įmonės kodas" : "asmens kodas"} {data.buyer.companyCode},
             </p>
-            <p style={{ color: '#000' }}>adresas {data.buyer.address}.</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>adresas {data.buyer.address}.</p>
             {data.buyer.vatCode && (
-              <p style={{ color: '#000' }}>PVM mokėtojo kodas: {data.buyer.vatCode}</p>
+              <p style={{ color: '#000000', margin: '2px 0' }}>PVM mokėtojo kodas: {data.buyer.vatCode}</p>
             )}
           </div>
         </div>
 
         {/* Car Details */}
         {data.invoiceType === "car_sale" && data.carDetails && (data.carDetails.make || data.carDetails.model) && (
-          <div className="mb-6">
-            <p className="font-bold mb-2" style={{ color: '#000' }}>AUTOMOBILIO DUOMENYS</p>
-            <div className="text-sm" style={{ color: '#000' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <p style={{ fontWeight: 'bold', marginBottom: '8px', color: '#000000' }}>AUTOMOBILIO DUOMENYS</p>
+            <div style={{ fontSize: '14px', color: '#000000' }}>
               {(data.carDetails.make || data.carDetails.model) && (
-                <p>Automobilis: {data.carDetails.make} {data.carDetails.model}</p>
+                <p style={{ margin: '2px 0', color: '#000000' }}>Automobilis: {data.carDetails.make} {data.carDetails.model}</p>
               )}
-              {data.carDetails.vin && <p>VIN: {data.carDetails.vin}</p>}
-              {data.carDetails.plate && <p>Valst. numeris: {data.carDetails.plate}</p>}
-              {data.carDetails.mileage && <p>Rida: {data.carDetails.mileage} km</p>}
-              {data.carDetails.notes && <p>Pastabos: {data.carDetails.notes}</p>}
+              {data.carDetails.vin && <p style={{ margin: '2px 0', color: '#000000' }}>VIN: {data.carDetails.vin}</p>}
+              {data.carDetails.plate && <p style={{ margin: '2px 0', color: '#000000' }}>Valst. numeris: {data.carDetails.plate}</p>}
+              {data.carDetails.mileage && <p style={{ margin: '2px 0', color: '#000000' }}>Rida: {data.carDetails.mileage} km</p>}
+              {data.carDetails.notes && <p style={{ margin: '2px 0', color: '#000000' }}>Pastabos: {data.carDetails.notes}</p>}
             </div>
           </div>
         )}
 
         {/* Items Table - Closed with borders */}
-        <div className="mb-6">
-          <table className="w-full" style={{ borderCollapse: 'collapse', color: '#000' }}>
+        <div style={{ marginBottom: '24px' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000000' }}>
             <thead>
               <tr>
-                <th 
-                  className="text-left p-2 font-bold" 
-                  style={{ border: '1px solid #000', width: '50px' }}
-                >
+                <th style={{ border: '1px solid #000000', width: '50px', textAlign: 'left', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
                   Eil. Nr.
                 </th>
-                <th 
-                  className="text-left p-2 font-bold" 
-                  style={{ border: '1px solid #000' }}
-                >
+                <th style={{ border: '1px solid #000000', textAlign: 'left', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
                   Prekės, paslaugos pavadinimas
                 </th>
-                <th 
-                  className="text-center p-2 font-bold" 
-                  style={{ border: '1px solid #000', width: '70px' }}
-                >
+                <th style={{ border: '1px solid #000000', width: '70px', textAlign: 'center', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
                   Kiekis
                 </th>
-                <th 
-                  className="text-right p-2 font-bold" 
-                  style={{ border: '1px solid #000', width: '100px' }}
-                >
+                <th style={{ border: '1px solid #000000', width: '100px', textAlign: 'right', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
                   Kaina
                 </th>
-                <th 
-                  className="text-right p-2 font-bold" 
-                  style={{ border: '1px solid #000', width: '100px' }}
-                >
+                <th style={{ border: '1px solid #000000', width: '100px', textAlign: 'right', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
                   Suma
                 </th>
               </tr>
@@ -212,19 +199,19 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
                 const lineTotal = item.quantity * item.price;
                 return (
                   <tr key={index}>
-                    <td className="p-2 text-center" style={{ border: '1px solid #000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'center', color: '#000000' }}>
                       {index + 1}
                     </td>
-                    <td className="p-2" style={{ border: '1px solid #000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '8px', color: '#000000' }}>
                       {item.description}
                     </td>
-                    <td className="p-2 text-center" style={{ border: '1px solid #000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'center', color: '#000000' }}>
                       {item.quantity}
                     </td>
-                    <td className="p-2 text-right" style={{ border: '1px solid #000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'right', color: '#000000' }}>
                       {formatCurrency(item.price)}
                     </td>
-                    <td className="p-2 text-right" style={{ border: '1px solid #000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'right', color: '#000000' }}>
                       {formatCurrency(lineTotal)}
                     </td>
                   </tr>
@@ -235,29 +222,29 @@ const InvoicePreview = ({ data, onBack }: InvoicePreviewProps) => {
         </div>
 
         {/* Totals */}
-        <div className="mb-6" style={{ color: '#000' }}>
-          <p>PVM 21% {formatCurrency(totalVat)}</p>
-          <p className="font-bold mt-2">Iš viso: {formatCurrency(total)}</p>
+        <div style={{ marginBottom: '24px', color: '#000000' }}>
+          <p style={{ margin: '4px 0', color: '#000000' }}>PVM 21% {formatCurrency(totalVat)}</p>
+          <p style={{ fontWeight: 'bold', marginTop: '8px', color: '#000000' }}>Iš viso: {formatCurrency(total)}</p>
         </div>
 
         {/* VAT Note */}
         {data.items.some(item => item.vatType === "vat_exempt") && (
-          <p className="mb-4 text-sm" style={{ color: '#000' }}>
+          <p style={{ marginBottom: '16px', fontSize: '14px', color: '#000000' }}>
             PVM įstatymu 28 straipsnio 1 dalimi, komisinis mokestis (tarpininkavimo paslaugos dėl paskolos suteikimo) nėra PVM objektas
           </p>
         )}
 
         {/* Custom Note */}
         {data.note && (
-          <p className="mb-6 text-sm" style={{ color: '#000' }}>
+          <p style={{ marginBottom: '24px', fontSize: '14px', color: '#000000' }}>
             {data.note}
           </p>
         )}
 
         {/* Signature */}
-        <div className="mt-16" style={{ color: '#000' }}>
-          <p>Sąskaitą išrašė:</p>
-          <p className="mt-8">{sellerInfo.name}</p>
+        <div style={{ marginTop: '64px', color: '#000000' }}>
+          <p style={{ margin: 0, color: '#000000' }}>Sąskaitą išrašė:</p>
+          <p style={{ marginTop: '32px', color: '#000000' }}>{sellerInfo.name}</p>
         </div>
       </div>
     </div>

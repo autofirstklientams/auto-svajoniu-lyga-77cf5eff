@@ -605,12 +605,12 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
                   type="text"
                   inputMode="decimal"
                   value={items[0]?.price === 0 ? "" : items[0]?.price}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                      updateItem(0, "price", val === "" ? 0 : parseFloat(val) || 0);
-                    }
-                  }}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(',', '.');
+                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                          updateItem(0, "price", val === "" ? 0 : parseFloat(val) || 0);
+                        }
+                      }}
                   className="input-elegant"
                   placeholder="0.00"
                   required
@@ -698,7 +698,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
                       inputMode="decimal"
                       value={item.price === 0 ? "" : item.price}
                       onChange={(e) => {
-                        const val = e.target.value;
+                        const val = e.target.value.replace(',', '.');
                         if (val === "" || /^\d*\.?\d*$/.test(val)) {
                           updateItem(index, "price", val === "" ? 0 : parseFloat(val) || 0);
                         }

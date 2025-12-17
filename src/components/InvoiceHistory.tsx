@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Trash2, FileText, Loader2, Upload, Download, ExternalLink } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Eye, Trash2, FileText, Loader2, Upload, Download, ExternalLink, Check } from "lucide-react";
 import { SavedInvoice } from "@/hooks/useInvoices";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -19,10 +20,11 @@ interface InvoiceHistoryProps {
   loading: boolean;
   onView: (invoice: SavedInvoice) => void;
   onDelete: (id: string) => void;
+  onTogglePaid?: (id: string, isPaid: boolean) => void;
   onRefresh?: () => void;
 }
 
-const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: InvoiceHistoryProps) => {
+const InvoiceHistory = ({ invoices, loading, onView, onDelete, onTogglePaid, onRefresh }: InvoiceHistoryProps) => {
   const [uploading, setUploading] = useState(false);
   const [uploadedInvoices, setUploadedInvoices] = useState<UploadedInvoice[]>([]);
   const [loadingUploaded, setLoadingUploaded] = useState(true);
@@ -250,25 +252,44 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onRefresh }: Invo
           {invoices.map((invoice) => (
             <div
               key={invoice.id}
-              className="flex items-center justify-between p-4 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors"
+              className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
+                invoice.is_paid 
+                  ? "bg-green-500/10 hover:bg-green-500/20 border border-green-500/30" 
+                  : "bg-secondary/30 hover:bg-secondary/50"
+              }`}
             >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-foreground">
-                    Nr. {invoice.invoice_number}
-                  </span>
-                  <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-                    {getTypeLabel(invoice.invoice_type)}
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground truncate">
-                  {invoice.buyer_name}
-                </p>
-                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                  <span>{formatDate(invoice.invoice_date)}</span>
-                  <span className="font-medium text-foreground">
-                    {formatCurrency(invoice.total_amount)}
-                  </span>
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                {onTogglePaid && (
+                  <Checkbox
+                    checked={invoice.is_paid}
+                    onCheckedChange={(checked) => onTogglePaid(invoice.id, checked as boolean)}
+                    className="h-5 w-5"
+                  />
+                )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-foreground">
+                      Nr. {invoice.invoice_number}
+                    </span>
+                    <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
+                      {getTypeLabel(invoice.invoice_type)}
+                    </span>
+                    {invoice.is_paid && (
+                      <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-600 rounded-full flex items-center gap-1">
+                        <Check className="w-3 h-3" />
+                        Apmokėta
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground truncate">
+                    {invoice.buyer_name}
+                  </p>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                    <span>{formatDate(invoice.invoice_date)}</span>
+                    <span className="font-medium text-foreground">
+                      {formatCurrency(invoice.total_amount)}
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2 ml-4">

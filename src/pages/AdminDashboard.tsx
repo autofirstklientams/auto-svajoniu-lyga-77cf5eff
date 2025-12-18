@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText } from "lucide-react";
+import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText, Shield, ShieldOff } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -33,10 +33,14 @@ interface CarListing {
   };
 }
 
+// Super admin - apsaugotas nuo pašalinimo
+const SUPER_ADMIN_ID = "02984778-7f5d-4547-9581-f3f81d8c87e0";
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [allCars, setAllCars] = useState<CarListing[]>([]);
 
@@ -52,6 +56,8 @@ const AdminDashboard = () => {
         navigate("/partner-login");
         return;
       }
+
+      setCurrentUserId(user.id);
 
       // Check if user has admin role
       const { data: roles, error } = await supabase
@@ -132,6 +138,11 @@ const AdminDashboard = () => {
   };
 
   const togglePartnerRole = async (userId: string, currentRole?: string) => {
+    if (userId === SUPER_ADMIN_ID) {
+      toast.error("Negalima keisti pagrindinio administratoriaus teisių");
+      return;
+    }
+
     try {
       if (currentRole === "partner") {
         const { error } = await supabase
@@ -158,7 +169,56 @@ const AdminDashboard = () => {
     }
   };
 
+  const toggleAdminRole = async (userId: string, hasAdminRole: boolean) => {
+    if (userId === SUPER_ADMIN_ID) {
+      toast.error("Negalima keisti pagrindinio administratoriaus teisių");
+      return;
+    }
+
+    if (userId === currentUserId) {
+      toast.error("Negalite pašalinti savo paties admin teisių");
+      return;
+    }
+
+    try {
+      if (hasAdminRole) {
+        // Remove admin role
+        const { error } = await supabase
+          .from("user_roles")
+          .delete()
+          .eq("user_id", userId)
+          .eq("role", "admin");
+
+        if (error) throw error;
+        toast.success("Admin teisės pašalintos");
+      } else {
+        // Add admin role
+        const { error } = await supabase
+          .from("user_roles")
+          .insert({ user_id: userId, role: "admin" });
+
+        if (error) throw error;
+        toast.success("Admin teisės suteiktos");
+      }
+
+      await fetchPartners();
+    } catch (error) {
+      console.error("Error toggling admin role:", error);
+      toast.error("Klaida keičiant admin teises");
+    }
+  };
+
   const handleDeleteUser = async (userId: string, userEmail: string) => {
+    if (userId === SUPER_ADMIN_ID) {
+      toast.error("Negalima ištrinti pagrindinio administratoriaus");
+      return;
+    }
+
+    if (userId === currentUserId) {
+      toast.error("Negalite ištrinti savo paskyros");
+      return;
+    }
+
     if (!confirm(`Ar tikrai norite ištrinti vartotoją ${userEmail}?`)) return;
 
     try {
@@ -275,40 +335,78 @@ const AdminDashboard = () => {
                       </div>
                       
                       <div className="flex items-center gap-2 flex-wrap">
+                        {/* Super admin badge */}
+                        {partner.id === SUPER_ADMIN_ID && (
+                          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200 rounded-full text-sm font-medium">
+                            Pagrindinis Admin
+                          </span>
+                        )}
+                        
+                        {/* Role badges */}
                         {partner.role === "admin" ? (
                           <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
                             Administratorius
                           </span>
                         ) : partner.role === "partner" ? (
-                          <>
-                            <span className="px-3 py-1 bg-accent/10 text-accent-foreground rounded-full text-sm font-medium">
-                              Partneris
-                            </span>
+                          <span className="px-3 py-1 bg-accent/10 text-accent-foreground rounded-full text-sm font-medium">
+                            Partneris
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm font-medium">
+                            Vartotojas
+                          </span>
+                        )}
+
+                        {/* Admin toggle button - not for super admin or self */}
+                        {partner.id !== SUPER_ADMIN_ID && partner.id !== currentUserId && (
+                          partner.role === "admin" ? (
+                            <Button
+                              onClick={() => toggleAdminRole(partner.id, true)}
+                              variant="outline"
+                              size="sm"
+                              className="text-orange-600 border-orange-300 hover:bg-orange-50"
+                            >
+                              <ShieldOff className="h-4 w-4 mr-2" />
+                              Pašalinti admin
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => toggleAdminRole(partner.id, false)}
+                              variant="outline"
+                              size="sm"
+                              className="text-blue-600 border-blue-300 hover:bg-blue-50"
+                            >
+                              <Shield className="h-4 w-4 mr-2" />
+                              Suteikti admin
+                            </Button>
+                          )
+                        )}
+
+                        {/* Partner role toggle - only for non-admins */}
+                        {partner.role !== "admin" && partner.id !== SUPER_ADMIN_ID && (
+                          partner.role === "partner" ? (
                             <Button
                               onClick={() => togglePartnerRole(partner.id, partner.role)}
                               variant="outline"
                               size="sm"
                             >
                               <UserX className="h-4 w-4 mr-2" />
-                              Pašalinti teises
+                              Pašalinti partnerio
                             </Button>
-                          </>
-                        ) : (
-                          <>
-                            <span className="px-3 py-1 bg-muted text-muted-foreground rounded-full text-sm font-medium">
-                              Vartotojas
-                            </span>
+                          ) : (
                             <Button
                               onClick={() => togglePartnerRole(partner.id, partner.role)}
                               variant="default"
                               size="sm"
                             >
                               <UserCheck className="h-4 w-4 mr-2" />
-                              Suteikti teises
+                              Suteikti partnerio
                             </Button>
-                          </>
+                          )
                         )}
-                        {partner.role !== "admin" && (
+
+                        {/* Delete button - not for super admin, self, or admins */}
+                        {partner.id !== SUPER_ADMIN_ID && partner.id !== currentUserId && partner.role !== "admin" && (
                           <Button
                             onClick={() => handleDeleteUser(partner.id, partner.email)}
                             variant="destructive"

@@ -9,6 +9,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// HTML escape function to prevent XSS/HTML injection
+function escapeHtml(str: string): string {
+  const htmlEscapes: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+  return str.replace(/[&<>"']/g, (match) => htmlEscapes[match] || match);
+}
+
 interface LoanApplicationRequest {
   name: string;
   email: string;
@@ -27,7 +39,13 @@ const handler = async (req: Request): Promise<Response> => {
     const { name, email, phone, loanAmount, loanTerm, monthlyPayment }: LoanApplicationRequest = 
       await req.json();
 
-    console.log("Received loan application:", { name, email, phone, loanAmount, loanTerm });
+    // Escape user input to prevent HTML injection
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safePhone = escapeHtml(phone);
+    const safeMonthlyPayment = escapeHtml(monthlyPayment);
+
+    console.log("Received loan application:", { name: safeName, email: safeEmail, phone: safePhone, loanAmount, loanTerm });
 
     // Send confirmation email to customer
     const customerEmail = await resend.emails.send({
@@ -38,12 +56,12 @@ const handler = async (req: Request): Promise<Response> => {
       text: `Sveiki, ${name}!\n\nGavome jūsų automobilio paskolos paraišką.\n\nSuma: ${loanAmount} €\nTerminas: ${loanTerm} mėn.\nMėnesinė įmoka: ${monthlyPayment} €.\n\nNetrukus susisieksime.\nAutoKopers komanda`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Sveiki, ${name}!</h1>
+          <h1 style="color: #333;">Sveiki, ${safeName}!</h1>
           <p>Gavome jūsų automobilio paskolos paraišką su šiais duomenimis:</p>
           <ul>
             <li><strong>Paskolos suma:</strong> ${loanAmount} €</li>
             <li><strong>Terminas:</strong> ${loanTerm} mėn.</li>
-            <li><strong>Planuojama mėnesinė įmoka:</strong> ${monthlyPayment} €</li>
+            <li><strong>Planuojama mėnesinė įmoka:</strong> ${safeMonthlyPayment} €</li>
           </ul>
           <p>Mūsų specialistai susisieks su jumis artimiausiu metu el. paštu <strong>labas@autokopers.lt</strong> arba telefonu <strong>+370 628 51439</strong>.</p>
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
@@ -60,22 +78,22 @@ const handler = async (req: Request): Promise<Response> => {
     const adminEmail = await resend.emails.send({
       from: "AutoKopers <onboarding@resend.dev>",
       to: ["autofirstklientams@gmail.com"],
-      subject: `Nauja paskolos paraiška - ${name}`,
+      subject: `Nauja paskolos paraiška - ${safeName}`,
       replyTo: email,
       text: `Nauja paskolos paraiška. Vardas: ${name}. El. paštas: ${email}. Tel.: ${phone}. Suma: ${loanAmount} €. Terminas: ${loanTerm} mėn. Mėnesinė įmoka: ${monthlyPayment} €`,
       html: `
         <h1>Nauja paskolos paraiška</h1>
         <h2>Kliento informacija:</h2>
         <ul>
-          <li><strong>Vardas:</strong> ${name}</li>
-          <li><strong>El. paštas:</strong> ${email}</li>
-          <li><strong>Telefonas:</strong> ${phone}</li>
+          <li><strong>Vardas:</strong> ${safeName}</li>
+          <li><strong>El. paštas:</strong> ${safeEmail}</li>
+          <li><strong>Telefonas:</strong> ${safePhone}</li>
         </ul>
         <h2>Paskolos duomenys:</h2>
         <ul>
           <li><strong>Suma:</strong> ${loanAmount} €</li>
           <li><strong>Terminas:</strong> ${loanTerm} mėn.</li>
-          <li><strong>Mėnesinė įmoka:</strong> ${monthlyPayment} €</li>
+          <li><strong>Mėnesinė įmoka:</strong> ${safeMonthlyPayment} €</li>
         </ul>
       `,
     });

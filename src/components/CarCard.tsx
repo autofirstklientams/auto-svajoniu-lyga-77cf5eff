@@ -3,12 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Calendar, Gauge, Fuel, ChevronRight, Award } from "lucide-react";
 import { Link } from "react-router-dom";
+import { calculateMonthlyPayment } from "@/components/LoanCalculator";
 
 interface CarCardProps {
   id?: string;
   image: string;
   title: string;
   price: string;
+  numericPrice?: number;
   year: number;
   mileage: string;
   fuel: string;
@@ -16,7 +18,18 @@ interface CarCardProps {
   isRecommended?: boolean;
 }
 
-const CarCard = ({ id, image, title, price, year, mileage, fuel, featured, isRecommended }: CarCardProps) => {
+const CarCard = ({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended }: CarCardProps) => {
+  const monthlyPayment = numericPrice ? calculateMonthlyPayment(numericPrice) : null;
+  
+  const formatMonthlyPayment = (amount: number) => {
+    return new Intl.NumberFormat("lt-LT", {
+      style: "currency",
+      currency: "EUR",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   const content = (
     <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-border/50 h-full">
       <div className="relative overflow-hidden">
@@ -39,10 +52,20 @@ const CarCard = ({ id, image, title, price, year, mileage, fuel, featured, isRec
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
       <CardContent className="p-5">
-        <div className="flex justify-between items-start mb-3">
+        <div className="flex justify-between items-start mb-1">
           <h3 className="text-xl font-bold text-foreground line-clamp-1">{title}</h3>
           <p className="text-xl font-bold text-primary whitespace-nowrap ml-2">{price}</p>
         </div>
+        
+        {monthlyPayment && (
+          <div className="flex justify-end mb-3">
+            <span className="text-sm text-muted-foreground">
+              nuo <span className="font-semibold text-primary">{formatMonthlyPayment(monthlyPayment)}</span>/mėn.
+            </span>
+          </div>
+        )}
+        
+        {!monthlyPayment && <div className="mb-3" />}
         
         <div className="flex gap-4 mb-5 text-sm text-muted-foreground">
           <div className="flex items-center gap-1.5">

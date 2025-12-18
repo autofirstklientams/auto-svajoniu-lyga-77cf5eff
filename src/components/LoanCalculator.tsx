@@ -1,7 +1,11 @@
 import { useState, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
-import { Calculator } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Calculator, FileText } from "lucide-react";
 
 interface LoanCalculatorProps {
   carPrice: number;
@@ -9,12 +13,19 @@ interface LoanCalculatorProps {
 }
 
 const INTEREST_RATE = 0.089; // 8.9% annual interest rate
-const DEFAULT_DOWN_PAYMENT_PERCENT = 0.15; // 15% down payment
+
+const DOWN_PAYMENT_OPTIONS = [
+  { value: 0, label: "Be pradinio įnašo" },
+  { value: 0.10, label: "10%" },
+  { value: 0.15, label: "15%" },
+  { value: 0.20, label: "20%" },
+  { value: 0.30, label: "30%" },
+];
 
 export const calculateMonthlyPayment = (
   price: number,
   months: number = 60,
-  downPaymentPercent: number = DEFAULT_DOWN_PAYMENT_PERCENT
+  downPaymentPercent: number = 0
 ): number => {
   const downPayment = price * downPaymentPercent;
   const principal = price - downPayment;
@@ -32,14 +43,15 @@ export const calculateMonthlyPayment = (
 
 const LoanCalculator = ({ carPrice, compact = false }: LoanCalculatorProps) => {
   const [months, setMonths] = useState(60);
+  const [downPaymentPercent, setDownPaymentPercent] = useState(0);
 
   const monthlyPayment = useMemo(() => {
-    return calculateMonthlyPayment(carPrice, months);
-  }, [carPrice, months]);
+    return calculateMonthlyPayment(carPrice, months, downPaymentPercent);
+  }, [carPrice, months, downPaymentPercent]);
 
   const downPayment = useMemo(() => {
-    return Math.round(carPrice * DEFAULT_DOWN_PAYMENT_PERCENT);
-  }, [carPrice]);
+    return Math.round(carPrice * downPaymentPercent);
+  }, [carPrice, downPaymentPercent]);
 
   const totalAmount = useMemo(() => {
     return downPayment + monthlyPayment * months;
@@ -78,6 +90,32 @@ const LoanCalculator = ({ carPrice, compact = false }: LoanCalculatorProps) => {
           <p className="text-2xl font-bold text-foreground">{formatPrice(carPrice)}</p>
         </div>
 
+        {/* Down payment options */}
+        <div className="space-y-3">
+          <span className="text-sm text-muted-foreground">Pradinis įnašas</span>
+          <RadioGroup
+            value={downPaymentPercent.toString()}
+            onValueChange={(v) => setDownPaymentPercent(parseFloat(v))}
+            className="flex flex-wrap gap-2"
+          >
+            {DOWN_PAYMENT_OPTIONS.map((option) => (
+              <div key={option.value} className="flex items-center">
+                <RadioGroupItem
+                  value={option.value.toString()}
+                  id={`down-${option.value}`}
+                  className="peer sr-only"
+                />
+                <Label
+                  htmlFor={`down-${option.value}`}
+                  className="cursor-pointer rounded-lg border-2 border-muted bg-popover px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary transition-colors"
+                >
+                  {option.label}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        </div>
+
         {/* Loan period slider */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
@@ -100,10 +138,12 @@ const LoanCalculator = ({ carPrice, compact = false }: LoanCalculatorProps) => {
 
         {/* Results */}
         <div className="space-y-3 pt-4 border-t">
-          <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Pradinis įnašas (15%)</span>
-            <span className="font-medium text-foreground">{formatPrice(downPayment)}</span>
-          </div>
+          {downPaymentPercent > 0 && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-muted-foreground">Pradinis įnašas ({(downPaymentPercent * 100).toFixed(0)}%)</span>
+              <span className="font-medium text-foreground">{formatPrice(downPayment)}</span>
+            </div>
+          )}
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Bendra suma</span>
             <span className="font-medium text-foreground">{formatPrice(totalAmount)}</span>
@@ -113,6 +153,14 @@ const LoanCalculator = ({ carPrice, compact = false }: LoanCalculatorProps) => {
             <span className="text-2xl font-bold text-primary">{formatPrice(monthlyPayment)}</span>
           </div>
         </div>
+
+        {/* Leasing application button */}
+        <Button asChild className="w-full" size="lg">
+          <Link to="/lizingas">
+            <FileText className="mr-2 h-4 w-4" />
+            Pateikti lizingo paraišką
+          </Link>
+        </Button>
 
         <p className="text-xs text-muted-foreground">
           * Skaičiavimas orientacinis. Tikslias sąlygas sužinosite pateikę lizingo paraišką. 

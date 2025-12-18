@@ -9,6 +9,18 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// HTML escape function to prevent XSS/HTML injection
+function escapeHtml(str: string): string {
+  const htmlEscapes: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  };
+  return str.replace(/[&<>"']/g, (match) => htmlEscapes[match] || match);
+}
+
 interface CarPurchaseRequest {
   name: string;
   email: string;
@@ -29,7 +41,17 @@ const handler = async (req: Request): Promise<Response> => {
     const { name, email, phone, carMake, carModel, carYear, mileage, additionalInfo }: CarPurchaseRequest = 
       await req.json();
 
-    console.log("Received car purchase request:", { name, email, phone, carMake, carModel });
+    // Escape user input to prevent HTML injection
+    const safeName = escapeHtml(name);
+    const safeEmail = escapeHtml(email);
+    const safePhone = escapeHtml(phone);
+    const safeCarMake = escapeHtml(carMake);
+    const safeCarModel = escapeHtml(carModel);
+    const safeCarYear = escapeHtml(carYear);
+    const safeMileage = escapeHtml(mileage);
+    const safeAdditionalInfo = additionalInfo ? escapeHtml(additionalInfo) : '';
+
+    console.log("Received car purchase request:", { name: safeName, email: safeEmail, phone: safePhone, carMake: safeCarMake, carModel: safeCarModel });
 
     // Send confirmation email to customer
     const customerEmail = await resend.emails.send({
@@ -40,15 +62,15 @@ const handler = async (req: Request): Promise<Response> => {
       text: `Sveiki, ${name}!\n\nGavome jūsų automobilio pardavimo užklausą.\nMarkė: ${carMake}\nModelis: ${carModel}\nMetai: ${carYear}\nRida: ${mileage} km\n${additionalInfo ? `Papildoma informacija: ${additionalInfo}` : ''}\n\nNetrukus susisieksime.\nAutoKopers komanda`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Sveiki, ${name}!</h1>
+          <h1 style="color: #333;">Sveiki, ${safeName}!</h1>
           <p>Gavome jūsų automobilio pardavimo užklausą su šiais duomenimis:</p>
           <h3>Automobilio informacija:</h3>
           <ul>
-            <li><strong>Markė:</strong> ${carMake}</li>
-            <li><strong>Modelis:</strong> ${carModel}</li>
-            <li><strong>Metai:</strong> ${carYear}</li>
-            <li><strong>Rida:</strong> ${mileage} km</li>
-            ${additionalInfo ? `<li><strong>Papildoma informacija:</strong> ${additionalInfo}</li>` : ''}
+            <li><strong>Markė:</strong> ${safeCarMake}</li>
+            <li><strong>Modelis:</strong> ${safeCarModel}</li>
+            <li><strong>Metai:</strong> ${safeCarYear}</li>
+            <li><strong>Rida:</strong> ${safeMileage} km</li>
+            ${safeAdditionalInfo ? `<li><strong>Papildoma informacija:</strong> ${safeAdditionalInfo}</li>` : ''}
           </ul>
           <p>Mūsų specialistas susisieks su jumis artimiausiu metu el. paštu <strong>labas@autokopers.lt</strong> arba telefonu <strong>+370 628 51439</strong> dėl automobilio įvertinimo.</p>
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
@@ -65,24 +87,24 @@ const handler = async (req: Request): Promise<Response> => {
     const adminEmail = await resend.emails.send({
       from: "AutoKopers <onboarding@resend.dev>",
       to: ["autofirstklientams@gmail.com"],
-      subject: `Nauja automobilio supirkimo užklausa - ${carMake} ${carModel}`,
+      subject: `Nauja automobilio supirkimo užklausa - ${safeCarMake} ${safeCarModel}`,
       replyTo: email,
       text: `Nauja užklausa. Vardas: ${name}. El. paštas: ${email}. Tel.: ${phone}. Markė: ${carMake}. Modelis: ${carModel}. Metai: ${carYear}. Rida: ${mileage} km. ${additionalInfo ? `Papildoma informacija: ${additionalInfo}` : ''}`,
       html: `
         <h1>Nauja automobilio supirkimo užklausa</h1>
         <h2>Kliento informacija:</h2>
         <ul>
-          <li><strong>Vardas:</strong> ${name}</li>
-          <li><strong>El. paštas:</strong> ${email}</li>
-          <li><strong>Telefonas:</strong> ${phone}</li>
+          <li><strong>Vardas:</strong> ${safeName}</li>
+          <li><strong>El. paštas:</strong> ${safeEmail}</li>
+          <li><strong>Telefonas:</strong> ${safePhone}</li>
         </ul>
         <h2>Automobilio duomenys:</h2>
         <ul>
-          <li><strong>Markė:</strong> ${carMake}</li>
-          <li><strong>Modelis:</strong> ${carModel}</li>
-          <li><strong>Metai:</strong> ${carYear}</li>
-          <li><strong>Rida:</strong> ${mileage} km</li>
-          ${additionalInfo ? `<li><strong>Papildoma informacija:</strong> ${additionalInfo}</li>` : ''}
+          <li><strong>Markė:</strong> ${safeCarMake}</li>
+          <li><strong>Modelis:</strong> ${safeCarModel}</li>
+          <li><strong>Metai:</strong> ${safeCarYear}</li>
+          <li><strong>Rida:</strong> ${safeMileage} km</li>
+          ${safeAdditionalInfo ? `<li><strong>Papildoma informacija:</strong> ${safeAdditionalInfo}</li>` : ''}
         </ul>
       `,
     });

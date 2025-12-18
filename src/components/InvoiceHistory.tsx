@@ -80,16 +80,15 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onTogglePaid, onR
 
       if (uploadError) throw uploadError;
 
-      const { data: urlData } = supabase.storage
-        .from('invoices')
-        .getPublicUrl(fileName);
+      // Store the file path (not public URL since bucket is now private)
+      const filePath = fileName;
 
       const { error: dbError } = await supabase
         .from('uploaded_invoices')
         .insert({
           user_id: user.id,
           file_name: file.name,
-          file_url: urlData.publicUrl,
+          file_url: filePath, // Store path, not public URL
           file_type: file.type,
         });
 
@@ -109,15 +108,19 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onTogglePaid, onR
     }
   };
 
-  const handleDeleteUploaded = async (id: string, fileUrl: string) => {
+  const handleDeleteUploaded = async (id: string, filePath: string) => {
     if (!confirm("Ar tikrai norite ištrinti šią sąskaitą?")) return;
     
     try {
-      // Extract file path from URL
-      const urlParts = fileUrl.split('/invoices/');
-      if (urlParts.length > 1) {
-        await supabase.storage.from('invoices').remove([urlParts[1]]);
+      // file_url now stores the file path directly (not full URL)
+      // Handle both old format (full URL) and new format (path only)
+      let pathToDelete = filePath;
+      if (filePath.includes('/invoices/')) {
+        const urlParts = filePath.split('/invoices/');
+        pathToDelete = urlParts[urlParts.length - 1];
       }
+      
+      await supabase.storage.from('invoices').remove([pathToDelete]);
 
       const { error } = await supabase
         .from('uploaded_invoices')
@@ -131,6 +134,34 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onTogglePaid, onR
     } catch (error: any) {
       console.error("Delete error:", error);
       toast.error("Nepavyko ištrinti: " + (error.message || "Klaida"));
+    }
+  };
+
+  // Handle opening uploaded invoice with signed URL
+  const handleOpenUploaded = async (filePath: string) => {
+    try {
+      // Handle both old format (full URL) and new format (path only)
+      let pathToSign = filePath;
+      if (filePath.includes('/invoices/')) {
+        const urlParts = filePath.split('/invoices/');
+        pathToSign = urlParts[urlParts.length - 1];
+      } else if (filePath.startsWith('http')) {
+        // Old public URL format - try to extract path
+        const match = filePath.match(/\/invoices\/(.+)$/);
+        if (match) pathToSign = match[1];
+      }
+      
+      const { data, error } = await supabase.storage
+        .from('invoices')
+        .createSignedUrl(pathToSign, 3600); // 1 hour expiry
+
+      if (error) throw error;
+      if (data?.signedUrl) {
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error: any) {
+      console.error("Error creating signed URL:", error);
+      toast.error("Nepavyko atidaryti failo");
     }
   };
 
@@ -341,12 +372,10 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onTogglePaid, onR
                 <Button
                   variant="ghost"
                   size="icon"
-                  asChild
+                  onClick={() => handleOpenUploaded(uploaded.file_url)}
                   title="Atidaryti"
                 >
-                  <a href={uploaded.file_url} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
+                  <ExternalLink className="w-4 h-4" />
                 </Button>
                 <Button
                   variant="ghost"

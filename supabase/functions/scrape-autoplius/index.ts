@@ -31,17 +31,37 @@ Deno.serve(async (req) => {
   try {
     const { url } = await req.json();
 
-    if (!url) {
+    if (!url || typeof url !== 'string') {
       return new Response(
         JSON.stringify({ success: false, error: 'URL is required' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    // Validate Autoplius URL
-    if (!url.includes('autoplius.lt') && !url.includes('en.autoplius.lt')) {
+    // Validate URL format and domain using proper URL parsing (prevents SSRF)
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(url);
+    } catch {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid URL format' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Strict domain validation - only allow autoplius.lt domains
+    const allowedDomains = ['autoplius.lt', 'www.autoplius.lt', 'en.autoplius.lt'];
+    if (!allowedDomains.includes(parsedUrl.hostname)) {
       return new Response(
         JSON.stringify({ success: false, error: 'Only Autoplius URLs are supported' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    // Ensure HTTPS protocol
+    if (parsedUrl.protocol !== 'https:') {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Only HTTPS URLs are supported' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

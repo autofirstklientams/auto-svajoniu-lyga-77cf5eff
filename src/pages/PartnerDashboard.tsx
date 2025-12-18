@@ -254,7 +254,28 @@ const PartnerDashboard = () => {
           <h2 className="text-xl font-semibold">Mano skelbimai</h2>
           <div className="flex gap-2">
             <Button
-              onClick={() => window.open(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`, '_blank')}
+              onClick={async () => {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session?.access_token) {
+                  toast.error("Prašome prisijungti");
+                  return;
+                }
+                try {
+                  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`, {
+                    headers: { 'Authorization': `Bearer ${session.access_token}` }
+                  });
+                  if (!response.ok) throw new Error('Failed to fetch XML');
+                  const blob = await response.blob();
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'autoplius-feed.xml';
+                  a.click();
+                  URL.revokeObjectURL(url);
+                } catch (error) {
+                  toast.error("Nepavyko atsisiųsti XML");
+                }
+              }}
               variant="outline"
             >
               Atsisiųsti Autoplius XML

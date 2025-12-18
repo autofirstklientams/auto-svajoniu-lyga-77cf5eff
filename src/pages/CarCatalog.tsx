@@ -327,6 +327,7 @@ const CarCatalog = () => {
                         title={`${car.make} ${car.model}`}
                         year={car.year}
                         price={`${car.price.toLocaleString()} €`}
+                        numericPrice={car.price}
                         mileage={`${car.mileage?.toLocaleString() || "N/A"} km`}
                         fuel={car.fuel_type || "-"}
                         image={car.image_url || "/placeholder.svg"}

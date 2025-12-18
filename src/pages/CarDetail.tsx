@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import LoanCalculator from "@/components/LoanCalculator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -391,8 +392,12 @@ const CarDetail = () => {
             )}
           </div>
 
-          {/* Right column - Contact Form */}
-          <div className="lg:col-span-1">
+          {/* Right column - Loan Calculator & Contact Form */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Loan Calculator */}
+            <LoanCalculator carPrice={car.price} />
+            
+            {/* Contact Form */}
             <Card className="sticky top-4">
               <CardHeader>
                 <CardTitle>Domina šis automobilis?</CardTitle>

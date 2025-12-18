@@ -395,7 +395,10 @@ const CarDetail = () => {
           {/* Right column - Loan Calculator & Contact Form */}
           <div className="lg:col-span-1 space-y-6">
             {/* Loan Calculator */}
-            <LoanCalculator carPrice={car.price} />
+            <LoanCalculator 
+              carPrice={car.price} 
+              carInfo={`${car.make} ${car.model} (${car.year})`}
+            />
             
             {/* Contact Form */}
             <Card className="sticky top-4">

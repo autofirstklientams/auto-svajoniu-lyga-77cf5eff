@@ -19,6 +19,7 @@ interface LoanApplicationFormProps {
   loanAmount: number;
   loanTerm: number;
   monthlyPayment: number;
+  carInfo?: string;
 }
 
 const LoanApplicationForm = ({
@@ -27,6 +28,7 @@ const LoanApplicationForm = ({
   loanAmount,
   loanTerm,
   monthlyPayment,
+  carInfo,
 }: LoanApplicationFormProps) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -55,6 +57,7 @@ const LoanApplicationForm = ({
           loanAmount,
           loanTerm,
           monthlyPayment: monthlyPayment.toFixed(2),
+          carInfo,
         },
       });
 
@@ -119,11 +122,17 @@ const LoanApplicationForm = ({
           </div>
 
           <div className="bg-muted/30 rounded-lg p-4 space-y-2">
-            <h4 className="font-semibold text-sm text-foreground">Paskolos duomenys:</h4>
+            <h4 className="font-semibold text-sm text-foreground">Lizingo duomenys:</h4>
             <div className="text-sm space-y-1">
+              {carInfo && (
+                <p className="flex justify-between">
+                  <span className="text-muted-foreground">Automobilis:</span>
+                  <span className="font-medium text-foreground">{carInfo}</span>
+                </p>
+              )}
               <p className="flex justify-between">
                 <span className="text-muted-foreground">Suma:</span>
-                <span className="font-medium text-foreground">{loanAmount} €</span>
+                <span className="font-medium text-foreground">{loanAmount.toLocaleString()} €</span>
               </p>
               <p className="flex justify-between">
                 <span className="text-muted-foreground">Terminas:</span>

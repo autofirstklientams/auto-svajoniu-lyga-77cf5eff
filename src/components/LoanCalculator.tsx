@@ -1,14 +1,15 @@
 import { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Calculator, FileText } from "lucide-react";
+import LoanApplicationForm from "@/components/LoanApplicationForm";
 
 interface LoanCalculatorProps {
   carPrice: number;
+  carInfo?: string;
   compact?: boolean;
 }
 
@@ -41,9 +42,10 @@ export const calculateMonthlyPayment = (
   return Math.round(monthlyPayment);
 };
 
-const LoanCalculator = ({ carPrice, compact = false }: LoanCalculatorProps) => {
+const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorProps) => {
   const [months, setMonths] = useState(60);
   const [downPaymentPercent, setDownPaymentPercent] = useState(0);
+  const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   const monthlyPayment = useMemo(() => {
     return calculateMonthlyPayment(carPrice, months, downPaymentPercent);
@@ -52,6 +54,10 @@ const LoanCalculator = ({ carPrice, compact = false }: LoanCalculatorProps) => {
   const downPayment = useMemo(() => {
     return Math.round(carPrice * downPaymentPercent);
   }, [carPrice, downPaymentPercent]);
+
+  const loanAmount = useMemo(() => {
+    return carPrice - downPayment;
+  }, [carPrice, downPayment]);
 
   const totalAmount = useMemo(() => {
     return downPayment + monthlyPayment * months;
@@ -155,12 +161,19 @@ const LoanCalculator = ({ carPrice, compact = false }: LoanCalculatorProps) => {
         </div>
 
         {/* Leasing application button */}
-        <Button asChild className="w-full" size="lg">
-          <Link to="/lizingas">
-            <FileText className="mr-2 h-4 w-4" />
-            Pateikti lizingo paraišką
-          </Link>
+        <Button className="w-full" size="lg" onClick={() => setShowApplicationForm(true)}>
+          <FileText className="mr-2 h-4 w-4" />
+          Pateikti lizingo paraišką
         </Button>
+
+        <LoanApplicationForm
+          open={showApplicationForm}
+          onOpenChange={setShowApplicationForm}
+          loanAmount={loanAmount}
+          loanTerm={months}
+          monthlyPayment={monthlyPayment}
+          carInfo={carInfo}
+        />
 
         <p className="text-xs text-muted-foreground">
           * Skaičiavimas orientacinis. Tikslias sąlygas sužinosite pateikę lizingo paraišką. 

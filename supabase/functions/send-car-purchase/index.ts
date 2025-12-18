@@ -21,6 +21,32 @@ function escapeHtml(str: string): string {
   return str.replace(/[&<>"']/g, (match) => htmlEscapes[match] || match);
 }
 
+// Input validation helpers
+function isValidEmail(email: string): boolean {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 255;
+}
+
+function isValidPhone(phone: string): boolean {
+  // Allow international format with optional +, spaces, and dashes
+  const phoneRegex = /^\+?[\d\s\-()]{8,20}$/;
+  return phoneRegex.test(phone);
+}
+
+function isValidYear(year: string): boolean {
+  const yearNum = parseInt(year, 10);
+  return !isNaN(yearNum) && yearNum >= 1900 && yearNum <= new Date().getFullYear() + 2;
+}
+
+function isValidMileage(mileage: string): boolean {
+  const mileageNum = parseInt(mileage, 10);
+  return !isNaN(mileageNum) && mileageNum >= 0 && mileageNum <= 10000000;
+}
+
+function sanitizeString(str: string, maxLength: number): string {
+  return str.trim().slice(0, maxLength);
+}
+
 interface CarPurchaseRequest {
   name: string;
   email: string;
@@ -38,20 +64,67 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, phone, carMake, carModel, carYear, mileage, additionalInfo }: CarPurchaseRequest = 
-      await req.json();
+    const body = await req.json();
+    
+    // Validate required fields exist
+    const { name, email, phone, carMake, carModel, carYear, mileage, additionalInfo } = body as CarPurchaseRequest;
+    
+    if (!name || !email || !phone || !carMake || !carModel || !carYear || !mileage) {
+      return new Response(
+        JSON.stringify({ error: "Visi privalomi laukai turi būti užpildyti" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      return new Response(
+        JSON.stringify({ error: "Neteisingas el. pašto formatas" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate phone format
+    if (!isValidPhone(phone)) {
+      return new Response(
+        JSON.stringify({ error: "Neteisingas telefono numerio formatas" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate year
+    if (!isValidYear(carYear)) {
+      return new Response(
+        JSON.stringify({ error: "Neteisingi automobilio metai" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Validate mileage
+    if (!isValidMileage(mileage)) {
+      return new Response(
+        JSON.stringify({ error: "Neteisinga rida" }),
+        { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    // Sanitize inputs with length limits
+    const sanitizedName = sanitizeString(name, 100);
+    const sanitizedCarMake = sanitizeString(carMake, 50);
+    const sanitizedCarModel = sanitizeString(carModel, 50);
+    const sanitizedAdditionalInfo = additionalInfo ? sanitizeString(additionalInfo, 1000) : '';
 
     // Escape user input to prevent HTML injection
-    const safeName = escapeHtml(name);
+    const safeName = escapeHtml(sanitizedName);
     const safeEmail = escapeHtml(email);
     const safePhone = escapeHtml(phone);
-    const safeCarMake = escapeHtml(carMake);
-    const safeCarModel = escapeHtml(carModel);
+    const safeCarMake = escapeHtml(sanitizedCarMake);
+    const safeCarModel = escapeHtml(sanitizedCarModel);
     const safeCarYear = escapeHtml(carYear);
     const safeMileage = escapeHtml(mileage);
-    const safeAdditionalInfo = additionalInfo ? escapeHtml(additionalInfo) : '';
+    const safeAdditionalInfo = sanitizedAdditionalInfo ? escapeHtml(sanitizedAdditionalInfo) : '';
 
-    console.log("Received car purchase request:", { name: safeName, email: safeEmail, phone: safePhone, carMake: safeCarMake, carModel: safeCarModel });
+    console.log("Received validated car purchase request:", { name: safeName, email: safeEmail, carMake: safeCarMake, carModel: safeCarModel });
 
     // Send confirmation email to customer
     const customerEmail = await resend.emails.send({
@@ -59,7 +132,7 @@ const handler = async (req: Request): Promise<Response> => {
       to: [email],
       subject: "Jūsų automobilio pardavimo užklausa gauta",
       replyTo: "labas@autokopers.lt",
-      text: `Sveiki, ${name}!\n\nGavome jūsų automobilio pardavimo užklausą.\nMarkė: ${carMake}\nModelis: ${carModel}\nMetai: ${carYear}\nRida: ${mileage} km\n${additionalInfo ? `Papildoma informacija: ${additionalInfo}` : ''}\n\nNetrukus susisieksime.\nAutoKopers komanda`,
+      text: `Sveiki, ${sanitizedName}!\n\nGavome jūsų automobilio pardavimo užklausą.\nMarkė: ${sanitizedCarMake}\nModelis: ${sanitizedCarModel}\nMetai: ${carYear}\nRida: ${mileage} km\n${sanitizedAdditionalInfo ? `Papildoma informacija: ${sanitizedAdditionalInfo}` : ''}\n\nNetrukus susisieksime.\nAutoKopers komanda`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h1 style="color: #333;">Sveiki, ${safeName}!</h1>
@@ -89,7 +162,7 @@ const handler = async (req: Request): Promise<Response> => {
       to: ["autofirstklientams@gmail.com"],
       subject: `Nauja automobilio supirkimo užklausa - ${safeCarMake} ${safeCarModel}`,
       replyTo: email,
-      text: `Nauja užklausa. Vardas: ${name}. El. paštas: ${email}. Tel.: ${phone}. Markė: ${carMake}. Modelis: ${carModel}. Metai: ${carYear}. Rida: ${mileage} km. ${additionalInfo ? `Papildoma informacija: ${additionalInfo}` : ''}`,
+      text: `Nauja užklausa. Vardas: ${sanitizedName}. El. paštas: ${email}. Tel.: ${phone}. Markė: ${sanitizedCarMake}. Modelis: ${sanitizedCarModel}. Metai: ${carYear}. Rida: ${mileage} km. ${sanitizedAdditionalInfo ? `Papildoma informacija: ${sanitizedAdditionalInfo}` : ''}`,
       html: `
         <h1>Nauja automobilio supirkimo užklausa</h1>
         <h2>Kliento informacija:</h2>
@@ -123,9 +196,8 @@ const handler = async (req: Request): Promise<Response> => {
     );
   } catch (error: any) {
     console.error("Error in send-car-purchase function:", error);
-    const message = error?.message || (typeof error === 'string' ? error : 'Unknown error');
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Įvyko klaida siunčiant užklausą" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

@@ -50,10 +50,6 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
   const [useCustomDownPayment, setUseCustomDownPayment] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
 
-  const monthlyPayment = useMemo(() => {
-    return calculateMonthlyPayment(carPrice, months, downPaymentPercent);
-  }, [carPrice, months, downPaymentPercent]);
-
   const downPayment = useMemo(() => {
     if (useCustomDownPayment && customDownPayment) {
       const parsed = parseFloat(customDownPayment);
@@ -65,6 +61,19 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
   const loanAmount = useMemo(() => {
     return carPrice - downPayment;
   }, [carPrice, downPayment]);
+
+  const monthlyPayment = useMemo(() => {
+    const principal = loanAmount;
+    const monthlyRate = INTEREST_RATE / 12;
+    
+    if (principal <= 0) return 0;
+    
+    const payment = 
+      (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
+      (Math.pow(1 + monthlyRate, months) - 1);
+    
+    return Math.round(payment);
+  }, [loanAmount, months]);
 
   const totalAmount = useMemo(() => {
     return downPayment + monthlyPayment * months;

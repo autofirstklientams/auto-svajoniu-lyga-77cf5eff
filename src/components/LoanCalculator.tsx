@@ -183,13 +183,13 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
             value={[months]}
             onValueChange={(value) => setMonths(value[0])}
             min={12}
-            max={84}
+            max={144}
             step={6}
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
             <span>12 mėn.</span>
-            <span>84 mėn.</span>
+            <span>144 mėn.</span>
           </div>
         </div>
 

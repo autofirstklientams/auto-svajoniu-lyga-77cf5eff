@@ -4,6 +4,7 @@ import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Calculator, FileText } from "lucide-react";
 import LoanApplicationForm from "@/components/LoanApplicationForm";
 
@@ -45,6 +46,8 @@ export const calculateMonthlyPayment = (
 const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorProps) => {
   const [months, setMonths] = useState(60);
   const [downPaymentPercent, setDownPaymentPercent] = useState(0);
+  const [customDownPayment, setCustomDownPayment] = useState<string>("");
+  const [useCustomDownPayment, setUseCustomDownPayment] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
 
   const monthlyPayment = useMemo(() => {
@@ -52,8 +55,12 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
   }, [carPrice, months, downPaymentPercent]);
 
   const downPayment = useMemo(() => {
+    if (useCustomDownPayment && customDownPayment) {
+      const parsed = parseFloat(customDownPayment);
+      return isNaN(parsed) ? 0 : Math.min(parsed, carPrice);
+    }
     return Math.round(carPrice * downPaymentPercent);
-  }, [carPrice, downPaymentPercent]);
+  }, [carPrice, downPaymentPercent, useCustomDownPayment, customDownPayment]);
 
   const loanAmount = useMemo(() => {
     return carPrice - downPayment;
@@ -100,8 +107,15 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
         <div className="space-y-3">
           <span className="text-sm text-muted-foreground">Pradinis įnašas</span>
           <RadioGroup
-            value={downPaymentPercent.toString()}
-            onValueChange={(v) => setDownPaymentPercent(parseFloat(v))}
+            value={useCustomDownPayment ? "custom" : downPaymentPercent.toString()}
+            onValueChange={(v) => {
+              if (v === "custom") {
+                setUseCustomDownPayment(true);
+              } else {
+                setUseCustomDownPayment(false);
+                setDownPaymentPercent(parseFloat(v));
+              }
+            }}
             className="flex flex-wrap gap-2"
           >
             {DOWN_PAYMENT_OPTIONS.map((option) => (
@@ -119,7 +133,35 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
                 </Label>
               </div>
             ))}
+            <div className="flex items-center">
+              <RadioGroupItem
+                value="custom"
+                id="down-custom"
+                className="peer sr-only"
+              />
+              <Label
+                htmlFor="down-custom"
+                className="cursor-pointer rounded-lg border-2 border-muted bg-popover px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary transition-colors"
+              >
+                Kita suma
+              </Label>
+            </div>
           </RadioGroup>
+          
+          {useCustomDownPayment && (
+            <div className="flex items-center gap-2">
+              <Input
+                type="number"
+                placeholder="Įveskite sumą"
+                value={customDownPayment}
+                onChange={(e) => setCustomDownPayment(e.target.value)}
+                min={0}
+                max={carPrice}
+                className="max-w-[180px]"
+              />
+              <span className="text-sm text-muted-foreground">€</span>
+            </div>
+          )}
         </div>
 
         {/* Loan period slider */}

@@ -51,13 +51,15 @@ const LoanApplicationForm = ({
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.functions.invoke('send-loan-application', {
+      const { error } = await supabase.functions.invoke('submit-inquiry', {
         body: {
-          ...formData,
-          loanAmount,
-          loanTerm,
-          monthlyPayment: monthlyPayment.toFixed(2),
-          carInfo,
+          name: formData.name,
+          email: formData.email,
+          phone: formData.phone,
+          amount: loanAmount,
+          loanType: carInfo ? 'lizingas' : 'paskola',
+          loanPeriod: `${loanTerm} mėn.`,
+          source: 'autokopers',
         },
       });
 

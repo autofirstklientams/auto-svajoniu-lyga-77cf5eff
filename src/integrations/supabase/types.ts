@@ -186,6 +186,42 @@ export type Database = {
           },
         ]
       }
+      inquiries: {
+        Row: {
+          amount: number | null
+          created_at: string
+          email: string
+          id: string
+          loan_period: string | null
+          loan_type: string | null
+          name: string
+          phone: string
+          source: string
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string
+          email: string
+          id?: string
+          loan_period?: string | null
+          loan_type?: string | null
+          name: string
+          phone: string
+          source?: string
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string
+          email?: string
+          id?: string
+          loan_period?: string | null
+          loan_type?: string | null
+          name?: string
+          phone?: string
+          source?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           attachments: string[] | null

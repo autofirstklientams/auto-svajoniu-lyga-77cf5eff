@@ -158,43 +158,64 @@ Deno.serve(async (req) => {
       );
     }
 
-    const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
-    if (!apiKey) {
-      console.error('FIRECRAWL_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ success: false, error: 'Firecrawl API key not configured' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    console.log('Scraping Autoplius URL:', url);
+
+    // Try direct fetch first (faster and no credits needed)
+    let html = '';
+    try {
+      const directResponse = await fetch(url, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'lt,en-US;q=0.7,en;q=0.3',
+        },
+      });
+
+      if (directResponse.ok) {
+        html = await directResponse.text();
+        console.log('Page fetched directly, parsing...');
+      }
+    } catch (fetchError) {
+      console.log('Direct fetch failed, trying Firecrawl...', fetchError);
     }
 
-    console.log('Scraping Autoplius URL with Firecrawl:', url);
+    // Fallback to Firecrawl if direct fetch failed or returned empty
+    if (!html || html.length < 1000) {
+      const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+      if (apiKey) {
+        try {
+          const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${apiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              url: url,
+              formats: ['html'],
+              onlyMainContent: false,
+              waitFor: 2000,
+            }),
+          });
 
-    // Use Firecrawl to scrape the page
-    const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        url: url,
-        formats: ['html', 'markdown'],
-        onlyMainContent: false,
-        waitFor: 2000,
-      }),
-    });
-
-    if (!firecrawlResponse.ok) {
-      const errorData = await firecrawlResponse.json();
-      console.error('Firecrawl API error:', errorData);
-      throw new Error(errorData.error || `Firecrawl request failed with status ${firecrawlResponse.status}`);
+          if (firecrawlResponse.ok) {
+            const firecrawlData = await firecrawlResponse.json();
+            html = firecrawlData.data?.html || firecrawlData.html || html;
+            console.log('Page fetched via Firecrawl fallback');
+          } else {
+            console.log('Firecrawl fallback failed, using direct fetch result');
+          }
+        } catch (fcError) {
+          console.log('Firecrawl error, continuing with direct fetch result:', fcError);
+        }
+      }
     }
 
-    const firecrawlData = await firecrawlResponse.json();
-    const html = firecrawlData.data?.html || firecrawlData.html || '';
-    const markdown = firecrawlData.data?.markdown || firecrawlData.markdown || '';
-    
-    console.log('Page fetched via Firecrawl, parsing...');
+    if (!html || html.length < 500) {
+      throw new Error('Nepavyko gauti puslapio turinio');
+    }
+
+    console.log('Parsing page content...');
 
     const carData: CarData = {};
 

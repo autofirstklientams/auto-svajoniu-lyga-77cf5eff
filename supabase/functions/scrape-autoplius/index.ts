@@ -160,28 +160,60 @@ Deno.serve(async (req) => {
 
     console.log('Scraping Autoplius URL:', url);
 
-    // Try direct fetch first (faster and no credits needed)
+    // Try direct fetch with mobile user agent (often less restricted)
     let html = '';
-    try {
-      const directResponse = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'lt,en-US;q=0.7,en;q=0.3',
-        },
-      });
+    
+    const userAgents = [
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      'Mozilla/5.0 (Linux; Android 14; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    ];
 
-      if (directResponse.ok) {
-        html = await directResponse.text();
-        console.log('Page fetched directly, parsing...');
+    for (const userAgent of userAgents) {
+      try {
+        console.log('Trying fetch with UA:', userAgent.substring(0, 50) + '...');
+        
+        const directResponse = await fetch(url, {
+          headers: {
+            'User-Agent': userAgent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+            'Accept-Language': 'lt-LT,lt;q=0.9,en-US;q=0.8,en;q=0.7',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'Cache-Control': 'no-cache',
+            'Pragma': 'no-cache',
+            'Sec-Fetch-Dest': 'document',
+            'Sec-Fetch-Mode': 'navigate',
+            'Sec-Fetch-Site': 'none',
+            'Sec-Fetch-User': '?1',
+            'Upgrade-Insecure-Requests': '1',
+          },
+        });
+
+        console.log('Response status:', directResponse.status);
+        
+        if (directResponse.ok) {
+          html = await directResponse.text();
+          console.log('Got HTML length:', html.length);
+          
+          // Check if we got actual content (not a block page)
+          if (html.length > 5000 && (html.includes('announcement-title') || html.includes('parameter-label') || html.includes('auto-price'))) {
+            console.log('Valid Autoplius page content found!');
+            break;
+          } else {
+            console.log('Page seems blocked or invalid, trying next UA...');
+            html = '';
+          }
+        }
+      } catch (fetchError) {
+        console.log('Fetch error:', fetchError);
       }
-    } catch (fetchError) {
-      console.log('Direct fetch failed, trying Firecrawl...', fetchError);
     }
 
-    // Fallback to Firecrawl if direct fetch failed or returned empty
-    if (!html || html.length < 1000) {
+    // Fallback to Firecrawl if direct fetch failed
+    if (!html || html.length < 5000) {
+      console.log('Direct fetch failed, trying Firecrawl...');
       const apiKey = Deno.env.get('FIRECRAWL_API_KEY');
+      
       if (apiKey) {
         try {
           const firecrawlResponse = await fetch('https://api.firecrawl.dev/v1/scrape', {
@@ -194,28 +226,31 @@ Deno.serve(async (req) => {
               url: url,
               formats: ['html'],
               onlyMainContent: false,
-              waitFor: 2000,
+              waitFor: 3000,
             }),
           });
 
-          if (firecrawlResponse.ok) {
-            const firecrawlData = await firecrawlResponse.json();
-            html = firecrawlData.data?.html || firecrawlData.html || html;
-            console.log('Page fetched via Firecrawl fallback');
+          const firecrawlData = await firecrawlResponse.json();
+          
+          if (firecrawlResponse.ok && firecrawlData.success !== false) {
+            html = firecrawlData.data?.html || firecrawlData.html || '';
+            console.log('Got HTML from Firecrawl, length:', html.length);
           } else {
-            console.log('Firecrawl fallback failed, using direct fetch result');
+            console.log('Firecrawl error:', firecrawlData.error || 'Unknown error');
           }
         } catch (fcError) {
-          console.log('Firecrawl error, continuing with direct fetch result:', fcError);
+          console.log('Firecrawl exception:', fcError);
         }
+      } else {
+        console.log('No Firecrawl API key configured');
       }
     }
 
-    if (!html || html.length < 500) {
-      throw new Error('Nepavyko gauti puslapio turinio');
+    if (!html || html.length < 1000) {
+      throw new Error('Nepavyko gauti puslapio turinio. Autoplius gali blokuoti užklausas. Bandykite vėliau arba įveskite duomenis rankiniu būdu.');
     }
 
-    console.log('Parsing page content...');
+    console.log('Parsing page content, HTML length:', html.length);
 
     const carData: CarData = {};
 

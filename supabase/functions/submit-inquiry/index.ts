@@ -169,7 +169,26 @@ const handler = async (req: Request): Promise<Response> => {
       ${safeLoanPeriod ? `<li><strong>Terminas:</strong> ${safeLoanPeriod}</li>` : ''}
     `;
 
-    // Send confirmation email to customer with AutoKopers branding (green)
+    // Convert name to vocative case (Lithuanian grammar)
+    const getVocativeName = (fullName: string): string => {
+      const parts = fullName.trim().split(/\s+/);
+      return parts.map(part => {
+        const lower = part.toLowerCase();
+        // Lithuanian vocative transformations
+        if (lower.endsWith('as')) return part.slice(0, -2) + 'ai';
+        if (lower.endsWith('is')) return part.slice(0, -2) + 'i';
+        if (lower.endsWith('us')) return part.slice(0, -2) + 'au';
+        if (lower.endsWith('ys')) return part.slice(0, -2) + 'y';
+        if (lower.endsWith('ė')) return part.slice(0, -1) + 'e';
+        if (lower.endsWith('a')) return part.slice(0, -1) + 'a';
+        return part;
+      }).join(' ');
+    };
+
+    const vocativeName = getVocativeName(sanitizedName);
+    const safeVocativeName = escapeHtml(vocativeName);
+
+    // Send confirmation email to customer with AutoKopers branding (navy blue)
     const customerEmail = await resend.emails.send({
       from: "AutoKopers <labas@autokopers.lt>",
       to: [email],
@@ -177,13 +196,16 @@ const handler = async (req: Request): Promise<Response> => {
       replyTo: "labas@autokopers.lt",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
-          <div style="background-color: #16a34a; padding: 30px; text-align: center;">
-            <h1 style="color: white; margin: 0; font-size: 28px;">AutoKopers</h1>
+          <div style="background-color: #2B3B5C; padding: 30px; text-align: center;">
+            <img src="https://www.autokopers.lt/logo-email.png" alt="AutoKopers" style="max-width: 220px; height: auto;" />
           </div>
           <div style="padding: 30px; background-color: white;">
-            <h2 style="color: #16a34a; margin-top: 0;">Sveiki, ${safeName}!</h2>
+            <h2 style="color: #2B3B5C; margin-top: 0;">Labas, ${safeVocativeName}!</h2>
             <p style="color: #333; font-size: 16px; line-height: 1.6;">
-              Dėkojame už Jūsų užklausą! Gavome šią informaciją:
+              Dėkojame už jūsų užklausą ir nekantraujame jums padėti!
+            </p>
+            <p style="color: #333; font-size: 16px; line-height: 1.6;">
+              Gavome šią informaciją:
             </p>
             <ul style="color: #333; font-size: 16px; line-height: 1.8;">
               ${loanDetailsHtml}
@@ -191,19 +213,18 @@ const handler = async (req: Request): Promise<Response> => {
             <p style="color: #333; font-size: 16px; line-height: 1.6;">
               Mūsų specialistai susisieks su jumis artimiausiu metu.
             </p>
-            <div style="background-color: #f0fdf4; border-left: 4px solid #16a34a; padding: 15px; margin: 20px 0;">
-              <p style="margin: 0; color: #166534;">
+            <div style="background-color: #f0f4f8; border-left: 4px solid #2B3B5C; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #2B3B5C;">
                 <strong>Kontaktai:</strong><br>
-                El. paštas: <a href="mailto:labas@autokopers.lt" style="color: #16a34a;">labas@autokopers.lt</a><br>
-                Telefonas: <a href="tel:+37062851439" style="color: #16a34a;">+370 628 51439</a>
+                El. paštas: <a href="mailto:labas@autokopers.lt" style="color: #2B3B5C;">labas@autokopers.lt</a><br>
+                Telefonas: <a href="tel:+37062851439" style="color: #2B3B5C;">+370 628 51439</a>
               </p>
             </div>
           </div>
-          <div style="background-color: #16a34a; padding: 20px; text-align: center;">
+          <div style="background-color: #2B3B5C; padding: 20px; text-align: center;">
             <p style="color: white; margin: 0; font-size: 14px;">
               Geros dienos,<br>AutoKopers komanda
             </p>
-            <img src="https://www.autokopers.lt/autokopers-social.jpg" alt="AutoKopers" style="max-width: 150px; margin-top: 15px; border-radius: 8px;" />
           </div>
         </div>
       `,
@@ -211,7 +232,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Customer email sent:", customerEmail);
 
-    // Send notification email to admin with AutoKopers branding (green)
+    // Send notification email to admin with AutoKopers branding (navy blue)
     const adminEmail = await resend.emails.send({
       from: "AutoKopers <labas@autokopers.lt>",
       to: ["autofirstklientams@gmail.com"],
@@ -219,12 +240,12 @@ const handler = async (req: Request): Promise<Response> => {
       replyTo: email,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background-color: #16a34a; padding: 20px; text-align: center;">
+          <div style="background-color: #2B3B5C; padding: 20px; text-align: center;">
             <h1 style="color: white; margin: 0;">Nauja užklausa</h1>
-            <p style="color: #dcfce7; margin: 5px 0 0 0;">Šaltinis: ${safeSource}</p>
+            <p style="color: #a0aec0; margin: 5px 0 0 0;">Šaltinis: ${safeSource}</p>
           </div>
           <div style="padding: 25px; background-color: #f8f9fa;">
-            <h2 style="color: #16a34a; margin-top: 0;">Kliento informacija:</h2>
+            <h2 style="color: #2B3B5C; margin-top: 0;">Kliento informacija:</h2>
             <table style="width: 100%; border-collapse: collapse;">
               <tr>
                 <td style="padding: 10px; border-bottom: 1px solid #e5e7eb;"><strong>Vardas:</strong></td>

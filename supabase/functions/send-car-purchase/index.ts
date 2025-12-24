@@ -126,29 +126,67 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Received validated car purchase request:", { name: safeName, email: safeEmail, carMake: safeCarMake, carModel: safeCarModel });
 
+    // Convert name to vocative case (Lithuanian grammar)
+    const getVocativeName = (fullName: string): string => {
+      const parts = fullName.trim().split(/\s+/);
+      return parts.map(part => {
+        const lower = part.toLowerCase();
+        if (lower.endsWith('as')) return part.slice(0, -2) + 'ai';
+        if (lower.endsWith('is')) return part.slice(0, -2) + 'i';
+        if (lower.endsWith('us')) return part.slice(0, -2) + 'au';
+        if (lower.endsWith('ys')) return part.slice(0, -2) + 'y';
+        if (lower.endsWith('ė')) return part.slice(0, -1) + 'e';
+        if (lower.endsWith('a')) return part.slice(0, -1) + 'a';
+        return part;
+      }).join(' ');
+    };
+
+    const vocativeName = getVocativeName(sanitizedName);
+    const safeVocativeName = escapeHtml(vocativeName);
+
     // Send confirmation email to customer
     const customerEmail = await resend.emails.send({
-      from: "AutoKopers <onboarding@resend.dev>",
+      from: "AutoKopers <labas@autokopers.lt>",
       to: [email],
-      subject: "Jūsų automobilio pardavimo užklausa gauta",
+      subject: "Jūsų automobilio pardavimo užklausa gauta - AutoKopers",
       replyTo: "labas@autokopers.lt",
-      text: `Sveiki, ${sanitizedName}!\n\nGavome jūsų automobilio pardavimo užklausą.\nMarkė: ${sanitizedCarMake}\nModelis: ${sanitizedCarModel}\nMetai: ${carYear}\nRida: ${mileage} km\n${sanitizedAdditionalInfo ? `Papildoma informacija: ${sanitizedAdditionalInfo}` : ''}\n\nNetrukus susisieksime.\nAutoKopers komanda`,
+      text: `Labas, ${vocativeName}!\n\nDėkojame už jūsų užklausą ir nekantraujame jums padėti!\n\nGavome jūsų automobilio pardavimo užklausą.\nMarkė: ${sanitizedCarMake}\nModelis: ${sanitizedCarModel}\nMetai: ${carYear}\nRida: ${mileage} km\n${sanitizedAdditionalInfo ? `Papildoma informacija: ${sanitizedAdditionalInfo}` : ''}\n\nNetrukus susisieksime.\nAutoKopers komanda`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #333;">Sveiki, ${safeName}!</h1>
-          <p>Gavome jūsų automobilio pardavimo užklausą su šiais duomenimis:</p>
-          <h3>Automobilio informacija:</h3>
-          <ul>
-            <li><strong>Markė:</strong> ${safeCarMake}</li>
-            <li><strong>Modelis:</strong> ${safeCarModel}</li>
-            <li><strong>Metai:</strong> ${safeCarYear}</li>
-            <li><strong>Rida:</strong> ${safeMileage} km</li>
-            ${safeAdditionalInfo ? `<li><strong>Papildoma informacija:</strong> ${safeAdditionalInfo}</li>` : ''}
-          </ul>
-          <p>Mūsų specialistas susisieks su jumis artimiausiu metu el. paštu <strong>labas@autokopers.lt</strong> arba telefonu <strong>+370 628 51439</strong> dėl automobilio įvertinimo.</p>
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee;">
-            <p style="color: #666; font-size: 14px;">Geros dienos,<br>AutoKopers komanda</p>
-            <img src="https://www.autokopers.lt/autokopers-social.jpg" alt="AutoKopers" style="max-width: 200px; margin-top: 20px;" />
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
+          <div style="background-color: #2B3B5C; padding: 30px; text-align: center;">
+            <img src="https://www.autokopers.lt/logo-email.png" alt="AutoKopers" style="max-width: 220px; height: auto;" />
+          </div>
+          <div style="padding: 30px; background-color: white;">
+            <h2 style="color: #2B3B5C; margin-top: 0;">Labas, ${safeVocativeName}!</h2>
+            <p style="color: #333; font-size: 16px; line-height: 1.6;">
+              Dėkojame už jūsų užklausą ir nekantraujame jums padėti!
+            </p>
+            <p style="color: #333; font-size: 16px; line-height: 1.6;">
+              Gavome jūsų automobilio pardavimo užklausą su šiais duomenimis:
+            </p>
+            <h3 style="color: #2B3B5C;">Automobilio informacija:</h3>
+            <ul style="color: #333; font-size: 16px; line-height: 1.8;">
+              <li><strong>Markė:</strong> ${safeCarMake}</li>
+              <li><strong>Modelis:</strong> ${safeCarModel}</li>
+              <li><strong>Metai:</strong> ${safeCarYear}</li>
+              <li><strong>Rida:</strong> ${safeMileage} km</li>
+              ${safeAdditionalInfo ? `<li><strong>Papildoma informacija:</strong> ${safeAdditionalInfo}</li>` : ''}
+            </ul>
+            <p style="color: #333; font-size: 16px; line-height: 1.6;">
+              Mūsų specialistas susisieks su jumis artimiausiu metu dėl automobilio įvertinimo.
+            </p>
+            <div style="background-color: #f0f4f8; border-left: 4px solid #2B3B5C; padding: 15px; margin: 20px 0;">
+              <p style="margin: 0; color: #2B3B5C;">
+                <strong>Kontaktai:</strong><br>
+                El. paštas: <a href="mailto:labas@autokopers.lt" style="color: #2B3B5C;">labas@autokopers.lt</a><br>
+                Telefonas: <a href="tel:+37062851439" style="color: #2B3B5C;">+370 628 51439</a>
+              </p>
+            </div>
+          </div>
+          <div style="background-color: #2B3B5C; padding: 20px; text-align: center;">
+            <p style="color: white; margin: 0; font-size: 14px;">
+              Geros dienos,<br>AutoKopers komanda
+            </p>
           </div>
         </div>
       `,

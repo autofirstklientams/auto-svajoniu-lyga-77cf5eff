@@ -171,7 +171,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to customer with AutoKopers branding (green)
     const customerEmail = await resend.emails.send({
-      from: "AutoKopers <onboarding@resend.dev>",
+      from: "AutoKopers <labas@autokopers.lt>",
       to: [email],
       subject: "Jūsų užklausa gauta - AutoKopers",
       replyTo: "labas@autokopers.lt",
@@ -213,7 +213,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send notification email to admin with AutoKopers branding (green)
     const adminEmail = await resend.emails.send({
-      from: "AutoKopers <onboarding@resend.dev>",
+      from: "AutoKopers <labas@autokopers.lt>",
       to: ["autofirstklientams@gmail.com"],
       subject: `Nauja užklausa (${safeSource}) - ${safeName}`,
       replyTo: email,

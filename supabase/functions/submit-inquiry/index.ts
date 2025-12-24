@@ -129,6 +129,39 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Inquiry saved to database:", insertedData?.id);
 
+    // Forward inquiry to autopaskolos.lt API
+    try {
+      const autopasklosResponse = await fetch(
+        "https://jwruubwnqwibbdwkpksz.supabase.co/functions/v1/submit-inquiry",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: sanitizedName,
+            email: email,
+            phone: phone,
+            amount: amount ? String(amount) : "",
+            loanPeriod: sanitizedLoanPeriod?.replace(" mėn.", "") || "",
+            loanType: sanitizedLoanType || "auto",
+            source: "autokopers",
+          }),
+        }
+      );
+
+      if (!autopasklosResponse.ok) {
+        const errorText = await autopasklosResponse.text();
+        console.error("Autopaskolos API error:", autopasklosResponse.status, errorText);
+      } else {
+        const autopasklosData = await autopasklosResponse.json();
+        console.log("Inquiry forwarded to autopaskolos.lt:", autopasklosData);
+      }
+    } catch (forwardError) {
+      console.error("Failed to forward inquiry to autopaskolos.lt:", forwardError);
+      // Continue execution - don't fail the whole request if forwarding fails
+    }
+
     // Build loan details HTML for emails
     const loanDetailsHtml = `
       ${amount ? `<li><strong>Suma:</strong> ${amount} €</li>` : ''}

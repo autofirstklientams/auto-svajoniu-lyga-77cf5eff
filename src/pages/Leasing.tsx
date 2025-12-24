@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Calculator, ChevronRight, Info, Clock, FileCheck, CreditCard, CheckCircle2, Shield, TrendingDown, Users } from "lucide-react";
+import { Calculator, ChevronRight, Info, Clock, FileCheck, CreditCard, CheckCircle2, Shield, TrendingDown, Users, Scale } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LoanApplicationForm from "@/components/LoanApplicationForm";
@@ -39,6 +39,11 @@ const Leasing = () => {
 
   const benefits = [
     {
+      icon: Scale,
+      title: "Palyginame sąlygas",
+      description: "Surandame geriausią pasiūlymą iš kelių finansų partnerių"
+    },
+    {
       icon: TrendingDown,
       title: "Žemos palūkanos",
       description: "Konkurencingos palūkanų normos nuo 6.9% metinių"
@@ -47,11 +52,6 @@ const Leasing = () => {
       icon: Clock,
       title: "Greitas sprendimas",
       description: "Atsakymas per 24 valandas, pinigai - per 1-2 dienas"
-    },
-    {
-      icon: Shield,
-      title: "Patikimas partneris",
-      description: "Dirbame su patikimais Lietuvos finansų partneriais"
     },
     {
       icon: Users,

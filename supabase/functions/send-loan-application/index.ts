@@ -143,7 +143,7 @@ const handler = async (req: Request): Promise<Response> => {
       text: `Labas, ${vocativeName}!\n\nDėkojame už jūsų užklausą ir nekantraujame jums padėti!\n\nGavome jūsų automobilio paskolos paraišką.\n\nSuma: ${loanAmount} €\nTerminas: ${loanTerm} mėn.\nMėnesinė įmoka: ${sanitizedMonthlyPayment} €.\n\nNetrukus susisieksime.\nAutoKopers komanda`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background-color: #f8f9fa;">
-          <div style="background-color: #2B3B5C; padding: 30px; text-align: center;">
+          <div style="background-color: white; padding: 30px; text-align: center; border-bottom: 1px solid #e5e7eb;">
             <img src="https://www.autokopers.lt/logo-email.png" alt="AutoKopers" style="max-width: 220px; height: auto;" />
           </div>
           <div style="padding: 30px; background-color: white;">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -12,6 +12,39 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+
+// Animated number component
+const AnimatedNumber = ({ value, suffix = "" }: { value: number; suffix?: string }) => {
+  const [displayValue, setDisplayValue] = useState(value);
+  const previousValue = useRef(value);
+  
+  useEffect(() => {
+    const startValue = previousValue.current;
+    const endValue = value;
+    const duration = 300;
+    const startTime = performance.now();
+    
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Easing function for smooth animation
+      const easeOutQuad = 1 - (1 - progress) * (1 - progress);
+      const currentValue = startValue + (endValue - startValue) * easeOutQuad;
+      
+      setDisplayValue(Math.round(currentValue));
+      
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+    
+    requestAnimationFrame(animate);
+    previousValue.current = value;
+  }, [value]);
+  
+  return <>{displayValue.toLocaleString()}{suffix}</>;
+};
 
 const Leasing = () => {
   const [loanAmount, setLoanAmount] = useState(10000);
@@ -81,12 +114,12 @@ const Leasing = () => {
         {/* Calculator Section */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-4">Paskaičiuokite mėnesinę įmoką</h2>
-            <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-4 animate-fade-in">Paskaičiuokite mėnesinę įmoką</h2>
+            <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
               Naudokite skaičiuoklę ir sužinokite preliminarią mėnesinę įmoką
             </p>
             
-            <Card className="shadow-xl border-0 max-w-4xl mx-auto overflow-hidden">
+            <Card className="shadow-xl border-0 max-w-4xl mx-auto overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
               <CardContent className="p-0">
                 <div className="grid md:grid-cols-2">
                   {/* Calculator side */}
@@ -102,7 +135,9 @@ const Leasing = () => {
                       <div>
                         <div className="flex justify-between items-center mb-3">
                           <label className="text-sm font-medium text-foreground">Paskolos suma</label>
-                          <span className="text-lg font-bold text-primary">{loanAmount.toLocaleString()} €</span>
+                          <span className="text-lg font-bold text-primary tabular-nums">
+                            <AnimatedNumber value={loanAmount} suffix=" €" />
+                          </span>
                         </div>
                         <Slider
                           value={[loanAmount]}
@@ -110,6 +145,7 @@ const Leasing = () => {
                           min={1000}
                           max={30000}
                           step={100}
+                          className="transition-all"
                         />
                         <div className="flex justify-between text-xs text-muted-foreground mt-1">
                           <span>1 000 €</span>
@@ -120,7 +156,9 @@ const Leasing = () => {
                       <div>
                         <div className="flex justify-between items-center mb-3">
                           <label className="text-sm font-medium text-foreground">Terminas</label>
-                          <span className="text-lg font-bold text-primary">{loanTerm} mėn.</span>
+                          <span className="text-lg font-bold text-primary tabular-nums">
+                            <AnimatedNumber value={loanTerm} suffix=" mėn." />
+                          </span>
                         </div>
                         <Slider
                           value={[loanTerm]}
@@ -128,6 +166,7 @@ const Leasing = () => {
                           min={6}
                           max={144}
                           step={6}
+                          className="transition-all"
                         />
                         <div className="flex justify-between text-xs text-muted-foreground mt-1">
                           <span>6 mėn.</span>
@@ -135,7 +174,7 @@ const Leasing = () => {
                         </div>
                       </div>
 
-                      <div className="bg-primary/5 rounded-xl p-4">
+                      <div className="bg-primary/5 rounded-xl p-4 transition-all duration-300">
                         <div className="flex items-center gap-1 mb-1">
                           <span className="text-sm text-muted-foreground">Mėnesio įmoka nuo</span>
                           <TooltipProvider>
@@ -149,11 +188,11 @@ const Leasing = () => {
                             </Tooltip>
                           </TooltipProvider>
                         </div>
-                        <div className="text-4xl font-bold text-primary">
-                          {monthlyPayment.toFixed(0)} <span className="text-xl">€/mėn.</span>
+                        <div className="text-4xl font-bold text-primary tabular-nums">
+                          <AnimatedNumber value={Math.round(monthlyPayment)} /> <span className="text-xl">€/mėn.</span>
                         </div>
-                        <div className="text-xs text-muted-foreground mt-2">
-                          Bendra grąžintina suma: {totalPayment.toFixed(0)} €
+                        <div className="text-xs text-muted-foreground mt-2 tabular-nums">
+                          Bendra grąžintina suma: <AnimatedNumber value={Math.round(totalPayment)} suffix=" €" />
                         </div>
                       </div>
                     </div>

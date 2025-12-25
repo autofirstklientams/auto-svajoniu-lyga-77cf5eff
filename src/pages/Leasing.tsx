@@ -78,34 +78,8 @@ const Leasing = () => {
           </div>
         </section>
 
-        {/* Steps Section */}
-        <section className="py-16 bg-muted/30">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Kaip veikia finansavimas?</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
-              {steps.map((step, index) => (
-                <div 
-                  key={index}
-                  className="flex flex-col items-center text-center p-6 rounded-xl bg-background border border-border hover:shadow-lg hover:border-primary/30 transition-all"
-                >
-                  <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 ${
-                    index === steps.length - 1 
-                      ? 'bg-primary text-primary-foreground' 
-                      : 'bg-accent text-accent-foreground'
-                  }`}>
-                    <step.icon className="h-6 w-6" />
-                  </div>
-                  <div className="text-xs text-muted-foreground mb-2">Žingsnis {index + 1}</div>
-                  <h3 className="font-semibold text-sm mb-1 text-foreground">{step.title}</h3>
-                  <p className="text-xs text-muted-foreground">{step.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
         {/* Calculator Section */}
-        <section className="py-16">
+        <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-4">Paskaičiuokite mėnesinę įmoką</h2>
             <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
@@ -240,6 +214,32 @@ const Leasing = () => {
                 </div>
               </CardContent>
             </Card>
+          </div>
+        </section>
+
+        {/* Steps Section */}
+        <section className="py-16">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">Kaip veikia finansavimas?</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
+              {steps.map((step, index) => (
+                <div 
+                  key={index}
+                  className="flex flex-col items-center text-center p-6 rounded-xl bg-background border border-border hover:shadow-lg hover:border-primary/30 transition-all"
+                >
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center mb-4 ${
+                    index === steps.length - 1 
+                      ? 'bg-primary text-primary-foreground' 
+                      : 'bg-accent text-accent-foreground'
+                  }`}>
+                    <step.icon className="h-6 w-6" />
+                  </div>
+                  <div className="text-xs text-muted-foreground mb-2">Žingsnis {index + 1}</div>
+                  <h3 className="font-semibold text-sm mb-1 text-foreground">{step.title}</h3>
+                  <p className="text-xs text-muted-foreground">{step.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

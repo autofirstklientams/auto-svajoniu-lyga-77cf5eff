@@ -16,20 +16,30 @@ const formSchema = z.object({
 interface LoanApplicationFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  loanAmount: number;
-  loanTerm: number;
-  monthlyPayment: number;
+  loanAmount?: number;
+  loanTerm?: number;
+  monthlyPayment?: number;
   carInfo?: string;
 }
 
 const LoanApplicationForm = ({
   open,
   onOpenChange,
-  loanAmount,
-  loanTerm,
+  loanAmount = 10000,
+  loanTerm = 60,
   monthlyPayment,
   carInfo,
 }: LoanApplicationFormProps) => {
+  // Calculate monthly payment if not provided
+  const annualInterestRate = 0.069;
+  const monthlyAdminFee = 9.5;
+  const monthlyRate = annualInterestRate / 12;
+  const calculatedMonthlyPayment = monthlyPayment ?? (
+    loanAmount > 0 
+      ? (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, loanTerm)) / 
+        (Math.pow(1 + monthlyRate, loanTerm) - 1) + monthlyAdminFee
+      : 0
+  );
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -142,7 +152,7 @@ const LoanApplicationForm = ({
               </p>
               <p className="flex justify-between">
                 <span className="text-muted-foreground">Mėn. įmoka:</span>
-                <span className="font-medium text-primary">{monthlyPayment.toFixed(2)} €</span>
+                <span className="font-medium text-primary">{calculatedMonthlyPayment.toFixed(2)} €</span>
               </p>
             </div>
           </div>

@@ -1,8 +1,69 @@
+import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Shield, Users, Award, Target } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import LoanApplicationForm from "@/components/LoanApplicationForm";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const About = () => {
+  const [isLoanFormOpen, setIsLoanFormOpen] = useState(false);
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
+  
+  const [contactForm, setContactForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    message: ""
+  });
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    
+    try {
+      const { error } = await supabase.functions.invoke('submit-inquiry', {
+        body: {
+          name: contactForm.name,
+          email: contactForm.email,
+          phone: contactForm.phone,
+          message: contactForm.message,
+          source: 'about_contact'
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Žinutė išsiųsta!",
+        description: "Susisieksime su jumis artimiausiu metu.",
+      });
+      
+      setIsContactFormOpen(false);
+      setContactForm({ name: "", email: "", phone: "", message: "" });
+    } catch (error) {
+      toast({
+        title: "Klaida",
+        description: "Nepavyko išsiųsti žinutės. Bandykite dar kartą.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -102,24 +163,88 @@ const About = () => {
                 Turite klausimų? Mūsų komanda pasiruošusi padėti!
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <a 
-                  href="/#contact"
-                  className="inline-flex items-center justify-center h-11 rounded-md px-8 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold transition-colors"
+                <Button 
+                  onClick={() => setIsContactFormOpen(true)}
+                  className="h-11 px-8 font-semibold"
                 >
                   Susisiekti
-                </a>
-                <a 
-                  href="/#financing"
-                  className="inline-flex items-center justify-center h-11 rounded-md px-8 bg-accent text-accent-foreground hover:bg-accent/90 font-semibold transition-colors"
+                </Button>
+                <Button 
+                  onClick={() => setIsLoanFormOpen(true)}
+                  variant="secondary"
+                  className="h-11 px-8 font-semibold bg-accent text-accent-foreground hover:bg-accent/90"
                 >
                   Gauti pasiūlymą
-                </a>
+                </Button>
               </div>
             </div>
           </div>
         </section>
       </main>
       <Footer />
+
+      {/* Contact Form Dialog */}
+      <Dialog open={isContactFormOpen} onOpenChange={setIsContactFormOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Susisiekite su mumis</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleContactSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="contact-name">Vardas</Label>
+              <Input
+                id="contact-name"
+                value={contactForm.name}
+                onChange={(e) => setContactForm(prev => ({ ...prev, name: e.target.value }))}
+                required
+                placeholder="Jūsų vardas"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-email">El. paštas</Label>
+              <Input
+                id="contact-email"
+                type="email"
+                value={contactForm.email}
+                onChange={(e) => setContactForm(prev => ({ ...prev, email: e.target.value }))}
+                required
+                placeholder="jusu@pastas.lt"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-phone">Telefonas</Label>
+              <Input
+                id="contact-phone"
+                type="tel"
+                value={contactForm.phone}
+                onChange={(e) => setContactForm(prev => ({ ...prev, phone: e.target.value }))}
+                required
+                placeholder="+370 600 00000"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="contact-message">Žinutė</Label>
+              <Textarea
+                id="contact-message"
+                value={contactForm.message}
+                onChange={(e) => setContactForm(prev => ({ ...prev, message: e.target.value }))}
+                required
+                placeholder="Jūsų klausimas ar žinutė..."
+                rows={4}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Siunčiama..." : "Siųsti žinutę"}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Loan Application Form */}
+      <LoanApplicationForm
+        open={isLoanFormOpen}
+        onOpenChange={setIsLoanFormOpen}
+      />
     </div>
   );
 };

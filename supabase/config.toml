@@ -17,3 +17,6 @@ verify_jwt = true
 
 [functions.submit-inquiry]
 verify_jwt = false
+
+[functions.submit-car-search]
+verify_jwt = false

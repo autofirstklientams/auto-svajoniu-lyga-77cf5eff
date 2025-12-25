@@ -6,8 +6,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 const CarSearchForm = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     make: "",
     model: "",
@@ -23,40 +25,40 @@ const CarSearchForm = () => {
     phone: "",
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
-    // Prepare email content
-    const emailSubject = `Auto paieškos užklausa: ${formData.make} ${formData.model}`;
-    const emailBody = `
-Automobilio paieškos užklausa:
+    try {
+      const { data, error } = await supabase.functions.invoke('submit-car-search', {
+        body: formData
+      });
 
-Gamintojas: ${formData.make || "Nenurodyta"}
-Modelis: ${formData.model || "Nenurodyta"}
-Metai nuo: ${formData.yearFrom || "Nenurodyta"}
-Metai iki: ${formData.yearTo || "Nenurodyta"}
-Kaina nuo: ${formData.priceFrom || "Nenurodyta"} €
-Kaina iki: ${formData.priceTo || "Nenurodyta"} €
-Kuro tipas: ${formData.fuelType || "Nenurodyta"}
-Pavarų dėžė: ${formData.transmission || "Nenurodyta"}
+      if (error) throw error;
 
-Papildoma informacija:
-${formData.additionalInfo || "Nenurodyta"}
-
----
-Kontaktinė informacija:
-Vardas: ${formData.name}
-El. paštas: ${formData.email}
-Telefonas: ${formData.phone}
-    `.trim();
-
-    // Create mailto link
-    const mailtoLink = `mailto:labas@autokopers.lt?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
-    
-    // Open email client
-    window.location.href = mailtoLink;
-    
-    toast.success("El. pašto programa atidaryta. Užbaigę rašyti, išsiųskite laišką.");
+      toast.success("Užklausa išsiųsta! Susisieksime su jumis artimiausiu metu.");
+      
+      // Reset form
+      setFormData({
+        make: "",
+        model: "",
+        yearFrom: "",
+        yearTo: "",
+        priceFrom: "",
+        priceTo: "",
+        fuelType: "",
+        transmission: "",
+        additionalInfo: "",
+        name: "",
+        email: "",
+        phone: "",
+      });
+    } catch (error: any) {
+      console.error("Error submitting car search:", error);
+      toast.error(error.message || "Nepavyko išsiųsti užklausos. Bandykite dar kartą.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -218,8 +220,8 @@ Telefonas: ${formData.phone}
             </div>
           </div>
 
-          <Button type="submit" size="lg" className="w-full">
-            Pateikti užklausą
+          <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Siunčiama..." : "Pateikti užklausą"}
           </Button>
         </form>
       </CardContent>

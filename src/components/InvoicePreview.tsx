@@ -6,6 +6,7 @@ import { sellerInfo, vatTypeLabels, VatType } from "@/data/suppliers";
 import logo from "@/assets/logo.png";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import SendInvoiceEmailDialog from "./SendInvoiceEmailDialog";
 
 interface InvoicePreviewProps {
   data: InvoiceData;
@@ -43,20 +44,18 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
     window.print();
   };
 
-  const handleDownloadPDF = async () => {
-    if (!invoiceRef.current) return;
+  const generatePdfData = async () => {
+    if (!invoiceRef.current) return null;
 
     const el = invoiceRef.current;
     const prevAnimation = el.style.animation;
     const prevOpacity = el.style.opacity;
     const prevTransform = el.style.transform;
 
-    // Ensure the capture is not affected by fade-in animations/transforms
     el.style.animation = "none";
     el.style.opacity = "1";
     el.style.transform = "none";
 
-    // Let the browser apply the styles before rendering to canvas
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 
     const canvas = await html2canvas(el, {
@@ -68,12 +67,10 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
       allowTaint: true,
     });
 
-    // Restore styles
     el.style.animation = prevAnimation;
     el.style.opacity = prevOpacity;
     el.style.transform = prevTransform;
 
-    // Use JPEG with high quality compression
     const imgData = canvas.toDataURL("image/jpeg", 0.92);
     const pdf = new jsPDF({
       orientation: "p",
@@ -86,7 +83,24 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight, undefined, "FAST");
-    pdf.save(`Saskaita-${data.invoiceNumber}.pdf`);
+    
+    return pdf;
+  };
+
+  const handleDownloadPDF = async () => {
+    const pdf = await generatePdfData();
+    if (pdf) {
+      pdf.save(`Saskaita-${data.invoiceNumber}.pdf`);
+    }
+  };
+
+  const generatePdfBase64 = async (): Promise<string | null> => {
+    const pdf = await generatePdfData();
+    if (!pdf) return null;
+    
+    // Get PDF as base64 (remove data URL prefix)
+    const pdfBase64 = pdf.output('datauristring').split(',')[1];
+    return pdfBase64;
   };
 
   return (
@@ -110,6 +124,12 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
           <Download className="w-4 h-4 mr-2" />
           Atsisiųsti PDF
         </Button>
+        <SendInvoiceEmailDialog
+          invoiceNumber={data.invoiceNumber}
+          buyerName={data.buyer.name}
+          totalAmount={total}
+          generatePdfBase64={generatePdfBase64}
+        />
       </div>
 
       {/* Invoice */}

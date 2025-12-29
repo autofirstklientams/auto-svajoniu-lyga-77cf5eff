@@ -60,7 +60,7 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 
     const canvas = await html2canvas(el, {
-      scale: 2,
+      scale: 3,
       useCORS: true,
       backgroundColor: "#ffffff",
       logging: false,
@@ -73,8 +73,8 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
     el.style.opacity = prevOpacity;
     el.style.transform = prevTransform;
 
-    // Use JPEG with compression for smaller file size
-    const imgData = canvas.toDataURL("image/jpeg", 0.85);
+    // Use JPEG with high quality compression
+    const imgData = canvas.toDataURL("image/jpeg", 0.92);
     const pdf = new jsPDF({
       orientation: "p",
       unit: "mm",

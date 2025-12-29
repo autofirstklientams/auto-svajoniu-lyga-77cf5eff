@@ -60,7 +60,7 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
     await new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
 
     const canvas = await html2canvas(el, {
-      scale: 4,
+      scale: 2,
       useCORS: true,
       backgroundColor: "#ffffff",
       logging: false,
@@ -73,18 +73,19 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
     el.style.opacity = prevOpacity;
     el.style.transform = prevTransform;
 
-    const imgData = canvas.toDataURL("image/png");
+    // Use JPEG with compression for smaller file size
+    const imgData = canvas.toDataURL("image/jpeg", 0.85);
     const pdf = new jsPDF({
       orientation: "p",
       unit: "mm",
       format: "a4",
-      compress: false,
+      compress: true,
     });
 
     const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-    pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight, undefined, "NONE");
+    pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight, undefined, "FAST");
     pdf.save(`Saskaita-${data.invoiceNumber}.pdf`);
   };
 

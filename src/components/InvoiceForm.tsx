@@ -80,6 +80,13 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
     { description: "", quantity: 1, unit: "vnt.", price: 0, vatType: "vat_exempt" },
   ]);
   
+  // Automobilio kaina ir PVM (atskirai nuo papildomų paslaugų)
+  const [carPrice, setCarPrice] = useState<number>(0);
+  const [carVatType, setCarVatType] = useState<VatType>("vat_exempt");
+  
+  // Papildomos paslaugos prie automobilio
+  const [additionalItems, setAdditionalItems] = useState<InvoiceItem[]>([]);
+  
   const [note, setNote] = useState("");
   
   const [carDetails, setCarDetails] = useState<CarDetails>({
@@ -125,6 +132,20 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
       if (initialData.bankAccount) {
         setSelectedBankAccount(initialData.bankAccount);
       }
+      
+      // Jei automobilio pardavimas, atskirti automobilio kainą nuo papildomų paslaugų
+      if (initialData.invoiceType === "car_sale" && initialData.items.length > 0) {
+        // Pirma eilutė yra automobilis
+        setCarPrice(initialData.items[0]?.price || 0);
+        setCarVatType(initialData.items[0]?.vatType || "vat_exempt");
+        // Likusios eilutės yra papildomos paslaugos
+        if (initialData.items.length > 1) {
+          setAdditionalItems(initialData.items.slice(1));
+        }
+      } else {
+        setItems(initialData.items);
+      }
+      
       // Clear initial data after populating
       onClearInitialData?.();
     }
@@ -191,20 +212,37 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
     setItems(newItems);
   };
 
+  // Papildomų paslaugų valdymas (automobilio pardavimui)
+  const addAdditionalItem = () => {
+    setAdditionalItems([...additionalItems, { description: "", quantity: 1, unit: "vnt.", price: 0, vatType: "with_vat" }]);
+  };
+
+  const removeAdditionalItem = (index: number) => {
+    setAdditionalItems(additionalItems.filter((_, i) => i !== index));
+  };
+
+  const updateAdditionalItem = (index: number, field: keyof InvoiceItem, value: string | number) => {
+    const newItems = [...additionalItems];
+    newItems[index] = { ...newItems[index], [field]: value };
+    setAdditionalItems(newItems);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Jei automobilio pardavimas, sukuriame prekę iš automobilio duomenų
+    // Jei automobilio pardavimas, sukuriame prekę iš automobilio duomenų + papildomos paslaugos
     let finalItems = items;
     if (invoiceType === "car_sale" && carDetails.make && carDetails.model) {
       const carDescription = `Automobilis ${carDetails.make} ${carDetails.model}${carDetails.vin ? `, VIN: ${carDetails.vin}` : ""}${carDetails.plate ? `, Nr.: ${carDetails.plate}` : ""}${carDetails.sdk ? `, SDK: ${carDetails.sdk}` : ""}${carDetails.mileage ? `, Rida: ${carDetails.mileage} km` : ""}`;
-      finalItems = [{
+      const carItem: InvoiceItem = {
         description: carDescription,
         quantity: 1,
         unit: "vnt.",
-        price: items[0]?.price || 0,
-        vatType: items[0]?.vatType || "vat_exempt",
-      }];
+        price: carPrice,
+        vatType: carVatType,
+      };
+      // Pridėti automobilį + papildomas paslaugas
+      finalItems = [carItem, ...additionalItems];
     }
     
     const data: InvoiceData = {
@@ -594,23 +632,23 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
       {/* Items - show price/VAT for car sale, full items for other types */}
       <Card className="form-section">
         <CardHeader>
-          <CardTitle>{invoiceType === "car_sale" ? "Kaina" : "Prekės / Paslaugos"}</CardTitle>
+          <CardTitle>{invoiceType === "car_sale" ? "Automobilio kaina" : "Prekės / Paslaugos"}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {invoiceType === "car_sale" ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Kaina €</Label>
+                <Label>Automobilio kaina €</Label>
                 <Input
                   type="text"
                   inputMode="decimal"
-                  value={items[0]?.price === 0 ? "" : items[0]?.price}
-                      onChange={(e) => {
-                        const val = e.target.value.replace(',', '.');
-                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                          updateItem(0, "price", val === "" ? 0 : parseFloat(val) || 0);
-                        }
-                      }}
+                  value={carPrice === 0 ? "" : carPrice}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(',', '.');
+                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                      setCarPrice(val === "" ? 0 : parseFloat(val) || 0);
+                    }
+                  }}
                   className="input-elegant"
                   placeholder="0.00"
                   required
@@ -619,9 +657,9 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
               <div className="space-y-2">
                 <Label>PVM</Label>
                 <Select
-                  value={items[0]?.vatType || "vat_exempt"}
+                  value={carVatType}
                   onValueChange={(v) => {
-                    updateItem(0, "vatType", v as VatType);
+                    setCarVatType(v as VatType);
                     // Automatiškai nustatyti maržos schemą
                     if (v === "margin_scheme") {
                       setCarDetails({ ...carDetails, isMarginScheme: true });
@@ -757,6 +795,129 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
           )}
         </CardContent>
       </Card>
+
+      {/* Papildomos paslaugos (tik automobilio pardavimui) */}
+      {invoiceType === "car_sale" && (
+        <Card className="form-section">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Papildomos paslaugos (neprivaloma)</span>
+              <Button type="button" variant="outline" size="sm" onClick={addAdditionalItem}>
+                <Plus className="w-4 h-4 mr-1" />
+                Pridėti
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {additionalItems.length === 0 ? (
+              <p className="text-muted-foreground text-sm">
+                Čia galite pridėti papildomas paslaugas, pvz. garantiją, remontą, draudimą ir pan.
+              </p>
+            ) : (
+              additionalItems.map((item, index) => (
+                <div key={index} className="grid grid-cols-12 gap-2 items-end">
+                  <div className="col-span-12 md:col-span-4 space-y-1">
+                    <Label>Aprašymas</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        value={item.description}
+                        onChange={(e) => updateAdditionalItem(index, "description", e.target.value)}
+                        className="input-elegant flex-1"
+                        placeholder="pvz. Garantija 12 mėn."
+                        required
+                      />
+                      {products.length > 0 && (
+                        <Select onValueChange={(v) => {
+                          const product = products.find((p) => p.id === v);
+                          if (product) {
+                            updateAdditionalItem(index, "description", product.description);
+                            updateAdditionalItem(index, "price", product.default_price);
+                          }
+                        }}>
+                          <SelectTrigger className="w-10 p-0 justify-center">
+                            <span className="text-xs">📋</span>
+                          </SelectTrigger>
+                          <SelectContent>
+                            {products.map((p) => (
+                              <SelectItem key={p.id} value={p.id}>
+                                {p.description}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-span-4 md:col-span-1 space-y-1">
+                    <Label>Kiekis</Label>
+                    <Input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={(e) => updateAdditionalItem(index, "quantity", parseInt(e.target.value) || 1)}
+                      className="input-elegant"
+                      required
+                    />
+                  </div>
+                  <div className="col-span-4 md:col-span-1 space-y-1">
+                    <Label>Vnt.</Label>
+                    <Input
+                      value={item.unit}
+                      onChange={(e) => updateAdditionalItem(index, "unit", e.target.value)}
+                      className="input-elegant"
+                    />
+                  </div>
+                  <div className="col-span-4 md:col-span-2 space-y-1">
+                    <Label>Kaina €</Label>
+                    <Input
+                      type="text"
+                      inputMode="decimal"
+                      value={item.price === 0 ? "" : item.price}
+                      onChange={(e) => {
+                        const val = e.target.value.replace(',', '.');
+                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                          updateAdditionalItem(index, "price", val === "" ? 0 : parseFloat(val) || 0);
+                        }
+                      }}
+                      className="input-elegant"
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                  <div className="col-span-10 md:col-span-3 space-y-1">
+                    <Label>PVM</Label>
+                    <Select
+                      value={item.vatType}
+                      onValueChange={(v) => updateAdditionalItem(index, "vatType", v as VatType)}
+                    >
+                      <SelectTrigger className="input-elegant">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(vatTypeLabels).map(([key, label]) => (
+                          <SelectItem key={key} value={key}>
+                            {label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="col-span-2 md:col-span-1 flex gap-1">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeAdditionalItem(index)}
+                    >
+                      <Trash2 className="w-4 h-4 text-destructive" />
+                    </Button>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Note */}
       <Card className="form-section">

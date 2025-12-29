@@ -387,6 +387,30 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       saved_notes: {
         Row: {
           content: string

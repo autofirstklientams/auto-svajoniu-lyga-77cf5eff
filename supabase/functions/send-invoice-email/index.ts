@@ -15,6 +15,7 @@ interface InvoiceEmailRequest {
   buyerName: string;
   totalAmount: number;
   pdfBase64: string;
+  customMessage?: string | null;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -24,13 +25,23 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { recipientEmail, invoiceNumber, buyerName, totalAmount, pdfBase64 }: InvoiceEmailRequest = await req.json();
+    const { recipientEmail, invoiceNumber, buyerName, totalAmount, pdfBase64, customMessage }: InvoiceEmailRequest = await req.json();
 
     console.log("Sending invoice email to:", recipientEmail);
     console.log("Invoice number:", invoiceNumber);
+    if (customMessage) {
+      console.log("Custom message included");
+    }
 
     // Convert base64 to buffer for attachment
     const pdfBuffer = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0));
+
+    // Build custom message HTML if provided
+    const customMessageHtml = customMessage 
+      ? `<div style="background-color: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;">
+          <p style="margin: 0; color: #333; white-space: pre-line;">${customMessage.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+        </div>`
+      : '';
 
     const emailResponse = await resend.emails.send({
       from: "Auto Kopers <info@autokopers.lt>",
@@ -47,6 +58,8 @@ const handler = async (req: Request): Promise<Response> => {
           <p>Siunčiame jums PVM sąskaitą faktūrą Nr. <strong>${invoiceNumber}</strong>.</p>
           
           <p><strong>Suma:</strong> ${totalAmount.toFixed(2)}€</p>
+          
+          ${customMessageHtml}
           
           <p>Sąskaita faktūra pridėta kaip PDF failas.</p>
           

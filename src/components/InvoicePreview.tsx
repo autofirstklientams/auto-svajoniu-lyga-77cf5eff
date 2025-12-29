@@ -156,7 +156,7 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
             <p style={{ color: '#000000', margin: '2px 0' }}>
               {data.buyer.isCompany ? "įmonės kodas" : "asmens kodas"} {data.buyer.companyCode},
             </p>
-            <p style={{ color: '#000000', margin: '2px 0' }}>adresas {data.buyer.address}.</p>
+            <p style={{ color: '#000000', margin: '2px 0' }}>adresas: {data.buyer.address}.</p>
             {data.buyer.vatCode && (
               <p style={{ color: '#000000', margin: '2px 0' }}>PVM mokėtojo kodas: {data.buyer.vatCode}</p>
             )}

@@ -128,11 +128,9 @@ const Invoice = () => {
       <div className="max-w-4xl mx-auto">
         <header className="mb-10 animate-fade-in print:hidden">
           <div className="flex items-center justify-between mb-6">
-            <Button variant="outline" asChild>
-              <Link to="/">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Grįžti
-              </Link>
+            <Button variant="outline" onClick={() => navigate(-1)}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Grįžti
             </Button>
             <img src={logo} alt="Auto Kopers" className="h-10" />
             <div className="w-24" /> {/* Spacer for centering */}

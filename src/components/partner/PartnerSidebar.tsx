@@ -45,11 +45,20 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
         <Link to="/" className="flex items-center gap-3 overflow-hidden">
-          <img src={logo} alt="Logo" className="h-10 w-10 rounded-lg object-cover flex-shrink-0" />
+          <div className="h-10 w-10 rounded-xl overflow-hidden flex-shrink-0 bg-primary/10 flex items-center justify-center shadow-sm">
+            <img 
+              src={logo} 
+              alt="AutoKOPERS" 
+              className="h-9 w-9 object-contain"
+            />
+          </div>
           {!isCollapsed && (
-            <span className="font-bold text-sidebar-foreground whitespace-nowrap">
-              AutoKOPERS
-            </span>
+            <div className="flex flex-col">
+              <span className="font-bold text-sidebar-foreground whitespace-nowrap text-lg leading-tight">
+                AutoKOPERS
+              </span>
+              <span className="text-xs text-muted-foreground">Partnerio zona</span>
+            </div>
           )}
         </Link>
         <Button

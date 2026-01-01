@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { User, Session } from "@supabase/supabase-js";
 import CreateListing from "./CreateListing";
-import { Pencil, Trash2, LogOut, Copy, Globe, ExternalLink } from "lucide-react";
-import logo from "@/assets/autokopers-logo.jpeg";
+import { Plus, Download, Search } from "lucide-react";
+import { PartnerSidebar } from "@/components/partner/PartnerSidebar";
+import { StatsCards } from "@/components/partner/StatsCards";
+import { CarListingCard } from "@/components/partner/CarListingCard";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 interface Car {
   id: string;
@@ -45,6 +48,8 @@ const PartnerDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const userIdRef = React.useRef<string | null>(null);
   const lastCarsErrorAtRef = React.useRef<number>(0);
@@ -105,7 +110,6 @@ const PartnerDashboard = () => {
         .eq("user_id", userId);
 
       if (error) {
-        // Nepanaikiname admin teisių dėl trumpalaikio tinklo/užklausos sutrikimo.
         console.error("Error checking user role:", error);
         scheduleRoleRetry(userId);
         return;
@@ -114,7 +118,6 @@ const PartnerDashboard = () => {
       const hasAdminRole = roles?.some((r) => r.role === "admin") ?? false;
       setIsAdmin(hasAdminRole);
     } catch (error) {
-      // "Failed to fetch" būna laikinas (mirksėjimas). Paliekame esamą isAdmin ir bandom dar kartą.
       console.error("Error checking user role:", error);
       scheduleRoleRetry(userId);
     }
@@ -147,7 +150,6 @@ const PartnerDashboard = () => {
       if (error) throw error;
       setCars(data || []);
     } catch (error: any) {
-      // Kad nemirksėtų / nesprogdintų toast'ų kas sekundę esant trumpalaikiam tinklo sutrikimui
       const now = Date.now();
       if (now - (lastCarsErrorAtRef.current || 0) > 4000) {
         lastCarsErrorAtRef.current = now;
@@ -186,7 +188,6 @@ const PartnerDashboard = () => {
 
       if (error) throw error;
 
-      // Copy images
       const { data: images } = await supabase
         .from("car_images")
         .select("*")
@@ -202,7 +203,7 @@ const PartnerDashboard = () => {
         await supabase.from("car_images").insert(newImages);
       }
 
-      toast.success("Skelbimas nukopijuotas! Redaguokite ir pasirinkite kur publikuoti.");
+      toast.success("Skelbimas nukopijuotas!");
       setEditingCar(newCar);
       setShowCreateForm(true);
       fetchCars();
@@ -212,13 +213,51 @@ const PartnerDashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/");
+  const handleDownloadXml = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.access_token) {
+      toast.error("Prašome prisijungti");
+      return;
+    }
+    try {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`, {
+        headers: { 'Authorization': `Bearer ${session.access_token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch XML');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'autoplius-feed.xml';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error("Nepavyko atsisiųsti XML");
+    }
   };
 
+  const filteredCars = cars.filter(car => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      car.make.toLowerCase().includes(query) ||
+      car.model.toLowerCase().includes(query) ||
+      car.year.toString().includes(query)
+    );
+  });
+
+  const webVisibleCount = cars.filter(c => c.visible_web).length;
+  const autopliusVisibleCount = cars.filter(c => c.visible_autoplius).length;
+
   if (isLoading) {
-    return <div className="min-h-screen flex items-center justify-center">Kraunama...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-12 w-12 rounded-full bg-primary/20"></div>
+          <p className="text-muted-foreground">Kraunama...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!user) {
@@ -227,68 +266,53 @@ const PartnerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <header className="border-b border-border">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link to="/" className="flex items-center">
-            <img src={logo} alt="AutoKOPERS logotipas" className="h-12" />
-          </Link>
-          <div className="flex gap-2">
-            {isAdmin && (
-              <Button 
-                onClick={() => navigate("/admin-dashboard")}
-                variant="outline"
-              >
-                Administratoriaus zona
-              </Button>
-            )}
-            <Button variant="outline" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Atsijungti
-            </Button>
-          </div>
-        </div>
-      </header>
+      <PartnerSidebar 
+        isCollapsed={sidebarCollapsed} 
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        isAdmin={isAdmin}
+      />
 
-      <main className="container mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-semibold">Mano skelbimai</h2>
-          <div className="flex gap-2">
-            <Button
-              onClick={async () => {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (!session?.access_token) {
-                  toast.error("Prašome prisijungti");
-                  return;
-                }
-                try {
-                  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`, {
-                    headers: { 'Authorization': `Bearer ${session.access_token}` }
-                  });
-                  if (!response.ok) throw new Error('Failed to fetch XML');
-                  const blob = await response.blob();
-                  const url = URL.createObjectURL(blob);
-                  const a = document.createElement('a');
-                  a.href = url;
-                  a.download = 'autoplius-feed.xml';
-                  a.click();
-                  URL.revokeObjectURL(url);
-                } catch (error) {
-                  toast.error("Nepavyko atsisiųsti XML");
-                }
-              }}
-              variant="outline"
-            >
-              Atsisiųsti Autoplius XML
+      <main
+        className={cn(
+          "min-h-screen transition-all duration-300 p-6 lg:p-8",
+          sidebarCollapsed ? "ml-16" : "ml-64"
+        )}
+      >
+        {/* Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+          <div>
+            <h1 className="text-2xl lg:text-3xl font-bold text-foreground">
+              Sveiki sugrįžę! 👋
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Valdykite savo automobilių skelbimus
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={handleDownloadXml}>
+              <Download className="h-4 w-4 mr-2" />
+              Autoplius XML
             </Button>
             <Button onClick={() => {
               setEditingCar(null);
               setShowCreateForm(true);
             }}>
-              Pridėti skelbimą
+              <Plus className="h-4 w-4 mr-2" />
+              Naujas skelbimas
             </Button>
           </div>
         </div>
 
+        {/* Stats */}
+        <div className="mb-8">
+          <StatsCards
+            totalCars={cars.length}
+            webVisible={webVisibleCount}
+            autopliusVisible={autopliusVisibleCount}
+          />
+        </div>
+
+        {/* Create/Edit Form */}
         {showCreateForm && (
           <CreateListing
             car={editingCar}
@@ -304,88 +328,62 @@ const PartnerDashboard = () => {
           />
         )}
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cars.map((car) => (
-            <Card key={car.id}>
-              <CardHeader className="pb-2">
-                <div className="flex gap-1 mb-2">
-                  {car.visible_web && (
-                    <Badge variant="secondary" className="text-xs">
-                      <Globe className="h-3 w-3 mr-1" />
-                      Web
-                    </Badge>
-                  )}
-                  {car.visible_autoplius && (
-                    <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200">
-                      <ExternalLink className="h-3 w-3 mr-1" />
-                      Autoplius
-                    </Badge>
-                  )}
-                  {!car.visible_web && !car.visible_autoplius && (
-                    <Badge variant="outline" className="text-xs text-muted-foreground">
-                      Nepublikuota
-                    </Badge>
-                  )}
-                </div>
-                <CardTitle className="flex justify-between items-start">
-                  <span className="text-base">{car.make} {car.model}</span>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleDuplicate(car)}
-                      title="Kopijuoti skelbimą"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => {
-                        setEditingCar(car);
-                        setShowCreateForm(true);
-                      }}
-                      title="Redaguoti"
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleDelete(car.id)}
-                      title="Ištrinti"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {car.image_url && (
-                  <img
-                    src={car.image_url}
-                    alt={`${car.make} ${car.model}`}
-                    className="w-full h-48 object-cover rounded-lg mb-4"
-                  />
-                )}
-                <div className="space-y-1 text-sm">
-                  <p><strong>Metai:</strong> {car.year}</p>
-                  <p><strong>Kaina:</strong> {car.price.toLocaleString()} €</p>
-                  {car.mileage && <p><strong>Rida:</strong> {car.mileage.toLocaleString()} km</p>}
-                  {car.fuel_type && <p><strong>Kuras:</strong> {car.fuel_type}</p>}
-                </div>
-              </CardContent>
-            </Card>
+        {/* Search */}
+        <div className="flex items-center gap-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Ieškoti pagal markę, modelį..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Rasta: {filteredCars.length} skelbimų
+          </p>
+        </div>
+
+        {/* Listings Grid */}
+        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredCars.map((car) => (
+            <CarListingCard
+              key={car.id}
+              car={car}
+              onEdit={() => {
+                setEditingCar(car);
+                setShowCreateForm(true);
+              }}
+              onDelete={() => handleDelete(car.id)}
+              onDuplicate={() => handleDuplicate(car)}
+            />
           ))}
         </div>
 
-        {cars.length === 0 && (
-          <Card>
-            <CardContent className="py-12 text-center text-muted-foreground">
-              Dar neturite skelbimų. Pradėkite nuo pirmo skelbimo sukūrimo!
+        {filteredCars.length === 0 && (
+          <Card className="border-dashed">
+            <CardContent className="py-16 text-center">
+              <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center mb-4">
+                <Plus className="h-8 w-8 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                {searchQuery ? "Nieko nerasta" : "Dar neturite skelbimų"}
+              </h3>
+              <p className="text-muted-foreground mb-4">
+                {searchQuery 
+                  ? "Pabandykite kitą paieškos užklausą"
+                  : "Pradėkite nuo pirmo skelbimo sukūrimo!"
+                }
+              </p>
+              {!searchQuery && (
+                <Button onClick={() => {
+                  setEditingCar(null);
+                  setShowCreateForm(true);
+                }}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Sukurti pirmą skelbimą
+                </Button>
+              )}
             </CardContent>
           </Card>
         )}

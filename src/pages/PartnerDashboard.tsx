@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { User, Session } from "@supabase/supabase-js";
 import CreateListing from "./CreateListing";
-import { Plus, Download, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { PartnerSidebar } from "@/components/partner/PartnerSidebar";
 import { StatsCards } from "@/components/partner/StatsCards";
 import { CarListingCard } from "@/components/partner/CarListingCard";
@@ -213,28 +213,6 @@ const PartnerDashboard = () => {
     }
   };
 
-  const handleDownloadXml = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session?.access_token) {
-      toast.error("Prašome prisijungti");
-      return;
-    }
-    try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`, {
-        headers: { 'Authorization': `Bearer ${session.access_token}` }
-      });
-      if (!response.ok) throw new Error('Failed to fetch XML');
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'autoplius-feed.xml';
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      toast.error("Nepavyko atsisiųsti XML");
-    }
-  };
 
   const filteredCars = cars.filter(car => {
     if (!searchQuery) return true;
@@ -288,19 +266,13 @@ const PartnerDashboard = () => {
               Valdykite savo automobilių skelbimus
             </p>
           </div>
-          <div className="flex gap-3">
-            <Button variant="outline" onClick={handleDownloadXml}>
-              <Download className="h-4 w-4 mr-2" />
-              Autoplius XML
-            </Button>
-            <Button onClick={() => {
-              setEditingCar(null);
-              setShowCreateForm(true);
-            }}>
-              <Plus className="h-4 w-4 mr-2" />
-              Naujas skelbimas
-            </Button>
-          </div>
+          <Button onClick={() => {
+            setEditingCar(null);
+            setShowCreateForm(true);
+          }}>
+            <Plus className="h-4 w-4 mr-2" />
+            Naujas skelbimas
+          </Button>
         </div>
 
         {/* Stats */}

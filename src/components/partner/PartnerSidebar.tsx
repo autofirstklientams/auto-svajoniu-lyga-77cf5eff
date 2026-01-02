@@ -23,7 +23,7 @@ interface PartnerSidebarProps {
 const menuItems = [
   { title: "Dashboard", url: "/partner-dashboard", icon: LayoutDashboard },
   { title: "Mano skelbimai", url: "/partner-dashboard", icon: Car, section: "listings" },
-  { title: "Sąskaitos", url: "/invoice", icon: FileText },
+  { title: "Sąskaitos", url: "/invoice", icon: FileText, adminOnly: true },
 ];
 
 export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSidebarProps) {
@@ -76,25 +76,27 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
 
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-        {menuItems.map((item) => {
-          const isActive = location.pathname === item.url;
-          return (
-            <Link
-              key={item.title}
-              to={item.url}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                isActive
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                  : "text-sidebar-foreground"
-              )}
-            >
-              <item.icon className="h-5 w-5 flex-shrink-0" />
-              {!isCollapsed && <span className="font-medium">{item.title}</span>}
-            </Link>
-          );
-        })}
+        {menuItems
+          .filter((item) => !item.adminOnly || isAdmin)
+          .map((item) => {
+            const isActive = location.pathname === item.url;
+            return (
+              <Link
+                key={item.title}
+                to={item.url}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
+                  "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                  isActive
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                    : "text-sidebar-foreground"
+                )}
+              >
+                <item.icon className="h-5 w-5 flex-shrink-0" />
+                {!isCollapsed && <span className="font-medium">{item.title}</span>}
+              </Link>
+            );
+          })}
 
         {isAdmin && (
           <Link

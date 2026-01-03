@@ -21,9 +21,10 @@ interface CarListingCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  isAdmin?: boolean;
 }
 
-export function CarListingCard({ car, onEdit, onDelete, onDuplicate }: CarListingCardProps) {
+export function CarListingCard({ car, onEdit, onDelete, onDuplicate, isAdmin = false }: CarListingCardProps) {
   return (
     <Card className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300">
       <div className="relative">
@@ -80,15 +81,17 @@ export function CarListingCard({ car, onEdit, onDelete, onDuplicate }: CarListin
           >
             <Pencil className="h-4 w-4" />
           </Button>
-          <Button
-            variant="destructive"
-            size="icon"
-            className="h-8 w-8 shadow-sm"
-            onClick={onDelete}
-            title="Ištrinti"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {isAdmin && (
+            <Button
+              variant="destructive"
+              size="icon"
+              className="h-8 w-8 shadow-sm"
+              onClick={onDelete}
+              title="Ištrinti"
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
+          )}
         </div>
       </div>
 

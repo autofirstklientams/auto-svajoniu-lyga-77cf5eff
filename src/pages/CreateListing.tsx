@@ -52,8 +52,7 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
   const [selectedFeatures, setSelectedFeatures] = useState<CarFeatures>(
     car?.features || {}
   );
-  // For non-admin users, all visibility options default to false (draft mode)
-  const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? (isAdmin ? true : false));
+  const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? true);
   const [visibleAutoplius, setVisibleAutoplius] = useState(car?.visible_autoplius ?? false);
   const [isCompanyCar, setIsCompanyCar] = useState(car?.is_company_car ?? false);
   const [isFeatured, setIsFeatured] = useState(car?.is_featured ?? false);
@@ -989,37 +988,38 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
           <div className="border rounded-lg p-4 bg-muted/30">
             <h3 className="text-lg font-semibold mb-4 text-foreground">Publikavimo nustatymai</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              {isAdmin 
-                ? "Pasirinkite kur norite publikuoti skelbimą" 
-                : "Jūsų skelbimas bus peržiūrėtas administratoriaus prieš publikavimą"
-              }
+              Pasirinkite kur norite publikuoti skelbimą
             </p>
-            
-            {isAdmin ? (
-              <>
-                <div className="flex flex-wrap gap-6">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox
-                      checked={visibleWeb}
-                      onCheckedChange={(checked) => setVisibleWeb(checked === true)}
-                    />
-                    <div className="flex items-center gap-2">
-                      <Globe className="h-4 w-4 text-primary" />
-                      <span className="font-medium">AutoKOPERS svetainė</span>
-                    </div>
-                  </label>
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox
-                      checked={visibleAutoplius}
-                      onCheckedChange={(checked) => setVisibleAutoplius(checked === true)}
-                    />
-                    <div className="flex items-center gap-2">
-                      <ExternalLink className="h-4 w-4 text-blue-600" />
-                      <span className="font-medium">Autoplius.lt</span>
-                    </div>
-                  </label>
+            <div className="flex flex-wrap gap-6">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <Checkbox
+                  checked={visibleWeb}
+                  onCheckedChange={(checked) => setVisibleWeb(checked === true)}
+                />
+                <div className="flex items-center gap-2">
+                  <Globe className="h-4 w-4 text-primary" />
+                  <span className="font-medium">AutoKOPERS svetainė</span>
                 </div>
-                
+              </label>
+              
+              {/* Autoplius only for admins */}
+              {isAdmin && (
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={visibleAutoplius}
+                    onCheckedChange={(checked) => setVisibleAutoplius(checked === true)}
+                  />
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium">Autoplius.lt</span>
+                  </div>
+                </label>
+              )}
+            </div>
+            
+            {/* Admin-only options */}
+            {isAdmin && (
+              <>
                 {/* Company car option */}
                 <div className="mt-4 pt-4 border-t">
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -1061,10 +1061,6 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
                   </div>
                 </div>
               </>
-            ) : (
-              <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
-                <p>ℹ️ Jūsų skelbimas bus išsaugotas kaip juodraštis. Administratorius peržiūrės ir nuspręs dėl publikavimo.</p>
-              </div>
             )}
           </div>
 

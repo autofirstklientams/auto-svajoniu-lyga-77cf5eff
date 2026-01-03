@@ -37,9 +37,10 @@ interface CreateListingProps {
   car?: any;
   onClose: () => void;
   onSuccess: () => void;
+  isAdmin?: boolean;
 }
 
-const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
+const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [autopliusUrl, setAutopliusUrl] = useState("");
@@ -51,7 +52,8 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
   const [selectedFeatures, setSelectedFeatures] = useState<CarFeatures>(
     car?.features || {}
   );
-  const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? true);
+  // For non-admin users, all visibility options default to false (draft mode)
+  const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? (isAdmin ? true : false));
   const [visibleAutoplius, setVisibleAutoplius] = useState(car?.visible_autoplius ?? false);
   const [isCompanyCar, setIsCompanyCar] = useState(car?.is_company_car ?? false);
   const [isFeatured, setIsFeatured] = useState(car?.is_featured ?? false);
@@ -987,71 +989,83 @@ const CreateListing = ({ car, onClose, onSuccess }: CreateListingProps) => {
           <div className="border rounded-lg p-4 bg-muted/30">
             <h3 className="text-lg font-semibold mb-4 text-foreground">Publikavimo nustatymai</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Pasirinkite kur norite publikuoti skelbimą
+              {isAdmin 
+                ? "Pasirinkite kur norite publikuoti skelbimą" 
+                : "Jūsų skelbimas bus peržiūrėtas administratoriaus prieš publikavimą"
+              }
             </p>
-            <div className="flex flex-wrap gap-6">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox
-                  checked={visibleWeb}
-                  onCheckedChange={(checked) => setVisibleWeb(checked === true)}
-                />
-                <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-primary" />
-                  <span className="font-medium">AutoKOPERS svetainė</span>
-                </div>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox
-                  checked={visibleAutoplius}
-                  onCheckedChange={(checked) => setVisibleAutoplius(checked === true)}
-                />
-                <div className="flex items-center gap-2">
-                  <ExternalLink className="h-4 w-4 text-blue-600" />
-                  <span className="font-medium">Autoplius.lt</span>
-                </div>
-              </label>
-            </div>
             
-            {/* Company car option */}
-            <div className="mt-4 pt-4 border-t">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox
-                  checked={isCompanyCar}
-                  onCheckedChange={(checked) => setIsCompanyCar(checked === true)}
-                />
-                <div>
-                  <span className="font-medium">AutoKOPERS įmonės automobilis</span>
-                  <p className="text-sm text-muted-foreground">Pažymėkite, jei šis automobilis priklauso AutoKOPERS įmonei</p>
+            {isAdmin ? (
+              <>
+                <div className="flex flex-wrap gap-6">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={visibleWeb}
+                      onCheckedChange={(checked) => setVisibleWeb(checked === true)}
+                    />
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-primary" />
+                      <span className="font-medium">AutoKOPERS svetainė</span>
+                    </div>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={visibleAutoplius}
+                      onCheckedChange={(checked) => setVisibleAutoplius(checked === true)}
+                    />
+                    <div className="flex items-center gap-2">
+                      <ExternalLink className="h-4 w-4 text-blue-600" />
+                      <span className="font-medium">Autoplius.lt</span>
+                    </div>
+                  </label>
                 </div>
-              </label>
-            </div>
+                
+                {/* Company car option */}
+                <div className="mt-4 pt-4 border-t">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <Checkbox
+                      checked={isCompanyCar}
+                      onCheckedChange={(checked) => setIsCompanyCar(checked === true)}
+                    />
+                    <div>
+                      <span className="font-medium">AutoKOPERS įmonės automobilis</span>
+                      <p className="text-sm text-muted-foreground">Pažymėkite, jei šis automobilis priklauso AutoKOPERS įmonei</p>
+                    </div>
+                  </label>
+                </div>
 
-            {/* Featured and Recommended options */}
-            <div className="mt-4 pt-4 border-t">
-              <h4 className="font-medium mb-3">Išskirtiniai nustatymai</h4>
-              <div className="space-y-3">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={isFeatured}
-                    onCheckedChange={(checked) => setIsFeatured(checked === true)}
-                  />
-                  <div>
-                    <span className="font-medium">Rodyti pagrindiniame puslapyje</span>
-                    <p className="text-sm text-muted-foreground">Automobilis bus matomas pagrindiniame puslapyje</p>
+                {/* Featured and Recommended options */}
+                <div className="mt-4 pt-4 border-t">
+                  <h4 className="font-medium mb-3">Išskirtiniai nustatymai</h4>
+                  <div className="space-y-3">
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <Checkbox
+                        checked={isFeatured}
+                        onCheckedChange={(checked) => setIsFeatured(checked === true)}
+                      />
+                      <div>
+                        <span className="font-medium">Rodyti pagrindiniame puslapyje</span>
+                        <p className="text-sm text-muted-foreground">Automobilis bus matomas pagrindiniame puslapyje</p>
+                      </div>
+                    </label>
+                    <label className="flex items-center gap-3 cursor-pointer">
+                      <Checkbox
+                        checked={isRecommended}
+                        onCheckedChange={(checked) => setIsRecommended(checked === true)}
+                      />
+                      <div>
+                        <span className="font-medium text-primary">✓ AUTOKOPERS rekomenduoja</span>
+                        <p className="text-sm text-muted-foreground">Ant nuotraukos bus rodomas "AUTOKOPERS rekomenduoja" ženkliukas</p>
+                      </div>
+                    </label>
                   </div>
-                </label>
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={isRecommended}
-                    onCheckedChange={(checked) => setIsRecommended(checked === true)}
-                  />
-                  <div>
-                    <span className="font-medium text-primary">✓ AUTOKOPERS rekomenduoja</span>
-                    <p className="text-sm text-muted-foreground">Ant nuotraukos bus rodomas "AUTOKOPERS rekomenduoja" ženkliukas</p>
-                  </div>
-                </label>
+                </div>
+              </>
+            ) : (
+              <div className="text-sm text-muted-foreground bg-muted/50 p-3 rounded-md">
+                <p>ℹ️ Jūsų skelbimas bus išsaugotas kaip juodraštis. Administratorius peržiūrės ir nuspręs dėl publikavimo.</p>
               </div>
-            </div>
+            )}
           </div>
 
           <div className="flex gap-2">

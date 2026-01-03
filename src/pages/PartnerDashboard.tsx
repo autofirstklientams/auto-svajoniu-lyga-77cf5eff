@@ -297,6 +297,7 @@ const PartnerDashboard = () => {
               setEditingCar(null);
               fetchCars();
             }}
+            isAdmin={isAdmin}
           />
         )}
 

@@ -329,7 +329,6 @@ const PartnerDashboard = () => {
               }}
               onDelete={() => handleDelete(car.id)}
               onDuplicate={() => handleDuplicate(car)}
-              isAdmin={isAdmin}
             />
           ))}
         </div>

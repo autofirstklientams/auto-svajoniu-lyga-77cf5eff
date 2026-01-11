@@ -1,12 +1,15 @@
 import { Card } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
 import autopliusLogo from "@/assets/autoplius-logo-new.jpg";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const ExternalCarPlatforms = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="mt-12 text-center">
       <h3 className="text-2xl font-bold mb-6 text-foreground">
-        Peržiūrėkite mūsų automobilius
+        {t("featured.viewPlatforms")}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-1 gap-6 max-w-4xl mx-auto">
         <a 
@@ -24,7 +27,7 @@ const ExternalCarPlatforms = () => {
                 loading="lazy"
               />
               <div className="flex items-center gap-2 text-primary font-semibold group-hover:gap-3 transition-all">
-                <span>Peržiūrėti skelbimus</span>
+                <span>{t("featured.viewListings")}</span>
                 <ExternalLink className="h-5 w-5" />
               </div>
             </div>

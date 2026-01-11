@@ -9,20 +9,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { z } from "zod";
 import logo from "@/assets/autokopers-logo.jpeg";
-
-const authSchema = z.object({
-  email: z.string().trim().email("Neteisingas el. pašto formatas"),
-  password: z.string().min(6, "Slaptažodis turi būti bent 6 simbolių"),
-  fullName: z.string().trim().min(1, "Vardas privalomas").optional(),
-});
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [loginData, setLoginData] = useState({ email: "", password: "" });
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
   const [resetEmail, setResetEmail] = useState("");
   const [showResetForm, setShowResetForm] = useState(false);
+
+  const authSchema = z.object({
+    email: z.string().trim().email(language === "lt" ? "Neteisingas el. pašto formatas" : "Invalid email format"),
+    password: z.string().min(6, language === "lt" ? "Slaptažodis turi būti bent 6 simbolių" : "Password must be at least 6 characters"),
+    fullName: z.string().trim().min(1, language === "lt" ? "Vardas privalomas" : "Name is required").optional(),
+  });
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,10 +44,10 @@ const Auth = () => {
 
       if (error) throw error;
       
-      toast.success("Sėkmingai prisijungėte!");
+      toast.success(t("auth.loginSuccess"));
       navigate("/partner-dashboard");
     } catch (error: any) {
-      toast.error(error.message || "Prisijungimo klaida");
+      toast.error(error.message || (language === "lt" ? "Prisijungimo klaida" : "Login error"));
     } finally {
       setIsLoading(false);
     }
@@ -75,13 +77,13 @@ const Auth = () => {
 
       if (error) throw error;
       
-      toast.success("Paskyra sukurta! Prisijunkite.");
+      toast.success(t("auth.signupSuccess"));
       setLoginData({ email: signupData.email, password: signupData.password });
     } catch (error: any) {
       if (error.message.includes("already registered")) {
-        toast.error("Šis el. paštas jau registruotas");
+        toast.error(language === "lt" ? "Šis el. paštas jau registruotas" : "This email is already registered");
       } else {
-        toast.error(error.message || "Registracijos klaida");
+        toast.error(error.message || (language === "lt" ? "Registracijos klaida" : "Registration error"));
       }
     } finally {
       setIsLoading(false);
@@ -92,13 +94,13 @@ const Auth = () => {
     e.preventDefault();
     
     if (!resetEmail.trim()) {
-      toast.error("Įveskite el. paštą");
+      toast.error(language === "lt" ? "Įveskite el. paštą" : "Enter your email");
       return;
     }
 
     const emailValidation = z.string().email();
     if (!emailValidation.safeParse(resetEmail).success) {
-      toast.error("Neteisingas el. pašto formatas");
+      toast.error(language === "lt" ? "Neteisingas el. pašto formatas" : "Invalid email format");
       return;
     }
 
@@ -110,11 +112,11 @@ const Auth = () => {
 
       if (error) throw error;
       
-      toast.success("Slaptažodžio atnaujinimo nuoroda išsiųsta į el. paštą");
+      toast.success(t("auth.resetEmailSent"));
       setShowResetForm(false);
       setResetEmail("");
     } catch (error: any) {
-      toast.error(error.message || "Klaida siunčiant nuorodą");
+      toast.error(error.message || (language === "lt" ? "Klaida siunčiant nuorodą" : "Error sending link"));
     } finally {
       setIsLoading(false);
     }
@@ -128,20 +130,20 @@ const Auth = () => {
         </Link>
         <Card className="w-full">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">Partnerio zona</CardTitle>
+          <CardTitle className="text-2xl text-center">{t("nav.partnerZone")}</CardTitle>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="login">
             <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Prisijungti</TabsTrigger>
-              <TabsTrigger value="signup">Registruotis</TabsTrigger>
+              <TabsTrigger value="login">{t("auth.login")}</TabsTrigger>
+              <TabsTrigger value="signup">{t("auth.signup")}</TabsTrigger>
             </TabsList>
             
             <TabsContent value="login">
               {!showResetForm ? (
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="login-email">El. paštas</Label>
+                    <Label htmlFor="login-email">{t("auth.email")}</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -151,7 +153,7 @@ const Auth = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="login-password">Slaptažodis</Label>
+                    <Label htmlFor="login-password">{t("auth.password")}</Label>
                     <Input
                       id="login-password"
                       type="password"
@@ -164,17 +166,17 @@ const Auth = () => {
                       onClick={() => setShowResetForm(true)}
                       className="text-sm text-primary hover:underline"
                     >
-                      Pamiršau slaptažodį
+                      {t("auth.forgotPassword")}
                     </button>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Jungiamasi..." : "Prisijungti"}
+                    {isLoading ? (language === "lt" ? "Jungiamasi..." : "Logging in...") : t("auth.login")}
                   </Button>
                 </form>
               ) : (
                 <form onSubmit={handlePasswordReset} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="reset-email">El. paštas</Label>
+                    <Label htmlFor="reset-email">{t("auth.email")}</Label>
                     <Input
                       id="reset-email"
                       type="email"
@@ -193,10 +195,10 @@ const Auth = () => {
                       }}
                       className="flex-1"
                     >
-                      Atgal
+                      {t("common.back")}
                     </Button>
                     <Button type="submit" className="flex-1" disabled={isLoading}>
-                      {isLoading ? "Siunčiama..." : "Siųsti nuorodą"}
+                      {isLoading ? (language === "lt" ? "Siunčiama..." : "Sending...") : t("auth.sendResetLink")}
                     </Button>
                   </div>
                 </form>
@@ -206,7 +208,7 @@ const Auth = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name">Vardas, Pavardė</Label>
+                  <Label htmlFor="signup-name">{t("auth.fullName")}</Label>
                   <Input
                     id="signup-name"
                     value={signupData.fullName}
@@ -215,7 +217,7 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email">El. paštas</Label>
+                  <Label htmlFor="signup-email">{t("auth.email")}</Label>
                   <Input
                     id="signup-email"
                     type="email"
@@ -225,7 +227,9 @@ const Auth = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password">Slaptažodis (min. 6 simboliai)</Label>
+                  <Label htmlFor="signup-password">
+                    {t("auth.password")} ({language === "lt" ? "min. 6 simboliai" : "min. 6 characters"})
+                  </Label>
                   <Input
                     id="signup-password"
                     type="password"
@@ -235,7 +239,7 @@ const Auth = () => {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Kuriama..." : "Registruotis"}
+                  {isLoading ? (language === "lt" ? "Kuriama..." : "Creating...") : t("auth.signup")}
                 </Button>
               </form>
             </TabsContent>

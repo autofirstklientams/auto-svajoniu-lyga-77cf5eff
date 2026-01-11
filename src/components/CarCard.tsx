@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Calendar, Gauge, Fuel, ChevronRight, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 import { calculateMonthlyPayment } from "@/components/LoanCalculator";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface CarCardProps {
   id?: string;
@@ -19,6 +20,7 @@ interface CarCardProps {
 }
 
 const CarCard = ({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended }: CarCardProps) => {
+  const { t } = useLanguage();
   const monthlyPayment = numericPrice ? calculateMonthlyPayment(numericPrice) : null;
   
   const formatMonthlyPayment = (amount: number) => {
@@ -36,12 +38,12 @@ const CarCard = ({ id, image, title, price, numericPrice, year, mileage, fuel, f
         {isRecommended && (
           <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-2 px-3 flex items-center justify-center gap-2 shadow-md">
             <Award className="h-4 w-4" />
-            <span className="text-sm font-bold tracking-wide">AUTOKOPERS rekomenduoja</span>
+            <span className="text-sm font-bold tracking-wide">{t("featured.recommended")}</span>
           </div>
         )}
         {featured && !isRecommended && (
           <Badge className="absolute top-4 left-4 z-10 bg-accent text-accent-foreground">
-            Rekomenduojama
+            {t("listing.featured")}
           </Badge>
         )}
         <img 
@@ -60,7 +62,7 @@ const CarCard = ({ id, image, title, price, numericPrice, year, mileage, fuel, f
         {monthlyPayment && (
           <div className="flex justify-end mb-3">
             <span className="text-sm text-muted-foreground">
-              nuo <span className="font-semibold text-primary">{formatMonthlyPayment(monthlyPayment)}</span>/mėn.
+              {t("car.monthlyFrom")} <span className="font-semibold text-primary">{formatMonthlyPayment(monthlyPayment)}</span>{t("car.perMonthShort")}
             </span>
           </div>
         )}
@@ -85,7 +87,7 @@ const CarCard = ({ id, image, title, price, numericPrice, year, mileage, fuel, f
         </div>
 
         <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold group/btn">
-          Peržiūrėti
+          {t("car.view")}
           <ChevronRight className="ml-1 h-4 w-4 group-hover/btn:translate-x-0.5 transition-transform" />
         </Button>
       </CardContent>

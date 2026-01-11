@@ -5,10 +5,13 @@ import { Phone, Mail, MapPin, Menu, LogIn, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/autokopers-logo.jpeg";
 import { supabase } from "@/integrations/supabase/client";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Header = () => {
   const [user, setUser] = useState<any>(null);
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => {
@@ -39,6 +42,7 @@ const Header = () => {
               <MapPin className="h-3 w-3 md:h-4 md:w-4" />
               <span className="hidden sm:inline">Varduvos g. 2, Kaunas</span>
             </div>
+            <LanguageSwitcher />
           </div>
         </div>
       </div>
@@ -56,37 +60,31 @@ const Header = () => {
                 to="/automobiliai"
                 className="text-foreground hover:text-primary font-medium transition-colors"
               >
-                Automobiliai
-              </Link>
-              <Link 
-                to="/car-search"
-                className="text-foreground hover:text-primary font-medium transition-colors"
-              >
-                Auto paieška
+                {t("nav.cars")}
               </Link>
               <Link 
                 to="/sell-your-car" 
                 className="text-primary hover:text-primary/80 font-semibold transition-colors"
               >
-                Parduosime tavo automobilį
+                {t("nav.carPurchase")}
               </Link>
               <Link 
                 to="/leasing" 
                 className="text-primary hover:text-primary/80 font-semibold transition-colors"
               >
-                Lizingas
+                {t("nav.leasing")}
               </Link>
               <Link 
                 to="/about" 
                 className="text-foreground hover:text-primary font-medium transition-colors"
               >
-                Apie mus
+                {t("nav.about")}
               </Link>
               <Link 
                 to="/#contact" 
                 className="text-foreground hover:text-primary font-medium transition-colors"
               >
-                Kontaktai
+                {t("contact.title")}
               </Link>
               {user ? (
                 <Button 
@@ -94,7 +92,7 @@ const Header = () => {
                   className="border-primary text-primary-foreground"
                 >
                   <User className="h-4 w-4 mr-2" />
-                  Partnerio zona
+                  {t("nav.partnerZone")}
                 </Button>
               ) : (
                 <Button 
@@ -103,36 +101,36 @@ const Header = () => {
                   className="border-primary text-primary hover:bg-primary/10"
                 >
                   <LogIn className="h-4 w-4 mr-2" />
-                  Partnerio zona
+                  {t("nav.partnerZone")}
                 </Button>
               )}
             </nav>
 
             {/* Mobile navigation */}
-            <div className="md:hidden">
+            <div className="md:hidden flex items-center gap-2">
+              <LanguageSwitcher />
               <Sheet>
                 <SheetTrigger asChild>
-                  <Button variant="outline" size="icon" aria-label="Atidaryti meniu">
+                  <Button variant="outline" size="icon" aria-label="Open menu">
                     <Menu className="h-5 w-5" />
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-72">
                   <div className="flex flex-col gap-4 mt-8">
-                    <Link to="/automobiliai" className="text-foreground hover:text-primary font-medium">Automobiliai</Link>
-                    <Link to="/car-search" className="text-foreground hover:text-primary font-medium">Auto paieška</Link>
-                    <Link to="/sell-your-car" className="text-primary hover:text-primary/80 font-semibold transition-colors">Parduosime tavo automobilį</Link>
+                    <Link to="/automobiliai" className="text-foreground hover:text-primary font-medium">{t("nav.cars")}</Link>
+                    <Link to="/sell-your-car" className="text-primary hover:text-primary/80 font-semibold transition-colors">{t("nav.carPurchase")}</Link>
                     <Link 
                       to="/leasing" 
                       className="text-primary hover:text-primary/80 font-semibold transition-colors"
                     >
-                      Lizingas
+                      {t("nav.leasing")}
                     </Link>
-                    <Link to="/about" className="text-foreground hover:text-primary font-medium">Apie mus</Link>
+                    <Link to="/about" className="text-foreground hover:text-primary font-medium">{t("nav.about")}</Link>
                     <Link 
                       to="/#contact" 
                       className="text-foreground hover:text-primary font-medium"
                     >
-                      Kontaktai
+                      {t("contact.title")}
                     </Link>
                     {user ? (
                       <Button 
@@ -140,7 +138,7 @@ const Header = () => {
                         className="w-full"
                       >
                         <User className="h-4 w-4 mr-2" />
-                        Partnerio zona
+                        {t("nav.partnerZone")}
                       </Button>
                     ) : (
                       <Button 
@@ -149,7 +147,7 @@ const Header = () => {
                         className="w-full border-primary text-primary hover:bg-primary/10"
                       >
                         <LogIn className="h-4 w-4 mr-2" />
-                        Partnerio zona
+                        {t("nav.partnerZone")}
                       </Button>
                     )}
                   </div>

@@ -11,11 +11,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Hero = () => {
   const [loanAmount, setLoanAmount] = useState(7000);
   const [loanTerm, setLoanTerm] = useState(72);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { t } = useLanguage();
 
   const annualInterestRate = 0.069;
   const monthlyAdminFee = 9.5;
@@ -52,19 +54,19 @@ const Hero = () => {
           <div className="text-white order-2 lg:order-1 animate-fade-in">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-white/20">
               <Calculator className="h-4 w-4 text-white" />
-              <span className="text-sm font-medium">Paskolos nuo 6.9% metinių palūkanų</span>
+              <span className="text-sm font-medium">{t("hero.badge")}</span>
             </div>
             
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight">
-              Greitas{" "}
+              {t("hero.title")}{" "}
               <span className="text-white">
-                Finansavimas
+                {t("hero.titleHighlight")}
               </span>{" "}
-              be Streso
+              {t("hero.titleEnd")}
             </h1>
             
             <p className="text-lg md:text-xl mb-8 text-white/85 leading-relaxed max-w-xl">
-              Platus naudotų automobilių pasirinkimas su finansavimu. Taip pat teikiame paskolas kitoms reikmėms – technikai, remontui ir kt.
+              {t("hero.description")}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4">
@@ -74,7 +76,7 @@ const Hero = () => {
                 onClick={() => document.getElementById('featured-cars')?.scrollIntoView({ behavior: 'smooth' })}
               >
                 <Search className="mr-2 h-5 w-5" />
-                Peržiūrėti Automobilius
+                {t("hero.viewCars")}
                 <ChevronRight className="ml-1 h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
@@ -84,15 +86,15 @@ const Hero = () => {
               <div className="flex flex-wrap gap-8">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white">500+</div>
-                  <div className="text-sm text-white/70">Patenkintų klientų</div>
+                  <div className="text-sm text-white/70">{t("hero.satisfiedClients")}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white">24h</div>
-                  <div className="text-sm text-white/70">Sprendimas</div>
+                  <div className="text-sm text-white/70">{t("hero.decision")}</div>
                 </div>
                 <div className="text-center">
                   <div className="text-3xl font-bold text-white">6.9%</div>
-                  <div className="text-sm text-white/70">Palūkanos nuo</div>
+                  <div className="text-sm text-white/70">{t("hero.interestFrom")}</div>
                 </div>
               </div>
             </div>
@@ -110,7 +112,7 @@ const Hero = () => {
                         <Calculator className="h-4 w-4 text-primary" />
                       </div>
                       <h2 className="text-lg font-bold text-foreground">
-                        Paskolos skaičiuoklė
+                        {t("hero.calculator")}
                       </h2>
                     </div>
                     
@@ -118,7 +120,7 @@ const Hero = () => {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <label className="text-sm font-medium text-foreground">
-                            Paskolos suma
+                            {t("hero.loanAmount")}
                           </label>
                           <span className="text-base font-bold text-primary">{loanAmount.toLocaleString()} €</span>
                         </div>
@@ -138,9 +140,9 @@ const Hero = () => {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <label className="text-sm font-medium text-foreground">
-                            Terminas
+                            {t("hero.term")}
                           </label>
-                          <span className="text-base font-bold text-primary">{loanTerm} mėn.</span>
+                          <span className="text-base font-bold text-primary">{loanTerm} {t("hero.months")}</span>
                         </div>
                         <Slider
                           value={[loanTerm]}
@@ -150,30 +152,30 @@ const Hero = () => {
                           step={6}
                         />
                         <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                          <span>6 mėn.</span>
-                          <span>144 mėn.</span>
+                          <span>6 {t("hero.months")}</span>
+                          <span>144 {t("hero.months")}</span>
                         </div>
                       </div>
 
                       <div className="bg-primary/5 rounded-lg p-3">
                         <div className="flex items-center gap-1 mb-1">
-                          <span className="text-xs text-muted-foreground">Mėnesio įmoka nuo</span>
+                          <span className="text-xs text-muted-foreground">{t("hero.monthlyPaymentFrom")}</span>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger>
                                 <Info className="h-3 w-3 text-muted-foreground" />
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs">
-                                <p>Skaičiuojama su 6.9% metinėmis palūkanomis + 9.50 € mėn. mokestis.</p>
+                                <p>{t("hero.calculatorTooltip")}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         </div>
                         <div className="text-3xl font-bold text-primary">
-                          {monthlyPayment.toFixed(0)} <span className="text-lg">€/mėn.</span>
+                          {monthlyPayment.toFixed(0)} <span className="text-lg">{t("hero.perMonth")}</span>
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">
-                          Bendra suma: {totalPayment.toFixed(0)} €
+                          {t("hero.totalAmount")}: {totalPayment.toFixed(0)} €
                         </div>
                       </div>
                     </div>
@@ -181,39 +183,39 @@ const Hero = () => {
 
                   {/* Conditions side */}
                   <div className="bg-muted/40 p-5 lg:p-6 flex flex-col">
-                    <h4 className="font-semibold text-foreground mb-3 text-sm">Kredito sąlygos</h4>
+                    <h4 className="font-semibold text-foreground mb-3 text-sm">{t("hero.loanConditions")}</h4>
                     
                     <div className="space-y-2 flex-1 text-xs">
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Metinė palūkanų norma</span>
+                        <span className="text-muted-foreground">{t("hero.annualRate")}</span>
                         <span className="font-semibold text-foreground">6.9%</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Paskolos suma</span>
+                        <span className="text-muted-foreground">{t("hero.loanSum")}</span>
                         <span className="font-semibold text-foreground">1 000 – 30 000 €</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Terminas</span>
-                        <span className="font-semibold text-foreground">6 – 144 mėn.</span>
+                        <span className="text-muted-foreground">{t("hero.term")}</span>
+                        <span className="font-semibold text-foreground">6 – 144 {t("hero.months")}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Mėn. mokestis</span>
+                        <span className="text-muted-foreground">{t("hero.monthlyFee")}</span>
                         <span className="font-semibold text-foreground">9.50 €</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-muted-foreground">Sutarties mokestis</span>
+                        <span className="text-muted-foreground">{t("hero.contractFee")}</span>
                         <span className="font-semibold text-foreground">50 €</span>
                       </div>
                       <div className="flex justify-between pt-2 border-t border-border">
                         <div className="flex items-center gap-1">
-                          <span className="font-medium text-foreground">BVKMNN nuo</span>
+                          <span className="font-medium text-foreground">{t("hero.bvkmnFrom")}</span>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger>
                                 <Info className="h-3 w-3 text-muted-foreground" />
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs">
-                                <p>Bendrosios vidutinės kredito kainos metinė norma.</p>
+                                <p>{t("hero.bvkmnTooltip")}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -227,7 +229,7 @@ const Hero = () => {
                       className="w-full mt-4 btn-gradient font-semibold"
                       size="default"
                     >
-                      Gauti pasiūlymą
+                      {t("hero.getOffer")}
                       <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                   </div>

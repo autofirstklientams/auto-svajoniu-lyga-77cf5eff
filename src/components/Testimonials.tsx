@@ -1,32 +1,38 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Star } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const testimonials = [
   {
     name: "Tomas Pauliukaitis",
-    text: "Labai greitas ir profesionalus aptarnavimas. Per kelias dienas gavau finansavimą ir savo svajonių automobilį!",
+    textLt: "Labai greitas ir profesionalus aptarnavimas. Per kelias dienas gavau finansavimą ir savo svajonių automobilį!",
+    textEn: "Very fast and professional service. In just a few days I got financing and my dream car!",
     rating: 5,
   },
   {
     name: "Laura Kazlauskienė",
-    text: "Malonus bendravimas, aiškūs pasiūlymai. Rekomenduoju visiems, kurie ieško patikimo automobilio.",
+    textLt: "Malonus bendravimas, aiškūs pasiūlymai. Rekomenduoju visiems, kurie ieško patikimo automobilio.",
+    textEn: "Pleasant communication, clear offers. I recommend to everyone looking for a reliable car.",
     rating: 5,
   },
   {
     name: "Rimvydas Silnevič",
-    text: "Puiki patirtis! Padėjo išsirinkti automobilį ir sutvarkė visus finansavimo dokumentus be jokio streso.",
+    textLt: "Puiki patirtis! Padėjo išsirinkti automobilį ir sutvarkė visus finansavimo dokumentus be jokio streso.",
+    textEn: "Great experience! They helped me choose a car and handled all financing documents stress-free.",
     rating: 5,
   },
 ];
 
 const Testimonials = () => {
+  const { t, language } = useLanguage();
+
   return (
     <section className="py-16 bg-muted/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold mb-4">Mūsų klientai sako</h2>
+          <h2 className="text-4xl font-bold mb-4">{t("testimonials.title")}</h2>
           <p className="text-xl text-muted-foreground">
-            Tūkstančiai patenkintų klientų jau rado savo automobilį
+            {t("testimonials.description")}
           </p>
         </div>
         <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
@@ -38,7 +44,9 @@ const Testimonials = () => {
                     <Star key={i} className="h-5 w-5 fill-primary text-primary" />
                   ))}
                 </div>
-                <p className="text-muted-foreground mb-4 italic">"{testimonial.text}"</p>
+                <p className="text-muted-foreground mb-4 italic">
+                  "{language === "lt" ? testimonial.textLt : testimonial.textEn}"
+                </p>
                 <p className="font-semibold">– {testimonial.name}</p>
               </CardContent>
             </Card>

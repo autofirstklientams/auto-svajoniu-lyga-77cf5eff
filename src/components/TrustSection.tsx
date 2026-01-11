@@ -1,29 +1,32 @@
 import { Shield, Award, Users, Clock } from "lucide-react";
-
-const features = [
-  {
-    icon: Shield,
-    title: "Patikima",
-    description: "Visi automobiliai su garantija ir draudimu",
-  },
-  {
-    icon: Award,
-    title: "10+ Metų Patirtis",
-    description: "Ilgametė patirtis automobilių rinkoje",
-  },
-  {
-    icon: Users,
-    title: "Žemos Palūkanos",
-    description: "Konkurencingos palūkanų normos nuo 3.9% metinių",
-  },
-  {
-    icon: Clock,
-    title: "Greitas Procesas",
-    description: "Finansavimas per 30 min",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TrustSection = () => {
+  const { t } = useLanguage();
+
+  const features = [
+    {
+      icon: Shield,
+      titleKey: "trust.reliable",
+      descKey: "trust.reliableDesc",
+    },
+    {
+      icon: Award,
+      titleKey: "trust.experience",
+      descKey: "trust.experienceDesc",
+    },
+    {
+      icon: Users,
+      titleKey: "trust.lowRates",
+      descKey: "trust.lowRatesDesc",
+    },
+    {
+      icon: Clock,
+      titleKey: "trust.fastProcess",
+      descKey: "trust.fastProcessDesc",
+    },
+  ];
+
   return (
     <section className="py-8 bg-background">
       <div className="container mx-auto px-4">
@@ -35,8 +38,8 @@ const TrustSection = () => {
                 <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
                   <Icon className="h-8 w-8 text-primary" />
                 </div>
-                <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
+                <h3 className="text-xl font-semibold mb-2">{t(feature.titleKey)}</h3>
+                <p className="text-muted-foreground">{t(feature.descKey)}</p>
               </div>
             );
           })}

@@ -28,6 +28,7 @@ export interface InvoiceItem {
   quantity: number;
   unit: string;
   price: number;
+  priceInput?: string; // For display purposes with comma support
   vatType: VatType;
 }
 
@@ -77,11 +78,11 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
   });
   
   const [items, setItems] = useState<InvoiceItem[]>([
-    { description: "", quantity: 1, unit: "vnt.", price: 0, vatType: "vat_exempt" },
+    { description: "", quantity: 1, unit: "vnt.", price: 0, priceInput: "", vatType: "vat_exempt" },
   ]);
   
   // Automobilio kaina ir PVM (atskirai nuo papildomų paslaugų)
-  const [carPrice, setCarPrice] = useState<number>(0);
+  const [carPriceInput, setCarPriceInput] = useState<string>("");
   const [carVatType, setCarVatType] = useState<VatType>("vat_exempt");
   
   // Papildomos paslaugos prie automobilio
@@ -136,7 +137,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
       // Jei automobilio pardavimas, atskirti automobilio kainą nuo papildomų paslaugų
       if (initialData.invoiceType === "car_sale" && initialData.items.length > 0) {
         // Pirma eilutė yra automobilis
-        setCarPrice(initialData.items[0]?.price || 0);
+        setCarPriceInput(initialData.items[0]?.price?.toString() || "");
         setCarVatType(initialData.items[0]?.vatType || "vat_exempt");
         // Likusios eilutės yra papildomos paslaugos
         if (initialData.items.length > 1) {
@@ -197,7 +198,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
   };
 
   const addItem = () => {
-    setItems([...items, { description: "", quantity: 1, unit: "vnt.", price: 0, vatType: "vat_exempt" }]);
+    setItems([...items, { description: "", quantity: 1, unit: "vnt.", price: 0, priceInput: "", vatType: "vat_exempt" }]);
   };
 
   const removeItem = (index: number) => {
@@ -214,7 +215,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
 
   // Papildomų paslaugų valdymas (automobilio pardavimui)
   const addAdditionalItem = () => {
-    setAdditionalItems([...additionalItems, { description: "", quantity: 1, unit: "vnt.", price: 0, vatType: "with_vat" }]);
+    setAdditionalItems([...additionalItems, { description: "", quantity: 1, unit: "vnt.", price: 0, priceInput: "", vatType: "with_vat" }]);
   };
 
   const removeAdditionalItem = (index: number) => {
@@ -238,7 +239,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
         description: carDescription,
         quantity: 1,
         unit: "vnt.",
-        price: carPrice,
+        price: parseFloat(carPriceInput.replace(',', '.')) || 0,
         vatType: carVatType,
       };
       // Pridėti automobilį + papildomas paslaugas
@@ -642,15 +643,16 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
                 <Input
                   type="text"
                   inputMode="decimal"
-                  value={carPrice === 0 ? "" : carPrice}
+                  value={carPriceInput}
                   onChange={(e) => {
-                    const val = e.target.value.replace(',', '.');
-                    if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                      setCarPrice(val === "" ? 0 : parseFloat(val) || 0);
+                    const val = e.target.value;
+                    // Allow digits, comma, and dot
+                    if (val === "" || /^[\d,.\s]*$/.test(val)) {
+                      setCarPriceInput(val);
                     }
                   }}
                   className="input-elegant"
-                  placeholder="0.00"
+                  placeholder="0,00"
                   required
                 />
               </div>
@@ -734,15 +736,18 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
                     <Input
                       type="text"
                       inputMode="decimal"
-                      value={item.price === 0 ? "" : item.price}
+                      value={item.priceInput !== undefined ? item.priceInput : (item.price === 0 ? "" : item.price.toString())}
                       onChange={(e) => {
-                        const val = e.target.value.replace(',', '.');
-                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                          updateItem(index, "price", val === "" ? 0 : parseFloat(val) || 0);
+                        const val = e.target.value;
+                        if (val === "" || /^[\d,.\s]*$/.test(val)) {
+                          const numericVal = parseFloat(val.replace(',', '.').replace(/\s/g, '')) || 0;
+                          const newItems = [...items];
+                          newItems[index] = { ...newItems[index], price: numericVal, priceInput: val };
+                          setItems(newItems);
                         }
                       }}
                       className="input-elegant"
-                      placeholder="0.00"
+                      placeholder="0,00"
                       required
                     />
                   </div>
@@ -872,15 +877,18 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
                     <Input
                       type="text"
                       inputMode="decimal"
-                      value={item.price === 0 ? "" : item.price}
+                      value={item.priceInput !== undefined ? item.priceInput : (item.price === 0 ? "" : item.price.toString())}
                       onChange={(e) => {
-                        const val = e.target.value.replace(',', '.');
-                        if (val === "" || /^\d*\.?\d*$/.test(val)) {
-                          updateAdditionalItem(index, "price", val === "" ? 0 : parseFloat(val) || 0);
+                        const val = e.target.value;
+                        if (val === "" || /^[\d,.\s]*$/.test(val)) {
+                          const numericVal = parseFloat(val.replace(',', '.').replace(/\s/g, '')) || 0;
+                          const newItems = [...additionalItems];
+                          newItems[index] = { ...newItems[index], price: numericVal, priceInput: val };
+                          setAdditionalItems(newItems);
                         }
                       }}
                       className="input-elegant"
-                      placeholder="0.00"
+                      placeholder="0,00"
                       required
                     />
                   </div>

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import ExternalCarPlatforms from "./ExternalCarPlatforms";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Car {
   id: string;
@@ -22,6 +23,7 @@ interface Car {
 const FeaturedCars = () => {
   const [cars, setCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useLanguage();
 
   useEffect(() => {
     fetchCars();
@@ -41,7 +43,7 @@ const FeaturedCars = () => {
       if (error) throw error;
       setCars(data || []);
     } catch (error: any) {
-      toast.error("Klaida užkraunant automobilius");
+      toast.error(t("common.error"));
     } finally {
       setIsLoading(false);
     }
@@ -74,10 +76,10 @@ const FeaturedCars = () => {
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Rekomenduojami automobiliai
+            {t("featured.title")}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Atrinkti automobiliai su patikrinta istorija ir konkurencinga kaina
+            {t("featured.description")}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -105,7 +107,7 @@ const FeaturedCars = () => {
         <div className="text-center mt-10">
           <Button asChild size="lg" className="group">
             <Link to="/automobiliai">
-              Visi automobiliai
+              {t("featured.viewAll")}
               <ChevronRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
           </Button>

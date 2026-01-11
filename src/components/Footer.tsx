@@ -2,8 +2,11 @@ import { Mail, Phone, MapPin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/autokopers-logo.jpeg";
 import { Link } from "react-router-dom";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const Footer = () => {
+  const { t, language } = useLanguage();
+
   return (
     <footer className="bg-card text-card-foreground border-t border-border">
       <div className="container mx-auto px-4 py-12">
@@ -13,7 +16,7 @@ const Footer = () => {
               <img src={logo} alt="AutoKOPERS" className="h-10" />
             </Link>
             <p className="text-muted-foreground mb-4">
-              Patikimas automobilių pardavimas ir finansavimas Lietuvoje
+              {t("footer.companyDesc")}
             </p>
             <div className="flex gap-3">
               <a 
@@ -36,28 +39,23 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-4 text-foreground">Nuorodos</h3>
+            <h3 className="font-bold text-lg mb-4 text-foreground">{t("footer.navigation")}</h3>
             <ul className="space-y-2">
               <li>
-                <Link to="/" className="text-muted-foreground hover:text-primary transition-colors">
-                  Automobiliai
-                </Link>
-              </li>
-              <li>
-                <Link to="/car-search" className="text-muted-foreground hover:text-primary transition-colors">
-                  Paieška
+                <Link to="/automobiliai" className="text-muted-foreground hover:text-primary transition-colors">
+                  {t("nav.cars")}
                 </Link>
               </li>
               <li>
                 <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
-                  Apie mus
+                  {t("nav.about")}
                 </Link>
               </li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-4 text-foreground">Kontaktai</h3>
+            <h3 className="font-bold text-lg mb-4 text-foreground">{t("footer.contact")}</h3>
             <ul className="space-y-3 text-muted-foreground">
               <li>
                 <a href="tel:+37062851439" className="flex items-center gap-2 hover:text-primary transition-colors">
@@ -79,36 +77,33 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-4 text-foreground">Darbo laikas</h3>
+            <h3 className="font-bold text-lg mb-4 text-foreground">{t("footer.workingHours")}</h3>
             <ul className="space-y-2 text-muted-foreground">
               <li className="flex justify-between">
-                <span>Pr-Pt:</span>
+                <span>{language === "lt" ? "Pr-Pt:" : "Mon-Fri:"}</span>
                 <span>9:00 - 18:00</span>
               </li>
               <li className="flex justify-between">
-                <span>Št:</span>
+                <span>{language === "lt" ? "Št:" : "Sat:"}</span>
                 <span>10:00 - 19:00</span>
               </li>
               <li className="flex justify-between">
-                <span>Sk:</span>
-                <span>Individualiai</span>
+                <span>{language === "lt" ? "Sk:" : "Sun:"}</span>
+                <span>{language === "lt" ? "Individualiai" : "By appointment"}</span>
               </li>
             </ul>
-            <p className="text-xs text-muted-foreground/70 mt-3">
-              Jeigu reikia – dirbame ir po darbo valandų
-            </p>
           </div>
         </div>
 
         <div className="border-t border-border mt-8 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. Visos teisės saugomos.</p>
+            <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. {t("footer.rights")}</p>
             <Button 
               onClick={() => window.location.href = '/partner-login'}
               variant="outline"
               size="sm"
             >
-              Partnerio zona
+              {t("nav.partnerZone")}
             </Button>
           </div>
         </div>

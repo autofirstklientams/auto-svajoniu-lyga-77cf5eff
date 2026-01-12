@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Cookie, X } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CookieConsent = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     const consent = localStorage.getItem("cookie-consent");
@@ -35,10 +37,9 @@ const CookieConsent = () => {
               <Cookie className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground mb-1">Slapukų politika</h3>
+              <h3 className="font-semibold text-foreground mb-1">{t("cookie.title")}</h3>
               <p className="text-sm text-muted-foreground">
-                Naudojame slapukus, kad pagerintume jūsų naršymo patirtį ir analizuotume svetainės lankomumą. 
-                Sutikdami padėsite mums tobulinti paslaugas.
+                {t("cookie.description")}
               </p>
             </div>
           </div>
@@ -49,14 +50,14 @@ const CookieConsent = () => {
               onClick={declineCookies}
               className="flex-1 sm:flex-none"
             >
-              Atmesti
+              {t("cookie.decline")}
             </Button>
             <Button 
               size="sm"
               onClick={acceptCookies}
               className="flex-1 sm:flex-none bg-primary hover:bg-primary/90"
             >
-              Sutinku
+              {t("cookie.accept")}
             </Button>
           </div>
           <button 

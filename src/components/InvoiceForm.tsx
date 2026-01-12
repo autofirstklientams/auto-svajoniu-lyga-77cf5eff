@@ -21,6 +21,8 @@ export interface CarDetails {
   mileage: string;
   notes: string;
   isMarginScheme: boolean;
+  originalPrice?: number;
+  discount?: number;
 }
 
 export interface InvoiceItem {
@@ -83,6 +85,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
   
   // Automobilio kaina ir PVM (atskirai nuo papildomų paslaugų)
   const [carPriceInput, setCarPriceInput] = useState<string>("");
+  const [carDiscountInput, setCarDiscountInput] = useState<string>("");
   const [carVatType, setCarVatType] = useState<VatType>("vat_exempt");
   
   // Papildomos paslaugos prie automobilio
@@ -99,6 +102,8 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
     mileage: "",
     notes: "",
     isMarginScheme: false,
+    originalPrice: undefined,
+    discount: undefined,
   });
 
   const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccount | null>(null);
@@ -233,18 +238,29 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
     
     // Jei automobilio pardavimas, sukuriame prekę iš automobilio duomenų + papildomos paslaugos
     let finalItems = items;
+    const originalPrice = parseFloat(carPriceInput.replace(',', '.').replace(/\s/g, '')) || 0;
+    const discount = parseFloat(carDiscountInput.replace(',', '.').replace(/\s/g, '')) || 0;
+    const finalCarPrice = Math.max(0, originalPrice - discount);
+    
     if (invoiceType === "car_sale" && carDetails.make && carDetails.model) {
       const carDescription = `Automobilis ${carDetails.make} ${carDetails.model}${carDetails.vin ? `, VIN: ${carDetails.vin}` : ""}${carDetails.plate ? `, Nr.: ${carDetails.plate}` : ""}${carDetails.sdk ? `, SDK: ${carDetails.sdk}` : ""}${carDetails.mileage ? `, Rida: ${carDetails.mileage} km` : ""}`;
       const carItem: InvoiceItem = {
         description: carDescription,
         quantity: 1,
         unit: "vnt.",
-        price: parseFloat(carPriceInput.replace(',', '.')) || 0,
+        price: finalCarPrice,
         vatType: carVatType,
       };
       // Pridėti automobilį + papildomas paslaugas
       finalItems = [carItem, ...additionalItems];
     }
+    
+    // Atnaujinti carDetails su nuolaidos informacija
+    const updatedCarDetails = invoiceType === "car_sale" ? {
+      ...carDetails,
+      originalPrice: discount > 0 ? originalPrice : undefined,
+      discount: discount > 0 ? discount : undefined,
+    } : undefined;
     
     const data: InvoiceData = {
       invoiceNumber,
@@ -253,7 +269,7 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
       items: finalItems,
       note,
       invoiceType,
-      carDetails: invoiceType === "car_sale" ? carDetails : undefined,
+      carDetails: updatedCarDetails,
       bankAccount: selectedBankAccount || bankAccounts[0],
     };
     
@@ -637,52 +653,94 @@ const InvoiceForm = ({ onGenerate, nextInvoiceNumber, initialData, onClearInitia
         </CardHeader>
         <CardContent className="space-y-4">
           {invoiceType === "car_sale" ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Automobilio kaina €</Label>
-                <Input
-                  type="text"
-                  inputMode="decimal"
-                  value={carPriceInput}
-                  onChange={(e) => {
-                    const val = e.target.value;
-                    // Allow digits, comma, and dot
-                    if (val === "" || /^[\d,.\s]*$/.test(val)) {
-                      setCarPriceInput(val);
-                    }
-                  }}
-                  className="input-elegant"
-                  placeholder="0,00"
-                  required
-                />
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label>Automobilio kaina €</Label>
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    value={carPriceInput}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      // Allow digits, comma, and dot
+                      if (val === "" || /^[\d,.\s]*$/.test(val)) {
+                        setCarPriceInput(val);
+                      }
+                    }}
+                    className="input-elegant"
+                    placeholder="0,00"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Nuolaida € <span className="text-muted-foreground text-xs">(neprivaloma)</span></Label>
+                  <Input
+                    type="text"
+                    inputMode="decimal"
+                    value={carDiscountInput}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (val === "" || /^[\d,.\s]*$/.test(val)) {
+                        setCarDiscountInput(val);
+                      }
+                    }}
+                    className="input-elegant"
+                    placeholder="0,00"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>PVM</Label>
+                  <Select
+                    value={carVatType}
+                    onValueChange={(v) => {
+                      setCarVatType(v as VatType);
+                      // Automatiškai nustatyti maržos schemą
+                      if (v === "margin_scheme") {
+                        setCarDetails({ ...carDetails, isMarginScheme: true });
+                      } else {
+                        setCarDetails({ ...carDetails, isMarginScheme: false });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="input-elegant">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(vatTypeLabels).map(([key, label]) => (
+                        <SelectItem key={key} value={key}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label>PVM</Label>
-                <Select
-                  value={carVatType}
-                  onValueChange={(v) => {
-                    setCarVatType(v as VatType);
-                    // Automatiškai nustatyti maržos schemą
-                    if (v === "margin_scheme") {
-                      setCarDetails({ ...carDetails, isMarginScheme: true });
-                    } else {
-                      setCarDetails({ ...carDetails, isMarginScheme: false });
-                    }
-                  }}
-                >
-                  <SelectTrigger className="input-elegant">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(vatTypeLabels).map(([key, label]) => (
-                      <SelectItem key={key} value={key}>
-                        {label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+              
+              {/* Nuolaidos suvestinė */}
+              {carPriceInput && parseFloat(carDiscountInput.replace(',', '.').replace(/\s/g, '') || '0') > 0 && (
+                <div className="p-4 rounded-lg bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800">
+                  <div className="flex flex-col gap-1">
+                    <div className="flex justify-between text-sm text-muted-foreground">
+                      <span>Pradinė kaina:</span>
+                      <span>{(parseFloat(carPriceInput.replace(',', '.').replace(/\s/g, '')) || 0).toFixed(2)} €</span>
+                    </div>
+                    <div className="flex justify-between text-sm text-green-600 dark:text-green-400 font-medium">
+                      <span>Nuolaida:</span>
+                      <span>- {(parseFloat(carDiscountInput.replace(',', '.').replace(/\s/g, '')) || 0).toFixed(2)} €</span>
+                    </div>
+                    <div className="border-t border-green-200 dark:border-green-700 mt-2 pt-2">
+                      <div className="flex justify-between font-bold text-lg">
+                        <span>Galutinė kaina:</span>
+                        <span className="text-green-700 dark:text-green-300">
+                          {Math.max(0, (parseFloat(carPriceInput.replace(',', '.').replace(/\s/g, '')) || 0) - (parseFloat(carDiscountInput.replace(',', '.').replace(/\s/g, '')) || 0)).toFixed(2)} €
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </>
           ) : (
             <>
               {items.map((item, index) => (

@@ -232,6 +232,37 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
           </table>
         </div>
 
+        {/* Discount Display */}
+        {data.invoiceType === "car_sale" && data.carDetails?.originalPrice && data.carDetails?.discount && data.carDetails.discount > 0 && (
+          <div style={{ 
+            marginBottom: '24px', 
+            padding: '16px', 
+            backgroundColor: '#f0fdf4',
+            border: '1px solid #bbf7d0',
+            borderRadius: '8px',
+          }}>
+            <p style={{ fontWeight: 'bold', marginBottom: '12px', color: '#166534', fontSize: '14px', margin: '0 0 12px 0' }}>
+              SUTEIKTA NUOLAIDA
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <p style={{ color: '#374151', margin: '4px 0', fontSize: '14px' }}>Pradinė kaina:</p>
+              <p style={{ color: '#374151', margin: '4px 0', fontSize: '14px', textAlign: 'right', textDecoration: 'line-through' }}>
+                {formatCurrency(data.carDetails.originalPrice)}
+              </p>
+              <p style={{ color: '#16a34a', margin: '4px 0', fontSize: '14px', fontWeight: '600' }}>Nuolaida:</p>
+              <p style={{ color: '#16a34a', margin: '4px 0', fontSize: '14px', textAlign: 'right', fontWeight: '600' }}>
+                - {formatCurrency(data.carDetails.discount)}
+              </p>
+              <p style={{ color: '#166534', margin: '4px 0', fontSize: '16px', fontWeight: 'bold', borderTop: '1px solid #bbf7d0', paddingTop: '8px' }}>
+                Kaina su nuolaida:
+              </p>
+              <p style={{ color: '#166534', margin: '4px 0', fontSize: '16px', textAlign: 'right', fontWeight: 'bold', borderTop: '1px solid #bbf7d0', paddingTop: '8px' }}>
+                {formatCurrency(data.carDetails.originalPrice - data.carDetails.discount)}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Totals */}
         <div style={{ marginBottom: '24px', color: '#000000' }}>
           {!data.carDetails?.isMarginScheme && totalVat > 0 && (

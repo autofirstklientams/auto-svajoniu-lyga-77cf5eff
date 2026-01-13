@@ -26,6 +26,8 @@ export interface SavedInvoice {
   attachments: string[];
   is_margin_scheme: boolean;
   is_paid: boolean;
+  creator_name?: string;
+  creator_email?: string;
 }
 
 export const useInvoices = () => {
@@ -37,35 +39,46 @@ export const useInvoices = () => {
     try {
       const { data, error } = await supabase
         .from("invoices")
-        .select("*")
+        .select(`
+          *,
+          profiles:user_id (
+            full_name,
+            email
+          )
+        `)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
 
-      const parsedInvoices = (data || []).map((inv: Record<string, unknown>) => ({
-        id: inv.id as string,
-        invoice_number: inv.invoice_number as string,
-        invoice_date: inv.invoice_date as string,
-        buyer_name: inv.buyer_name as string,
-        buyer_company_code: inv.buyer_company_code as string,
-        buyer_vat_code: inv.buyer_vat_code as string | null,
-        buyer_address: inv.buyer_address as string,
-        buyer_is_company: (inv.buyer_is_company as boolean) ?? true,
-        items: inv.items as unknown as InvoiceItem[],
-        total_amount: inv.total_amount as number,
-        note: inv.note as string | null,
-        created_at: inv.created_at as string,
-        invoice_type: (inv.invoice_type as InvoiceType) || "commission",
-        car_vin: inv.car_vin as string | null,
-        car_plate: inv.car_plate as string | null,
-        car_mileage: inv.car_mileage as number | null,
-        car_notes: inv.car_notes as string | null,
-        car_make: inv.car_make as string | null,
-        car_model: inv.car_model as string | null,
-        attachments: (inv.attachments as unknown as string[]) || [],
-        is_margin_scheme: (inv.is_margin_scheme as boolean) ?? false,
-        is_paid: (inv.is_paid as boolean) ?? false,
-      }));
+      const parsedInvoices = (data || []).map((inv: Record<string, unknown>) => {
+        const profile = inv.profiles as { full_name?: string; email?: string } | null;
+        return {
+          id: inv.id as string,
+          invoice_number: inv.invoice_number as string,
+          invoice_date: inv.invoice_date as string,
+          buyer_name: inv.buyer_name as string,
+          buyer_company_code: inv.buyer_company_code as string,
+          buyer_vat_code: inv.buyer_vat_code as string | null,
+          buyer_address: inv.buyer_address as string,
+          buyer_is_company: (inv.buyer_is_company as boolean) ?? true,
+          items: inv.items as unknown as InvoiceItem[],
+          total_amount: inv.total_amount as number,
+          note: inv.note as string | null,
+          created_at: inv.created_at as string,
+          invoice_type: (inv.invoice_type as InvoiceType) || "commission",
+          car_vin: inv.car_vin as string | null,
+          car_plate: inv.car_plate as string | null,
+          car_mileage: inv.car_mileage as number | null,
+          car_notes: inv.car_notes as string | null,
+          car_make: inv.car_make as string | null,
+          car_model: inv.car_model as string | null,
+          attachments: (inv.attachments as unknown as string[]) || [],
+          is_margin_scheme: (inv.is_margin_scheme as boolean) ?? false,
+          is_paid: (inv.is_paid as boolean) ?? false,
+          creator_name: profile?.full_name || undefined,
+          creator_email: profile?.email || undefined,
+        };
+      });
 
       setInvoices(parsedInvoices);
 

@@ -320,6 +320,11 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onTogglePaid, onR
                     <span className="font-medium text-foreground">
                       {formatCurrency(invoice.total_amount)}
                     </span>
+                    {invoice.creator_name && (
+                      <span className="text-muted-foreground/70" title={invoice.creator_email}>
+                        • {invoice.creator_name}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>

@@ -1,11 +1,14 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Eye, Trash2, FileText, Loader2, Upload, Download, ExternalLink, Check } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Eye, Trash2, FileText, Loader2, Upload, Download, ExternalLink, Check, ChevronDown, FolderOpen } from "lucide-react";
 import { SavedInvoice } from "@/hooks/useInvoices";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { format, parseISO } from "date-fns";
+import { lt } from "date-fns/locale";
 
 interface UploadedInvoice {
   id: string;
@@ -28,7 +31,58 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onTogglePaid, onR
   const [uploading, setUploading] = useState(false);
   const [uploadedInvoices, setUploadedInvoices] = useState<UploadedInvoice[]>([]);
   const [loadingUploaded, setLoadingUploaded] = useState(true);
+  const [openMonths, setOpenMonths] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Group invoices by month
+  const groupedInvoices = useMemo(() => {
+    const groups: Record<string, { invoices: SavedInvoice[]; uploaded: UploadedInvoice[]; total: number }> = {};
+    
+    // Group generated invoices
+    invoices.forEach((invoice) => {
+      const date = parseISO(invoice.invoice_date);
+      const monthKey = format(date, "yyyy-MM");
+      if (!groups[monthKey]) {
+        groups[monthKey] = { invoices: [], uploaded: [], total: 0 };
+      }
+      groups[monthKey].invoices.push(invoice);
+      groups[monthKey].total += invoice.total_amount;
+    });
+
+    // Group uploaded invoices
+    uploadedInvoices.forEach((uploaded) => {
+      const date = new Date(uploaded.created_at);
+      const monthKey = format(date, "yyyy-MM");
+      if (!groups[monthKey]) {
+        groups[monthKey] = { invoices: [], uploaded: [], total: 0 };
+      }
+      groups[monthKey].uploaded.push(uploaded);
+    });
+
+    // Sort by month (newest first)
+    const sortedKeys = Object.keys(groups).sort((a, b) => b.localeCompare(a));
+    
+    return sortedKeys.map((key) => ({
+      key,
+      label: format(parseISO(`${key}-01`), "yyyy LLLL", { locale: lt }),
+      ...groups[key],
+    }));
+  }, [invoices, uploadedInvoices]);
+
+  // Open first month by default
+  useEffect(() => {
+    if (groupedInvoices.length > 0 && openMonths.length === 0) {
+      setOpenMonths([groupedInvoices[0].key]);
+    }
+  }, [groupedInvoices]);
+
+  const toggleMonth = (monthKey: string) => {
+    setOpenMonths((prev) =>
+      prev.includes(monthKey)
+        ? prev.filter((k) => k !== monthKey)
+        : [...prev, monthKey]
+    );
+  };
 
   const fetchUploadedInvoices = async () => {
     try {
@@ -279,119 +333,159 @@ const InvoiceHistory = ({ invoices, loading, onView, onDelete, onTogglePaid, onR
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {/* Generated invoices */}
-          {invoices.map((invoice) => (
-            <div
-              key={invoice.id}
-              className={`flex items-center justify-between p-4 rounded-lg transition-colors ${
-                invoice.is_paid 
-                  ? "bg-green-500/10 hover:bg-green-500/20 border border-green-500/30" 
-                  : "bg-secondary/30 hover:bg-secondary/50"
-              }`}
+          {groupedInvoices.map((group) => (
+            <Collapsible
+              key={group.key}
+              open={openMonths.includes(group.key)}
+              onOpenChange={() => toggleMonth(group.key)}
             >
-              <div className="flex items-center gap-3 flex-1 min-w-0">
-                {onTogglePaid && (
-                  <Checkbox
-                    checked={invoice.is_paid}
-                    onCheckedChange={(checked) => onTogglePaid(invoice.id, checked as boolean)}
-                    className="h-5 w-5"
-                  />
-                )}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-foreground">
-                      Nr. {invoice.invoice_number}
-                    </span>
+              <CollapsibleTrigger className="w-full">
+                <div className="flex items-center justify-between p-3 bg-muted/50 hover:bg-muted/70 rounded-lg transition-colors cursor-pointer">
+                  <div className="flex items-center gap-3">
+                    <FolderOpen className="w-5 h-5 text-primary" />
+                    <span className="font-semibold capitalize">{group.label}</span>
                     <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
-                      {getTypeLabel(invoice.invoice_type)}
+                      {group.invoices.length + group.uploaded.length} sąsk.
                     </span>
-                    {invoice.is_paid && (
-                      <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-600 rounded-full flex items-center gap-1">
-                        <Check className="w-3 h-3" />
-                        Apmokėta
-                      </span>
-                    )}
                   </div>
-                  <p className="text-sm text-muted-foreground truncate">
-                    {invoice.buyer_name}
-                  </p>
-                  <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                    <span>{formatDate(invoice.invoice_date)}</span>
-                    <span className="font-medium text-foreground">
-                      {formatCurrency(invoice.total_amount)}
+                  <div className="flex items-center gap-3">
+                    <span className="text-sm font-medium text-foreground">
+                      {formatCurrency(group.total)}
                     </span>
-                    {invoice.creator_name && (
-                      <span className="text-muted-foreground/70" title={invoice.creator_email}>
-                        • {invoice.creator_name}
-                      </span>
-                    )}
+                    <ChevronDown
+                      className={`w-5 h-5 text-muted-foreground transition-transform ${
+                        openMonths.includes(group.key) ? "rotate-180" : ""
+                      }`}
+                    />
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-2 ml-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onView(invoice)}
-                  title="Peržiūrėti"
-                >
-                  <Eye className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => {
-                    if (confirm("Ar tikrai norite ištrinti šią sąskaitą?")) {
-                      onDelete(invoice.id);
-                    }
-                  }}
-                  title="Ištrinti"
-                >
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              </div>
-            </div>
-          ))}
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="mt-2 space-y-2 pl-2 border-l-2 border-muted ml-2">
+                  {/* Generated invoices for this month */}
+                  {group.invoices.map((invoice) => (
+                    <div
+                      key={invoice.id}
+                      className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+                        invoice.is_paid
+                          ? "bg-green-500/10 hover:bg-green-500/20 border border-green-500/30"
+                          : "bg-secondary/30 hover:bg-secondary/50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        {onTogglePaid && (
+                          <Checkbox
+                            checked={invoice.is_paid}
+                            onCheckedChange={(checked) =>
+                              onTogglePaid(invoice.id, checked as boolean)
+                            }
+                            className="h-5 w-5"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-semibold text-foreground">
+                              Nr. {invoice.invoice_number}
+                            </span>
+                            <span className="text-xs px-2 py-0.5 bg-primary/10 text-primary rounded-full">
+                              {getTypeLabel(invoice.invoice_type)}
+                            </span>
+                            {invoice.is_paid && (
+                              <span className="text-xs px-2 py-0.5 bg-green-500/20 text-green-600 rounded-full flex items-center gap-1">
+                                <Check className="w-3 h-3" />
+                                Apmokėta
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-muted-foreground truncate">
+                            {invoice.buyer_name}
+                          </p>
+                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                            <span>{formatDate(invoice.invoice_date)}</span>
+                            <span className="font-medium text-foreground">
+                              {formatCurrency(invoice.total_amount)}
+                            </span>
+                            {invoice.creator_name && (
+                              <span
+                                className="text-muted-foreground/70"
+                                title={invoice.creator_email}
+                              >
+                                • {invoice.creator_name}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => onView(invoice)}
+                          title="Peržiūrėti"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm("Ar tikrai norite ištrinti šią sąskaitą?")) {
+                              onDelete(invoice.id);
+                            }
+                          }}
+                          title="Ištrinti"
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
 
-          {/* Uploaded invoices */}
-          {uploadedInvoices.map((uploaded) => (
-            <div
-              key={uploaded.id}
-              className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors"
-            >
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-foreground truncate">
-                    {uploaded.file_name}
-                  </span>
-                  <span className="text-xs px-2 py-0.5 bg-muted-foreground/20 text-muted-foreground rounded-full">
-                    Įkelta
-                  </span>
+                  {/* Uploaded invoices for this month */}
+                  {group.uploaded.map((uploaded) => (
+                    <div
+                      key={uploaded.id}
+                      className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold text-foreground truncate">
+                            {uploaded.file_name}
+                          </span>
+                          <span className="text-xs px-2 py-0.5 bg-muted-foreground/20 text-muted-foreground rounded-full">
+                            Įkelta
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          <span>{formatDate(uploaded.created_at)}</span>
+                          <span>{uploaded.file_type.split("/")[1]?.toUpperCase()}</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleOpenUploaded(uploaded.file_url)}
+                          title="Atidaryti"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() =>
+                            handleDeleteUploaded(uploaded.id, uploaded.file_url)
+                          }
+                          title="Ištrinti"
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
-                  <span>{formatDate(uploaded.created_at)}</span>
-                  <span>{uploaded.file_type.split('/')[1]?.toUpperCase()}</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 ml-4">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleOpenUploaded(uploaded.file_url)}
-                  title="Atidaryti"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => handleDeleteUploaded(uploaded.id, uploaded.file_url)}
-                  title="Ištrinti"
-                >
-                  <Trash2 className="w-4 h-4 text-destructive" />
-                </Button>
-              </div>
-            </div>
+              </CollapsibleContent>
+            </Collapsible>
           ))}
         </div>
       </CardContent>

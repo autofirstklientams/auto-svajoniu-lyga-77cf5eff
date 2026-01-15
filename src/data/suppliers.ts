@@ -84,10 +84,11 @@ export const sellerInfo = {
   address: "Apės g. 11, Kaunas",
 };
 
-export type VatType = "with_vat" | "no_vat" | "vat_exempt" | "margin_scheme";
+export type VatType = "with_vat" | "with_vat_included" | "no_vat" | "vat_exempt" | "margin_scheme";
 
 export const vatTypeLabels: Record<VatType, string> = {
-  with_vat: "Su PVM (21%)",
+  with_vat: "Su PVM (21% pridedama)",
+  with_vat_included: "Su PVM (21% įskaičiuota)",
   no_vat: "Be PVM",
   vat_exempt: "PVM neapmokestinama (28 str.)",
   margin_scheme: "Maržos schema (106 str.)",

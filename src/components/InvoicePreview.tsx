@@ -26,19 +26,46 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
     return amount.toFixed(2) + "€";
   };
 
+  // Apskaičiuoja PVM sumą pagal PVM tipą
   const calculateVat = (price: number, vatType: VatType) => {
     if (vatType === "with_vat") {
+      // PVM pridedama prie kainos
       return price * 0.21;
+    }
+    if (vatType === "with_vat_included") {
+      // PVM jau įskaičiuota į kainą - išskaičiuojame
+      return price - (price / 1.21);
     }
     return 0;
   };
 
-  const subtotal = data.items.reduce((sum, item) => sum + item.quantity * item.price, 0);
+  // Apskaičiuoja bazinę kainą be PVM
+  const getBasePrice = (price: number, vatType: VatType) => {
+    if (vatType === "with_vat_included") {
+      // Kaina su PVM - apskaičiuojame be PVM
+      return price / 1.21;
+    }
+    return price;
+  };
+
+  const subtotal = data.items.reduce((sum, item) => {
+    const linePrice = item.quantity * item.price;
+    return sum + getBasePrice(linePrice, item.vatType);
+  }, 0);
+  
   const totalVat = data.items.reduce(
     (sum, item) => sum + calculateVat(item.quantity * item.price, item.vatType),
     0
   );
-  const total = subtotal + totalVat;
+  
+  const total = data.items.reduce((sum, item) => {
+    const linePrice = item.quantity * item.price;
+    if (item.vatType === "with_vat") {
+      return sum + linePrice + (linePrice * 0.21);
+    }
+    // Visiems kitiems atvejams (įskaitant with_vat_included) - tiesiog pridedame kainą
+    return sum + linePrice;
+  }, 0);
 
   const handlePrint = () => {
     window.print();
@@ -208,6 +235,8 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
             <tbody>
               {data.items.map((item, index) => {
                 const lineTotal = item.quantity * item.price;
+                const basePrice = getBasePrice(item.price, item.vatType);
+                const baseLineTotal = getBasePrice(lineTotal, item.vatType);
                 return (
                   <tr key={index}>
                     <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'center', color: '#000000' }}>
@@ -220,10 +249,10 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
                       {item.quantity}
                     </td>
                     <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'right', color: '#000000' }}>
-                      {formatCurrency(item.price)}
+                      {formatCurrency(basePrice)}
                     </td>
                     <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'right', color: '#000000' }}>
-                      {formatCurrency(lineTotal)}
+                      {formatCurrency(baseLineTotal)}
                     </td>
                   </tr>
                 );

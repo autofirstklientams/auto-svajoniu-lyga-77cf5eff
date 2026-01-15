@@ -235,8 +235,6 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
             <tbody>
               {data.items.map((item, index) => {
                 const lineTotal = item.quantity * item.price;
-                const basePrice = getBasePrice(item.price, item.vatType);
-                const baseLineTotal = getBasePrice(lineTotal, item.vatType);
                 return (
                   <tr key={index}>
                     <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'center', color: '#000000' }}>
@@ -249,10 +247,10 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
                       {item.quantity}
                     </td>
                     <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'right', color: '#000000' }}>
-                      {formatCurrency(basePrice)}
+                      {formatCurrency(item.price)}
                     </td>
                     <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'right', color: '#000000' }}>
-                      {formatCurrency(baseLineTotal)}
+                      {formatCurrency(lineTotal)}
                     </td>
                   </tr>
                 );

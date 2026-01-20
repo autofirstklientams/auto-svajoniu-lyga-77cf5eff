@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "https://esm.sh/resend@4.0.0";
+import { Resend } from "https://esm.sh/resend@2.0.0";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -9,6 +9,12 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+// Available sender emails
+const SENDER_EMAILS = {
+  info: "Auto Kopers <info@autokopers.lt>",
+  labas: "Auto Kopers <labas@autokopers.lt>",
+};
+
 interface InvoiceEmailRequest {
   recipientEmail: string;
   invoiceNumber: string;
@@ -16,6 +22,7 @@ interface InvoiceEmailRequest {
   totalAmount: number;
   pdfBase64: string;
   customMessage?: string | null;
+  senderEmail?: "info" | "labas";
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -25,16 +32,31 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { recipientEmail, invoiceNumber, buyerName, totalAmount, pdfBase64, customMessage }: InvoiceEmailRequest = await req.json();
+    const { 
+      recipientEmail, 
+      invoiceNumber, 
+      buyerName, 
+      totalAmount, 
+      pdfBase64, 
+      customMessage,
+      senderEmail = "info"
+    }: InvoiceEmailRequest = await req.json();
 
     console.log("Sending invoice email to:", recipientEmail);
     console.log("Invoice number:", invoiceNumber);
+    console.log("Sender email:", senderEmail);
+    console.log("PDF base64 length:", pdfBase64?.length || 0);
     if (customMessage) {
       console.log("Custom message included");
     }
 
-    // Convert base64 to buffer for attachment
-    const pdfBuffer = Uint8Array.from(atob(pdfBase64), c => c.charCodeAt(0));
+    // Validate PDF base64
+    if (!pdfBase64 || pdfBase64.length === 0) {
+      throw new Error("PDF base64 is empty or missing");
+    }
+
+    // Get sender email
+    const fromEmail = SENDER_EMAILS[senderEmail] || SENDER_EMAILS.info;
 
     // Build custom message HTML if provided
     const customMessageHtml = customMessage 
@@ -44,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
       : '';
 
     const emailResponse = await resend.emails.send({
-      from: "Auto Kopers <info@autokopers.lt>",
+      from: fromEmail,
       to: [recipientEmail],
       subject: `PVM Sąskaita faktūra Nr. ${invoiceNumber}`,
       html: `
@@ -68,15 +90,15 @@ const handler = async (req: Request): Promise<Response> => {
           <p style="color: #666; font-size: 14px;">
             Pagarbiai,<br/>
             <strong>Auto Kopers</strong><br/>
-            El. paštas: info@autokopers.lt<br/>
-            Telefonas: +370 600 00000
+            El. paštas: ${senderEmail === "labas" ? "labas@autokopers.lt" : "info@autokopers.lt"}<br/>
+            Telefonas: +370 628 51439
           </p>
         </div>
       `,
       attachments: [
         {
           filename: `Saskaita-${invoiceNumber}.pdf`,
-          content: pdfBuffer,
+          content: pdfBase64,
         },
       ],
     });

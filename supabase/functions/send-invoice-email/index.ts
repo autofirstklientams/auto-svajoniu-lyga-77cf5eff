@@ -72,7 +72,7 @@ const handler = async (req: Request): Promise<Response> => {
       subject: `PVM Sąskaita faktūra Nr. ${invoiceNumber}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <img src="https://vjdzzaerrxfctkkiwkmn.supabase.co/storage/v1/object/public/car-images/logo-email.png" alt="Auto Kopers" style="height: 50px; margin-bottom: 20px;" />
+          <img src="https://www.autokopers.lt/logo-email.png" alt="Auto Kopers" style="max-width: 220px; height: auto; margin-bottom: 20px;" />
           
           <h2 style="color: #333;">PVM Sąskaita faktūra Nr. ${invoiceNumber}</h2>
           

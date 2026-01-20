@@ -16,12 +16,26 @@ import { Mail, Loader2, Save, X, Star } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SavedEmail {
   id: string;
   email: string;
   name: string | null;
 }
+
+type SenderEmail = "info" | "labas";
+
+const SENDER_OPTIONS: { value: SenderEmail; label: string }[] = [
+  { value: "info", label: "info@autokopers.lt" },
+  { value: "labas", label: "labas@autokopers.lt" },
+];
 
 interface SendInvoiceEmailDialogProps {
   invoiceNumber: string;
@@ -39,6 +53,7 @@ const SendInvoiceEmailDialog = ({
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [customMessage, setCustomMessage] = useState("");
+  const [senderEmail, setSenderEmail] = useState<SenderEmail>("info");
   const [sending, setSending] = useState(false);
   const [savedEmails, setSavedEmails] = useState<SavedEmail[]>([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
@@ -173,6 +188,7 @@ const SendInvoiceEmailDialog = ({
           totalAmount,
           pdfBase64,
           customMessage: customMessage.trim() || null,
+          senderEmail,
         },
       });
 
@@ -188,6 +204,7 @@ const SendInvoiceEmailDialog = ({
       setOpen(false);
       setEmail("");
       setCustomMessage("");
+      setSenderEmail("info");
     } catch (error: any) {
       console.error("Error sending invoice email:", error);
       toast({
@@ -249,9 +266,26 @@ const SendInvoiceEmailDialog = ({
             </div>
           )}
 
+          {/* Sender email selection */}
+          <div className="grid gap-2">
+            <Label htmlFor="sender">Siųsti nuo</Label>
+            <Select value={senderEmail} onValueChange={(v) => setSenderEmail(v as SenderEmail)} disabled={sending}>
+              <SelectTrigger id="sender">
+                <SelectValue placeholder="Pasirinkite siuntėjo el. paštą" />
+              </SelectTrigger>
+              <SelectContent>
+                {SENDER_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Email input */}
           <div className="grid gap-2">
-            <Label htmlFor="email">El. pašto adresas</Label>
+            <Label htmlFor="email">Gavėjo el. pašto adresas</Label>
             <div className="flex gap-2">
               <Input
                 id="email"

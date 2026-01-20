@@ -30,11 +30,12 @@ interface SavedEmail {
   name: string | null;
 }
 
-type SenderEmail = "info" | "labas";
+type SenderEmail = "labas" | "aivaras" | "ziggy";
 
 const SENDER_OPTIONS: { value: SenderEmail; label: string }[] = [
-  { value: "info", label: "info@autokopers.lt" },
   { value: "labas", label: "labas@autokopers.lt" },
+  { value: "aivaras", label: "aivaras@autokopers.lt" },
+  { value: "ziggy", label: "ziggy@autokopers.lt" },
 ];
 
 interface SendInvoiceEmailDialogProps {
@@ -53,7 +54,7 @@ const SendInvoiceEmailDialog = ({
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState("");
   const [customMessage, setCustomMessage] = useState("");
-  const [senderEmail, setSenderEmail] = useState<SenderEmail>("info");
+  const [senderEmail, setSenderEmail] = useState<SenderEmail>("labas");
   const [sending, setSending] = useState(false);
   const [savedEmails, setSavedEmails] = useState<SavedEmail[]>([]);
   const [loadingSaved, setLoadingSaved] = useState(false);
@@ -204,7 +205,7 @@ const SendInvoiceEmailDialog = ({
       setOpen(false);
       setEmail("");
       setCustomMessage("");
-      setSenderEmail("info");
+      setSenderEmail("labas");
     } catch (error: any) {
       console.error("Error sending invoice email:", error);
       toast({

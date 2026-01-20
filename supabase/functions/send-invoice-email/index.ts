@@ -10,9 +10,10 @@ const corsHeaders = {
 };
 
 // Available sender emails
-const SENDER_EMAILS = {
-  info: "Auto Kopers <info@autokopers.lt>",
+const SENDER_EMAILS: Record<string, string> = {
   labas: "Auto Kopers <labas@autokopers.lt>",
+  aivaras: "Auto Kopers <aivaras@autokopers.lt>",
+  ziggy: "Auto Kopers <ziggy@autokopers.lt>",
 };
 
 interface InvoiceEmailRequest {
@@ -22,7 +23,7 @@ interface InvoiceEmailRequest {
   totalAmount: number;
   pdfBase64: string;
   customMessage?: string | null;
-  senderEmail?: "info" | "labas";
+  senderEmail?: "labas" | "aivaras" | "ziggy";
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -39,7 +40,7 @@ const handler = async (req: Request): Promise<Response> => {
       totalAmount, 
       pdfBase64, 
       customMessage,
-      senderEmail = "info"
+      senderEmail = "labas"
     }: InvoiceEmailRequest = await req.json();
 
     console.log("Sending invoice email to:", recipientEmail);
@@ -56,7 +57,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Get sender email
-    const fromEmail = SENDER_EMAILS[senderEmail] || SENDER_EMAILS.info;
+    const fromEmail = SENDER_EMAILS[senderEmail] || SENDER_EMAILS.labas;
 
     // Build custom message HTML if provided
     const customMessageHtml = customMessage 
@@ -90,7 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
           <p style="color: #666; font-size: 14px;">
             Pagarbiai,<br/>
             <strong>Auto Kopers</strong><br/>
-            El. paštas: ${senderEmail === "labas" ? "labas@autokopers.lt" : "info@autokopers.lt"}<br/>
+            El. paštas: ${senderEmail}@autokopers.lt<br/>
             Telefonas: +370 628 51439
           </p>
         </div>

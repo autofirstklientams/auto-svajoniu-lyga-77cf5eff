@@ -28,6 +28,8 @@ interface SavedEmail {
   id: string;
   email: string;
   name: string | null;
+  use_count: number;
+  last_used_at: string | null;
 }
 
 type SenderEmail = "labas" | "aivaras" | "ziggy";
@@ -75,9 +77,10 @@ const SendInvoiceEmailDialog = ({
 
       const { data, error } = await supabase
         .from("saved_emails")
-        .select("id, email, name")
+        .select("id, email, name, use_count, last_used_at")
         .eq("user_id", user.id)
-        .order("created_at", { ascending: false });
+        .order("use_count", { ascending: false })
+        .order("last_used_at", { ascending: false, nullsFirst: false });
 
       if (error) throw error;
       setSavedEmails(data || []);
@@ -162,6 +165,27 @@ const SendInvoiceEmailDialog = ({
     }
   };
 
+  const updateEmailUsage = async (emailAddress: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Find the saved email and increment its use count
+      const savedEmail = savedEmails.find(e => e.email === emailAddress);
+      if (savedEmail) {
+        await supabase
+          .from("saved_emails")
+          .update({
+            use_count: savedEmail.use_count + 1,
+            last_used_at: new Date().toISOString(),
+          })
+          .eq("id", savedEmail.id);
+      }
+    } catch (error) {
+      console.error("Error updating email usage:", error);
+    }
+  };
+
   const handleSend = async () => {
     if (!email || !email.includes("@")) {
       toast({
@@ -196,6 +220,9 @@ const SendInvoiceEmailDialog = ({
       if (error) {
         throw error;
       }
+
+      // Update usage count for this email
+      await updateEmailUsage(email.trim());
 
       toast({
         title: "Išsiųsta!",
@@ -251,6 +278,9 @@ const SendInvoiceEmailDialog = ({
                   >
                     <span onClick={() => setEmail(saved.email)}>
                       {saved.name ? `${saved.name} (${saved.email})` : saved.email}
+                      {saved.use_count > 0 && (
+                        <span className="ml-1 text-xs text-muted-foreground">({saved.use_count})</span>
+                      )}
                     </span>
                     <button
                       onClick={(e) => {

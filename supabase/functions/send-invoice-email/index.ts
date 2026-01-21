@@ -71,30 +71,114 @@ const handler = async (req: Request): Promise<Response> => {
       to: [recipientEmail],
       subject: `PVM Sąskaita faktūra Nr. ${invoiceNumber}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <img src="https://www.autokopers.lt/logo-email.png" alt="Auto Kopers" style="max-width: 220px; height: auto; margin-bottom: 20px;" />
-          
-          <h2 style="color: #333;">PVM Sąskaita faktūra Nr. ${invoiceNumber}</h2>
-          
-          <p>Sveiki, ${buyerName}!</p>
-          
-          <p>Siunčiame jums PVM sąskaitą faktūrą Nr. <strong>${invoiceNumber}</strong>.</p>
-          
-          <p><strong>Suma:</strong> ${totalAmount.toFixed(2)}€</p>
-          
-          ${customMessageHtml}
-          
-          <p>Sąskaita faktūra pridėta kaip PDF failas.</p>
-          
-          <hr style="border: none; border-top: 1px solid #eee; margin: 30px 0;" />
-          
-          <p style="color: #666; font-size: 14px;">
-            Pagarbiai,<br/>
-            <strong>Auto Kopers</strong><br/>
-            El. paštas: ${senderEmail}@autokopers.lt<br/>
-            Telefonas: +370 628 51439
-          </p>
-        </div>
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #f4f4f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #f4f4f5;">
+            <tr>
+              <td align="center" style="padding: 40px 20px;">
+                <table role="presentation" width="600" cellspacing="0" cellpadding="0" style="background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                  
+                  <!-- Header with Logo -->
+                  <tr>
+                    <td style="padding: 32px 40px 24px 40px; border-bottom: 1px solid #e4e4e7;">
+                      <img src="https://www.autokopers.lt/logo-email.png" alt="Auto Kopers" style="max-width: 180px; height: auto; display: block;" />
+                    </td>
+                  </tr>
+                  
+                  <!-- Main Content -->
+                  <tr>
+                    <td style="padding: 32px 40px;">
+                      <h1 style="margin: 0 0 24px 0; font-size: 24px; font-weight: 600; color: #18181b;">
+                        PVM Sąskaita faktūra
+                      </h1>
+                      
+                      <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #3f3f46;">
+                        Sveiki, <strong>${buyerName}</strong>!
+                      </p>
+                      
+                      <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #3f3f46;">
+                        Siunčiame jums PVM sąskaitą faktūrą. Dokumentas pridėtas kaip PDF failas.
+                      </p>
+                      
+                      <!-- Invoice Details Box -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #fafafa; border-radius: 8px; border: 1px solid #e4e4e7; margin-bottom: 24px;">
+                        <tr>
+                          <td style="padding: 20px;">
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                              <tr>
+                                <td style="padding-bottom: 12px;">
+                                  <span style="font-size: 13px; color: #71717a; text-transform: uppercase; letter-spacing: 0.5px;">Sąskaitos numeris</span>
+                                  <div style="font-size: 18px; font-weight: 600; color: #18181b; margin-top: 4px;">${invoiceNumber}</div>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td>
+                                  <span style="font-size: 13px; color: #71717a; text-transform: uppercase; letter-spacing: 0.5px;">Bendra suma</span>
+                                  <div style="font-size: 24px; font-weight: 700; color: #16a34a; margin-top: 4px;">${totalAmount.toFixed(2)} €</div>
+                                </td>
+                              </tr>
+                            </table>
+                          </td>
+                        </tr>
+                      </table>
+                      
+                      ${customMessage ? `
+                      <!-- Custom Message -->
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background-color: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b; margin-bottom: 24px;">
+                        <tr>
+                          <td style="padding: 16px 20px;">
+                            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #92400e; white-space: pre-line;">${customMessage.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                          </td>
+                        </tr>
+                      </table>
+                      ` : ''}
+                      
+                      <p style="margin: 0; font-size: 14px; color: #71717a;">
+                        📎 Sąskaita faktūra pridėta kaip PDF failas prie šio laiško.
+                      </p>
+                    </td>
+                  </tr>
+                  
+                  <!-- Footer -->
+                  <tr>
+                    <td style="padding: 24px 40px 32px 40px; background-color: #18181b; border-radius: 0 0 12px 12px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <td>
+                            <p style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #ffffff;">
+                              Auto Kopers
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 14px; color: #a1a1aa;">
+                              📧 ${senderEmail}@autokopers.lt
+                            </p>
+                            <p style="margin: 0 0 4px 0; font-size: 14px; color: #a1a1aa;">
+                              📞 +370 628 51439
+                            </p>
+                            <p style="margin: 0; font-size: 14px; color: #a1a1aa;">
+                              🌐 www.autokopers.lt
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  
+                </table>
+                
+                <!-- Bottom Text -->
+                <p style="margin: 24px 0 0 0; font-size: 12px; color: #71717a; text-align: center;">
+                  Šis laiškas sugeneruotas automatiškai. Jei turite klausimų, susisiekite su mumis.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </body>
+        </html>
       `,
       attachments: [
         {

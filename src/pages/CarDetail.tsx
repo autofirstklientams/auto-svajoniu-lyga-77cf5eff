@@ -213,15 +213,85 @@ const CarDetail = () => {
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="container mx-auto px-4 py-8">
-        {/* Back button */}
-        <Link to="/car-search" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
+      <main className="container mx-auto px-4 py-4 sm:py-8">
+        {/* Back button - hidden on mobile, shown on desktop */}
+        <Link to="/car-search" className="hidden sm:inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
           Grįžti į paiešką
         </Link>
 
-        {/* Title & Price */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        {/* Mobile: Image first, then title */}
+        <div className="lg:hidden">
+          {/* Main Image - Full width on mobile */}
+          {allImages.length > 0 && (
+            <div className="relative -mx-4 aspect-[4/3] sm:aspect-video bg-muted overflow-hidden sm:mx-0 sm:rounded-lg mb-4">
+              <img
+                src={allImages[currentImageIndex]}
+                alt={`${car.make} ${car.model}`}
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={() => setLightboxOpen(true)}
+              />
+              {allImages.length > 1 && (
+                <>
+                  <button
+                    onClick={handlePrevImage}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                  >
+                    <ChevronLeft className="h-5 w-5" />
+                  </button>
+                  <button
+                    onClick={handleNextImage}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                  >
+                    <ChevronRight className="h-5 w-5" />
+                  </button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/50 text-white px-2.5 py-1 rounded-full text-xs">
+                    {currentImageIndex + 1} / {allImages.length}
+                  </div>
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Thumbnails - Mobile */}
+          {allImages.length > 1 && (
+            <div className="flex gap-1.5 overflow-x-auto pb-3 mb-3 -mx-4 px-4 sm:mx-0 sm:px-0">
+              {allImages.map((img, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentImageIndex(index)}
+                  className={`flex-shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-md overflow-hidden border-2 transition-colors ${
+                    currentImageIndex === index 
+                      ? "border-primary" 
+                      : "border-transparent hover:border-muted-foreground/50"
+                  }`}
+                >
+                  <img
+                    src={img}
+                    alt={`Thumbnail ${index + 1}`}
+                    className="w-full h-full object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Title & Price - Mobile */}
+          <div className="mb-4">
+            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+              {car.make} {car.model}
+            </h1>
+            <div className="flex items-center justify-between mt-1">
+              <p className="text-sm text-muted-foreground">{car.year} • {car.condition || "Naudotas"}</p>
+              <div className="text-xl sm:text-2xl font-bold text-primary">
+                {formatPrice(car.price)}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: Title first */}
+        <div className="hidden lg:flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
             <h1 className="text-3xl font-bold text-foreground">
               {car.make} {car.model}
@@ -233,43 +303,45 @@ const CarDetail = () => {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Left column - Images & Details */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Main Image */}
-            {allImages.length > 0 && (
-              <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-                <img
-                  src={allImages[currentImageIndex]}
-                  alt={`${car.make} ${car.model}`}
-                  className="w-full h-full object-cover cursor-pointer"
-                  onClick={() => setLightboxOpen(true)}
-                />
-                {allImages.length > 1 && (
-                  <>
-                    <button
-                      onClick={handlePrevImage}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-                    >
-                      <ChevronLeft className="h-6 w-6" />
-                    </button>
-                    <button
-                      onClick={handleNextImage}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
-                    >
-                      <ChevronRight className="h-6 w-6" />
-                    </button>
-                    <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
-                      {currentImageIndex + 1} / {allImages.length}
-                    </div>
-                  </>
-                )}
-              </div>
-            )}
+          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
+            {/* Main Image - Desktop only */}
+            <div className="hidden lg:block">
+              {allImages.length > 0 && (
+                <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
+                  <img
+                    src={allImages[currentImageIndex]}
+                    alt={`${car.make} ${car.model}`}
+                    className="w-full h-full object-cover cursor-pointer"
+                    onClick={() => setLightboxOpen(true)}
+                  />
+                  {allImages.length > 1 && (
+                    <>
+                      <button
+                        onClick={handlePrevImage}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                      >
+                        <ChevronLeft className="h-6 w-6" />
+                      </button>
+                      <button
+                        onClick={handleNextImage}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white p-2 rounded-full transition-colors"
+                      >
+                        <ChevronRight className="h-6 w-6" />
+                      </button>
+                      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+                        {currentImageIndex + 1} / {allImages.length}
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
 
-            {/* Thumbnails */}
+            {/* Thumbnails - Desktop only */}
             {allImages.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto pb-2">
+              <div className="hidden lg:flex gap-2 overflow-x-auto pb-2">
                 {allImages.map((img, index) => (
                   <button
                     key={index}

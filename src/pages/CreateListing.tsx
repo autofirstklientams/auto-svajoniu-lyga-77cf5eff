@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,9 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, X, Link, Loader2, Globe, ExternalLink } from "lucide-react";
+import { Upload, Link, Loader2, Globe, ExternalLink, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
+import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
+import { processImages } from "@/utils/imageUtils";
 
 const carSchema = z.object({
   make: z.string().trim().min(1, "Markė privaloma"),
@@ -147,9 +149,6 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
     }
   };
 
-  const handleRemoveImportedImage = (index: number) => {
-    setImportedImageUrls(prev => prev.filter((_, i) => i !== index));
-  };
 
   useEffect(() => {
     if (car?.id) {
@@ -174,14 +173,15 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
     setExistingImages(data?.map(img => ({ id: img.id, url: img.image_url, order: img.display_order })) || []);
   };
 
-  const processImageFiles = (files: File[]) => {
+  const processImageFiles = async (files: File[]) => {
     const validFiles = files.filter(file => {
       if (!file.type.startsWith('image/')) {
         toast.error(`${file.name} nėra nuotrauka`);
         return false;
       }
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} per didelis. Maksimalus dydis: 5MB`);
+      // Increased limit since we auto-resize
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error(`${file.name} per didelis. Maksimalus dydis: 20MB`);
         return false;
       }
       return true;
@@ -189,15 +189,29 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
 
     if (validFiles.length === 0) return;
 
-    setImageFiles(prev => [...prev, ...validFiles]);
+    // Process and resize images
+    try {
+      const processedImages = await processImages(validFiles);
+      const resizedCount = processedImages.filter(r => r.wasResized).length;
+      
+      if (resizedCount > 0) {
+        toast.success(`${resizedCount} nuotrauk${resizedCount === 1 ? 'a' : 'os'} automatiškai sumažint${resizedCount === 1 ? 'a' : 'os'}`);
+      }
 
-    validFiles.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreviews(prev => [...prev, reader.result as string]);
-      };
-      reader.readAsDataURL(file);
-    });
+      const newFiles = processedImages.map(r => r.file);
+      setImageFiles(prev => [...prev, ...newFiles]);
+
+      newFiles.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreviews(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
+    } catch (error) {
+      console.error("Error processing images:", error);
+      toast.error("Klaida apdorojant nuotraukas");
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -226,12 +240,13 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
     processImageFiles(files);
   };
 
-  const handleRemoveNewImage = (index: number) => {
+  const handleRemoveNewImage = useCallback((id: string) => {
+    const index = parseInt(id.replace('new-', ''));
     setImageFiles(prev => prev.filter((_, i) => i !== index));
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
-  };
+  }, []);
 
-  const handleRemoveExistingImage = async (imageId: string) => {
+  const handleRemoveExistingImage = useCallback(async (imageId: string) => {
     const { error } = await supabase
       .from("car_images")
       .delete()
@@ -244,7 +259,40 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
 
     setExistingImages(prev => prev.filter(img => img.id !== imageId));
     toast.success("Nuotrauka pašalinta");
-  };
+  }, []);
+
+  const handleRemoveImportedImage = useCallback((id: string) => {
+    const index = parseInt(id.replace('imported-', ''));
+    setImportedImageUrls(prev => prev.filter((_, i) => i !== index));
+  }, []);
+
+  const handleReorderExistingImages = useCallback((reorderedImages: DraggableImage[]) => {
+    setExistingImages(reorderedImages.map((img, index) => ({
+      id: img.id,
+      url: img.url,
+      order: index
+    })));
+  }, []);
+
+  const handleReorderNewImages = useCallback((reorderedImages: DraggableImage[]) => {
+    const newFiles: File[] = [];
+    const newPreviews: string[] = [];
+    
+    reorderedImages.forEach(img => {
+      const index = parseInt(img.id.replace('new-', ''));
+      if (imageFiles[index]) {
+        newFiles.push(imageFiles[index]);
+        newPreviews.push(img.url);
+      }
+    });
+    
+    setImageFiles(newFiles);
+    setImagePreviews(newPreviews);
+  }, [imageFiles]);
+
+  const handleReorderImportedImages = useCallback((reorderedImages: DraggableImage[]) => {
+    setImportedImageUrls(reorderedImages.map(img => img.url));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -302,6 +350,25 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
           .update(carData)
           .eq("id", car.id);
         if (error) throw error;
+        
+        // Update existing images order if changed
+        for (let i = 0; i < existingImages.length; i++) {
+          const img = existingImages[i];
+          if (img.order !== i) {
+            await supabase
+              .from("car_images")
+              .update({ display_order: i })
+              .eq("id", img.id);
+          }
+        }
+        
+        // Update main car image if first image changed
+        if (existingImages.length > 0) {
+          await supabase
+            .from("cars")
+            .update({ image_url: existingImages[0].url })
+            .eq("id", car.id);
+        }
       } else {
         const { data: newCar, error } = await supabase
           .from("cars")
@@ -859,7 +926,7 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
                 <span className={`text-sm transition-colors ${isDragging ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
                   {isDragging ? 'Paleiskite nuotraukas čia' : 'Įkelkite arba užvilkite nuotraukas'}
                 </span>
-                <span className="text-xs text-muted-foreground mt-1">Max 5MB kiekviena</span>
+                <span className="text-xs text-muted-foreground mt-1">Max 20MB kiekviena (automatiškai sumažinama)</span>
               </label>
               <Input
                 id="image"
@@ -870,86 +937,39 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
                 onChange={handleImageChange}
               />
 
-              {/* Existing images */}
-              {existingImages.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium mb-2">Esamos nuotraukos:</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {existingImages.map((img) => (
-                      <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border">
-                        <img
-                          src={img.url}
-                          alt={`Existing ${img.order}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-1 right-1 h-6 w-6"
-                          onClick={() => handleRemoveExistingImage(img.id)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Existing images with drag-and-drop */}
+              <DraggableImageGrid
+                images={existingImages.map(img => ({
+                  id: img.id,
+                  url: img.url,
+                }))}
+                onReorder={handleReorderExistingImages}
+                onRemove={handleRemoveExistingImage}
+                title="Esamos nuotraukos:"
+              />
 
-              {/* New images preview */}
-              {imagePreviews.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium mb-2">Naujos nuotraukos:</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {imagePreviews.map((preview, index) => (
-                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
-                        <img
-                          src={preview}
-                          alt={`Preview ${index}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-1 right-1 h-6 w-6"
-                          onClick={() => handleRemoveNewImage(index)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* New images with drag-and-drop */}
+              <DraggableImageGrid
+                images={imagePreviews.map((preview, index) => ({
+                  id: `new-${index}`,
+                  url: preview,
+                  isNew: true,
+                }))}
+                onReorder={handleReorderNewImages}
+                onRemove={handleRemoveNewImage}
+                title="Naujos nuotraukos:"
+              />
 
-              {/* Imported images preview */}
-              {importedImageUrls.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium mb-2">Importuotos nuotraukos ({importedImageUrls.length}):</p>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {importedImageUrls.map((url, index) => (
-                      <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
-                        <img
-                          src={url}
-                          alt={`Imported ${index}`}
-                          className="w-full h-full object-cover"
-                        />
-                        <Button
-                          type="button"
-                          variant="destructive"
-                          size="icon"
-                          className="absolute top-1 right-1 h-6 w-6"
-                          onClick={() => handleRemoveImportedImage(index)}
-                        >
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Imported images with drag-and-drop */}
+              <DraggableImageGrid
+                images={importedImageUrls.map((url, index) => ({
+                  id: `imported-${index}`,
+                  url: url,
+                }))}
+                onReorder={handleReorderImportedImages}
+                onRemove={handleRemoveImportedImage}
+                title={`Importuotos nuotraukos (${importedImageUrls.length}):`}
+              />
             </div>
           </div>
 

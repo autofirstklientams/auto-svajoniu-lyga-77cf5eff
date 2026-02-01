@@ -12,6 +12,7 @@ import { StatsCards } from "@/components/partner/StatsCards";
 import { CarListingCard } from "@/components/partner/CarListingCard";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Car {
   id: string;
@@ -48,7 +49,8 @@ const PartnerDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   const userIdRef = React.useRef<string | null>(null);
@@ -252,8 +254,8 @@ const PartnerDashboard = () => {
 
       <main
         className={cn(
-          "min-h-screen transition-all duration-300 p-6 lg:p-8",
-          sidebarCollapsed ? "ml-16" : "ml-64"
+          "min-h-screen transition-all duration-300 p-4 pt-16 md:p-6 lg:p-8",
+          isMobile ? "ml-0" : (sidebarCollapsed ? "ml-16" : "ml-64")
         )}
       >
         {/* Header */}
@@ -318,7 +320,7 @@ const PartnerDashboard = () => {
         </div>
 
         {/* Listings Grid */}
-        <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
           {filteredCars.map((car) => (
             <CarListingCard
               key={car.id}

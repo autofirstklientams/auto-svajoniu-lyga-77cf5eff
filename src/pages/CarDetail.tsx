@@ -386,7 +386,7 @@ const CarDetail = () => {
                     {car.engine_capacity && (
                       <div className="p-3 bg-muted/50 rounded-lg">
                         <p className="text-xs text-muted-foreground">Variklis</p>
-                        <p className="font-medium text-foreground">{car.engine_capacity} L</p>
+                        <p className="font-medium text-foreground">{Math.round(car.engine_capacity * 1000)} cm³</p>
                       </div>
                     )}
                     {car.power_kw && (

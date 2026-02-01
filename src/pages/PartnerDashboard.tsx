@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -22,20 +22,20 @@ interface Car {
   price: number;
   mileage: number | null;
   fuel_type: string | null;
-  transmission: string | null;
-  description: string | null;
+  transmission?: string | null;
+  description?: string | null;
   image_url: string | null;
-  body_type: string | null;
-  engine_capacity: number | null;
-  power_kw: number | null;
-  doors: number | null;
-  seats: number | null;
-  color: string | null;
-  steering_wheel: string | null;
-  condition: string | null;
-  vin: string | null;
-  defects: string | null;
-  features: any;
+  body_type?: string | null;
+  engine_capacity?: number | null;
+  power_kw?: number | null;
+  doors?: number | null;
+  seats?: number | null;
+  color?: string | null;
+  steering_wheel?: string | null;
+  condition?: string | null;
+  vin?: string | null;
+  defects?: string | null;
+  features?: any;
   visible_web: boolean;
   visible_autoplius: boolean;
 }
@@ -141,12 +141,13 @@ const PartnerDashboard = () => {
     }
   }, [user]);
 
-  const fetchCars = async () => {
+  const fetchCars = useCallback(async () => {
+    if (!user?.id) return;
     try {
       const { data, error } = await supabase
         .from("cars")
-        .select("*")
-        .eq("partner_id", user?.id)
+        .select("id, make, model, year, price, mileage, fuel_type, transmission, image_url, visible_web, visible_autoplius")
+        .eq("partner_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -158,7 +159,7 @@ const PartnerDashboard = () => {
         toast.error("Klaida užkraunant skelbimus");
       }
     }
-  };
+  }, [user?.id]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Ar tikrai norite ištrinti šį skelbimą?")) return;
@@ -216,18 +217,20 @@ const PartnerDashboard = () => {
   };
 
 
-  const filteredCars = cars.filter(car => {
-    if (!searchQuery) return true;
+  const filteredCars = useMemo(() => {
+    if (!searchQuery) return cars;
     const query = searchQuery.toLowerCase();
-    return (
+    return cars.filter(car =>
       car.make.toLowerCase().includes(query) ||
       car.model.toLowerCase().includes(query) ||
       car.year.toString().includes(query)
     );
-  });
+  }, [cars, searchQuery]);
 
-  const webVisibleCount = cars.filter(c => c.visible_web).length;
-  const autopliusVisibleCount = cars.filter(c => c.visible_autoplius).length;
+  const { webVisibleCount, autopliusVisibleCount } = useMemo(() => ({
+    webVisibleCount: cars.filter(c => c.visible_web).length,
+    autopliusVisibleCount: cars.filter(c => c.visible_autoplius).length,
+  }), [cars]);
 
   if (isLoading) {
     return (
@@ -278,7 +281,7 @@ const PartnerDashboard = () => {
         </div>
 
         {/* Stats */}
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <StatsCards
             totalCars={cars.length}
             webVisible={webVisibleCount}

@@ -26,7 +26,7 @@ const DOWN_PAYMENT_OPTIONS = [
 
 export const calculateMonthlyPayment = (
   price: number,
-  months: number = 60,
+  months: number = 144,
   downPaymentPercent: number = 0
 ): number => {
   const downPayment = price * downPaymentPercent;

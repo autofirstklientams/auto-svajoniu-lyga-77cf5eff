@@ -40,16 +40,16 @@ export function StatsCards({ totalCars, webVisible, autopliusVisible }: StatsCar
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
       {stats.map((stat) => (
         <Card key={stat.title} className="border-none shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className={`p-3 rounded-xl ${stat.bgColor}`}>
-              <stat.icon className={`h-6 w-6 ${stat.color}`} />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
+            <div className={`p-2 sm:p-3 rounded-xl ${stat.bgColor}`}>
+              <stat.icon className={`h-4 w-4 sm:h-6 sm:w-6 ${stat.color}`} />
             </div>
             <div>
-              <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-sm text-muted-foreground">{stat.title}</p>
+              <p className="text-lg sm:text-2xl font-bold text-foreground">{stat.value}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">{stat.title}</p>
             </div>
           </CardContent>
         </Card>

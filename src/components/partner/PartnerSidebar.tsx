@@ -3,16 +3,17 @@ import {
   Car, 
   LayoutDashboard, 
   FileText, 
-  Settings, 
   LogOut, 
   ChevronLeft,
   Shield,
-  Download
+  Menu,
+  X
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/autokopers-logo.jpeg";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PartnerSidebarProps {
   isCollapsed: boolean;
@@ -29,12 +30,129 @@ const menuItems = [
 export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSidebarProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate("/");
   };
 
+  // Mobile: show hamburger button when collapsed, overlay menu when open
+  if (isMobile) {
+    return (
+      <>
+        {/* Mobile hamburger button */}
+        {isCollapsed && (
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={onToggle}
+            className="fixed top-4 left-4 z-50 h-10 w-10 bg-background shadow-md"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
+        )}
+
+        {/* Mobile overlay menu */}
+        {!isCollapsed && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/50 z-40"
+              onClick={onToggle}
+            />
+            
+            {/* Sidebar */}
+            <aside className="fixed left-0 top-0 z-50 h-screen w-72 bg-sidebar border-r border-sidebar-border flex flex-col animate-in slide-in-from-left duration-200">
+              {/* Header */}
+              <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
+                <Link to="/" className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-xl overflow-hidden flex-shrink-0 bg-primary/10 flex items-center justify-center shadow-sm">
+                    <img 
+                      src={logo} 
+                      alt="AutoKOPERS" 
+                      className="h-9 w-9 object-contain"
+                    />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="font-bold text-sidebar-foreground whitespace-nowrap text-lg leading-tight">
+                      AutoKOPERS
+                    </span>
+                    <span className="text-xs text-muted-foreground">Partnerio zona</span>
+                  </div>
+                </Link>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={onToggle}
+                  className="h-8 w-8 text-sidebar-foreground hover:bg-sidebar-accent"
+                >
+                  <X className="h-5 w-5" />
+                </Button>
+              </div>
+
+              {/* Navigation */}
+              <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+                {menuItems
+                  .filter((item) => !item.adminOnly || isAdmin)
+                  .map((item) => {
+                    const isActive = location.pathname === item.url;
+                    return (
+                      <Link
+                        key={item.title}
+                        to={item.url}
+                        onClick={onToggle}
+                        className={cn(
+                          "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200",
+                          "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                          isActive
+                            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                            : "text-sidebar-foreground"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5 flex-shrink-0" />
+                        <span className="font-medium">{item.title}</span>
+                      </Link>
+                    );
+                  })}
+
+                {isAdmin && (
+                  <Link
+                    to="/admin-dashboard"
+                    onClick={onToggle}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-3 rounded-lg transition-all duration-200",
+                      "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                      location.pathname === "/admin-dashboard"
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                        : "text-sidebar-foreground"
+                    )}
+                  >
+                    <Shield className="h-5 w-5 flex-shrink-0" />
+                    <span className="font-medium">Admin zona</span>
+                  </Link>
+                )}
+              </nav>
+
+              {/* Footer */}
+              <div className="p-3 border-t border-sidebar-border">
+                <Button
+                  variant="ghost"
+                  onClick={handleLogout}
+                  className="w-full justify-start gap-3 text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                >
+                  <LogOut className="h-5 w-5 flex-shrink-0" />
+                  <span>Atsijungti</span>
+                </Button>
+              </div>
+            </aside>
+          </>
+        )}
+      </>
+    );
+  }
+
+  // Desktop sidebar
   return (
     <aside
       className={cn(

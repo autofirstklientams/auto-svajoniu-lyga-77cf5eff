@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
@@ -81,10 +81,10 @@ const CarDetail = () => {
     }
   }, [id]);
 
-  const fetchCar = async () => {
+  const fetchCar = useCallback(async () => {
     const { data, error } = await supabase
       .from("cars")
-      .select("*")
+      .select("id, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features")
       .eq("id", id)
       .eq("visible_web", true)
       .single();
@@ -96,37 +96,39 @@ const CarDetail = () => {
       setCar(data as Car);
     }
     setIsLoading(false);
-  };
+  }, [id]);
 
-  const fetchImages = async () => {
+  const fetchImages = useCallback(async () => {
     const { data, error } = await supabase
       .from("car_images")
-      .select("*")
+      .select("id, image_url, display_order")
       .eq("car_id", id)
       .order("display_order", { ascending: true });
 
     if (!error && data) {
       setImages(data);
     }
-  };
+  }, [id]);
 
-  const allImages = images.length > 0 
-    ? images.map(img => img.image_url) 
-    : car?.image_url 
-      ? [car.image_url] 
-      : [];
+  const allImages = useMemo(() => {
+    return images.length > 0 
+      ? images.map(img => img.image_url) 
+      : car?.image_url 
+        ? [car.image_url] 
+        : [];
+  }, [images, car?.image_url]);
 
-  const handlePrevImage = () => {
+  const handlePrevImage = useCallback(() => {
     setCurrentImageIndex((prev) => 
       prev === 0 ? allImages.length - 1 : prev - 1
     );
-  };
+  }, [allImages.length]);
 
-  const handleNextImage = () => {
+  const handleNextImage = useCallback(() => {
     setCurrentImageIndex((prev) => 
       prev === allImages.length - 1 ? 0 : prev + 1
     );
-  };
+  }, [allImages.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

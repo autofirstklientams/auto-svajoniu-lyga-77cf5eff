@@ -637,6 +637,8 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
                     <SelectItem value="Dyzelinas">Dyzelinas</SelectItem>
                     <SelectItem value="Elektra">Elektra</SelectItem>
                     <SelectItem value="Hibridinis">Hibridinis</SelectItem>
+                    <SelectItem value="Benzinas/Elektra">Benzinas/Elektra</SelectItem>
+                    <SelectItem value="Dyzelinas/Elektra">Dyzelinas/Elektra</SelectItem>
                     <SelectItem value="Dujos">Dujos</SelectItem>
                     <SelectItem value="Benzinas/Dujos">Benzinas/Dujos</SelectItem>
                   </SelectContent>

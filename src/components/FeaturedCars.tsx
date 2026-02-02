@@ -32,7 +32,7 @@ const FeaturedCars = () => {
     try {
       const { data, error } = await supabase
         .from("cars")
-        .select("*")
+        .select("id, make, model, year, price, mileage, image_url, fuel_type, is_recommended")
         .eq("visible_web", true)
         .eq("is_featured", true)
         .order("is_recommended", { ascending: false })

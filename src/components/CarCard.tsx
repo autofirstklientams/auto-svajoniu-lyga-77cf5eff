@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,7 +20,7 @@ interface CarCardProps {
   isRecommended?: boolean;
 }
 
-const CarCard = ({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended }: CarCardProps) => {
+function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended }: CarCardProps) {
   const { t } = useLanguage();
   const monthlyPayment = numericPrice ? calculateMonthlyPayment(numericPrice) : null;
   
@@ -49,6 +50,7 @@ const CarCard = ({ id, image, title, price, numericPrice, year, mileage, fuel, f
         <img 
           src={image} 
           alt={title}
+          loading="lazy"
           className={`w-full h-40 sm:h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -99,6 +101,7 @@ const CarCard = ({ id, image, title, price, numericPrice, year, mileage, fuel, f
   }
 
   return content;
-};
+}
 
+const CarCard = memo(CarCardComponent);
 export default CarCard;

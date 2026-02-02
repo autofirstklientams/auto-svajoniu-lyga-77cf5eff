@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -46,7 +46,6 @@ const sortOptions: { value: SortOption; label: string }[] = [
 
 const CarCatalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [cars, setCars] = useState<Car[]>([]);
   const [allCars, setAllCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [makeCounts, setMakeCounts] = useState<MakeCount[]>([]);
@@ -60,10 +59,6 @@ const CarCatalog = () => {
   }, []);
 
   useEffect(() => {
-    applyFiltersAndSort();
-  }, [allCars, searchQuery, selectedMakes, sortBy]);
-
-  useEffect(() => {
     const newParams = new URLSearchParams();
     if (sortBy !== "recommended") newParams.set("sort", sortBy);
     if (selectedMakes.length > 0) newParams.set("makes", selectedMakes.join(","));
@@ -71,11 +66,11 @@ const CarCatalog = () => {
     setSearchParams(newParams);
   }, [sortBy, selectedMakes, searchQuery]);
 
-  const fetchCars = async () => {
+  const fetchCars = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from("cars")
-        .select("*")
+        .select("id, make, model, year, price, mileage, image_url, fuel_type, transmission, body_type, is_recommended")
         .eq("visible_web", true);
 
       if (error) throw error;
@@ -98,9 +93,9 @@ const CarCatalog = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
-  const applyFiltersAndSort = () => {
+  const filteredCars = useMemo(() => {
     let filtered = [...allCars];
 
     // Apply search filter
@@ -150,8 +145,8 @@ const CarCatalog = () => {
         break;
     }
 
-    setCars(filtered);
-  };
+    return filtered;
+  }, [allCars, searchQuery, selectedMakes, sortBy]);
 
   const toggleMake = (make: string) => {
     setSelectedMakes((prev) =>
@@ -239,7 +234,7 @@ const CarCatalog = () => {
                 Automobiliai
               </h1>
               <p className="text-muted-foreground mt-2">
-                {cars.length} {cars.length === 1 ? "rezultatas" : "rezultatai"}
+                {filteredCars.length} {filteredCars.length === 1 ? "rezultatas" : "rezultatai"}
               </p>
             </div>
 
@@ -305,7 +300,7 @@ const CarCatalog = () => {
                 <div className="flex items-center justify-center min-h-[400px]">
                   <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
                 </div>
-              ) : cars.length === 0 ? (
+              ) : filteredCars.length === 0 ? (
                 <div className="text-center py-16 bg-muted/30 rounded-xl">
                   <p className="text-muted-foreground text-lg">
                     Automobilių pagal pasirinktus filtrus nerasta
@@ -316,7 +311,7 @@ const CarCatalog = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {cars.map((car, index) => (
+                  {filteredCars.map((car, index) => (
                     <div
                       key={car.id}
                       className="animate-fade-in"

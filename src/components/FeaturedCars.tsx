@@ -3,7 +3,6 @@ import { Link } from "react-router-dom";
 import CarCard from "./CarCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import ExternalCarPlatforms from "./ExternalCarPlatforms";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -65,7 +64,9 @@ const FeaturedCars = () => {
     return (
       <section id="featured-cars" className="py-20 bg-muted/30">
         <div className="container mx-auto px-4">
-          <ExternalCarPlatforms />
+          <div className="text-center">
+            <p className="text-muted-foreground">{t("featured.noCars")}</p>
+          </div>
         </div>
       </section>
     );
@@ -112,8 +113,6 @@ const FeaturedCars = () => {
             </Link>
           </Button>
         </div>
-        
-        <ExternalCarPlatforms />
       </div>
     </section>
   );

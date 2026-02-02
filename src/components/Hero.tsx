@@ -50,8 +50,8 @@ const Hero = () => {
       
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          {/* Left side - Text content */}
-          <div className="text-white order-2 lg:order-1 animate-fade-in">
+          {/* Left side - Text content (hidden on mobile) */}
+          <div className="text-white order-2 lg:order-1 animate-fade-in hidden lg:block">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 mb-6 border border-white/20">
               <Calculator className="h-4 w-4 text-white" />
               <span className="text-sm font-medium">{t("hero.badge")}</span>

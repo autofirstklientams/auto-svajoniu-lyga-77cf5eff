@@ -108,7 +108,6 @@ const Header = () => {
 
             {/* Mobile navigation */}
             <div className="md:hidden flex items-center gap-2">
-              <LanguageSwitcher />
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="icon" aria-label="Open menu">

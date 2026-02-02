@@ -26,9 +26,15 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        <TrustSection />
+        {/* Mobile: Calculator -> Cars -> Trust/Testimonials. Desktop: Trust first */}
+        <div className="hidden md:block">
+          <TrustSection />
+        </div>
         <div id="featured-cars">
           <FeaturedCars />
+        </div>
+        <div className="md:hidden">
+          <TrustSection />
         </div>
         <FinancingSection />
         <Testimonials />

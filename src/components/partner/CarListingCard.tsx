@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ interface Car {
   image_url: string | null;
   visible_web: boolean;
   visible_autoplius: boolean;
+  [key: string]: any; // Allow additional properties for editing
 }
 
 interface CarListingCardProps {
@@ -26,7 +27,7 @@ interface CarListingCardProps {
   isOwner?: boolean;
 }
 
-export function CarListingCard({ car, onEdit, onDelete, onDuplicate, isOwner = true }: CarListingCardProps) {
+export const CarListingCard = memo(function CarListingCard({ car, onEdit, onDelete, onDuplicate, isOwner = true }: CarListingCardProps) {
   const [showManagement, setShowManagement] = useState(false);
   const carTitle = `${car.make} ${car.model} (${car.year})`;
 
@@ -39,6 +40,7 @@ export function CarListingCard({ car, onEdit, onDelete, onDuplicate, isOwner = t
               src={car.image_url}
               alt={`${car.make} ${car.model}`}
               className="w-full h-48 object-cover"
+              loading="lazy"
             />
           ) : (
             <div className="w-full h-48 bg-muted flex items-center justify-center">
@@ -141,4 +143,4 @@ export function CarListingCard({ car, onEdit, onDelete, onDuplicate, isOwner = t
       />
     </>
   );
-}
+});

@@ -16,7 +16,7 @@ interface Car {
   image_url: string | null;
   visible_web: boolean;
   visible_autoplius: boolean;
-  [key: string]: any; // Allow additional properties for editing
+  [key: string]: any;
 }
 
 interface CarListingCardProps {
@@ -27,7 +27,7 @@ interface CarListingCardProps {
   isOwner?: boolean;
 }
 
-export const CarListingCard = memo(function CarListingCard({ car, onEdit, onDelete, onDuplicate, isOwner = true }: CarListingCardProps) {
+function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, isOwner = true }: CarListingCardProps) {
   const [showManagement, setShowManagement] = useState(false);
   const carTitle = `${car.make} ${car.model} (${car.year})`;
 
@@ -143,4 +143,6 @@ export const CarListingCard = memo(function CarListingCard({ car, onEdit, onDele
       />
     </>
   );
-});
+}
+
+export const CarListingCard = memo(CarListingCardComponent);

@@ -3,6 +3,7 @@ import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare } from "lucide
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { OptimizedImage } from "@/components/OptimizedImage";
 import { CarManagementDialog } from "./CarManagementDialog";
 
 interface Car {
@@ -36,11 +37,10 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, isOwner =
       <Card className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300">
         <div className="relative">
           {car.image_url ? (
-            <img
+            <OptimizedImage
               src={car.image_url}
               alt={`${car.make} ${car.model}`}
-              className="w-full h-48 object-cover"
-              loading="lazy"
+              className="w-full h-48"
             />
           ) : (
             <div className="w-full h-48 bg-muted flex items-center justify-center">

@@ -141,6 +141,12 @@ const PartnerDashboard = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    if (showCreateForm) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [showCreateForm]);
+
   const fetchCars = useCallback(async () => {
     if (!user?.id) return;
     try {

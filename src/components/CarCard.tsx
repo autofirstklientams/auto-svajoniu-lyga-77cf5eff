@@ -6,6 +6,7 @@ import { Calendar, Gauge, Fuel, ChevronRight, Award } from "lucide-react";
 import { Link } from "react-router-dom";
 import { calculateMonthlyPayment } from "@/components/LoanCalculator";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { OptimizedImage } from "@/components/OptimizedImage";
 
 interface CarCardProps {
   id?: string;
@@ -47,13 +48,12 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
             {t("listing.featured")}
           </Badge>
         )}
-        <img 
-          src={image} 
+        <OptimizedImage
+          src={image}
           alt={title}
-          loading="lazy"
-          className={`w-full h-40 sm:h-48 md:h-56 object-cover transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
+          className={`w-full h-40 sm:h-48 md:h-56 transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       </div>
       <CardContent className="p-3 sm:p-4 md:p-5">
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-0.5 sm:gap-0 mb-1">

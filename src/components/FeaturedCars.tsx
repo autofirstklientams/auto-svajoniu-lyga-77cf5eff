@@ -88,7 +88,7 @@ const FeaturedCars = () => {
             <div 
               key={car.id} 
               className="animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
+              style={{ animationDelay: `${Math.min(index * 0.05, 0.3)}s` }}
             >
               <CarCard
                 id={car.id}

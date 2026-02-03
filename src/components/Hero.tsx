@@ -33,6 +33,8 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-[700px] flex items-center overflow-hidden py-12 lg:py-0">
+      {/* Preload hero image */}
+      <link rel="preload" as="image" href={heroImage} />
       <div 
         className="absolute inset-0"
         style={{

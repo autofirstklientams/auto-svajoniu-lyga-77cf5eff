@@ -149,12 +149,87 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
     }
   };
 
-
+  // Reset form when car prop changes (for editing)
   useEffect(() => {
-    if (car?.id) {
+    if (car) {
+      setFormData({
+        make: car.make || "",
+        model: car.model || "",
+        year: car.year || new Date().getFullYear(),
+        price: car.price || 0,
+        mileage: car.mileage || 0,
+        fuel_type: car.fuel_type || "",
+        transmission: car.transmission || "",
+        description: car.description || "",
+        body_type: car.body_type || "",
+        engine_capacity: car.engine_capacity || 0,
+        power_kw: car.power_kw || 0,
+        doors: car.doors || 4,
+        seats: car.seats || 5,
+        color: car.color || "",
+        steering_wheel: car.steering_wheel || "",
+        condition: car.condition || "",
+        vin: car.vin || "",
+        defects: car.defects || "",
+        euro_standard: car.euro_standard || "",
+        fuel_cons_urban: car.fuel_cons_urban || 0,
+        fuel_cons_highway: car.fuel_cons_highway || 0,
+        fuel_cons_combined: car.fuel_cons_combined || 0,
+        origin_country: car.origin_country || "",
+        wheel_drive: car.wheel_drive || "",
+        co2_emission: car.co2_emission || 0,
+        city: car.city || "Vilnius",
+      });
+      setSelectedFeatures(car.features || {});
+      setVisibleWeb(car.visible_web ?? true);
+      setVisibleAutoplius(car.visible_autoplius ?? false);
+      setIsCompanyCar(car.is_company_car ?? false);
+      setIsFeatured(car.is_featured ?? false);
+      setIsRecommended(car.is_recommended ?? false);
       fetchExistingImages();
+    } else {
+      // Reset to defaults when creating new
+      setFormData({
+        make: "",
+        model: "",
+        year: new Date().getFullYear(),
+        price: 0,
+        mileage: 0,
+        fuel_type: "",
+        transmission: "",
+        description: "",
+        body_type: "",
+        engine_capacity: 0,
+        power_kw: 0,
+        doors: 4,
+        seats: 5,
+        color: "",
+        steering_wheel: "",
+        condition: "",
+        vin: "",
+        defects: "",
+        euro_standard: "",
+        fuel_cons_urban: 0,
+        fuel_cons_highway: 0,
+        fuel_cons_combined: 0,
+        origin_country: "",
+        wheel_drive: "",
+        co2_emission: 0,
+        city: "Vilnius",
+      });
+      setSelectedFeatures({});
+      setVisibleWeb(true);
+      setVisibleAutoplius(false);
+      setIsCompanyCar(false);
+      setIsFeatured(false);
+      setIsRecommended(false);
+      setExistingImages([]);
     }
-  }, [car?.id]);
+    // Clear temp states
+    setImageFiles([]);
+    setImagePreviews([]);
+    setImportedImageUrls([]);
+  }, [car]);
 
   const fetchExistingImages = async () => {
     if (!car?.id) return;

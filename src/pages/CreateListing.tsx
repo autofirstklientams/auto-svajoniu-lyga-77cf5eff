@@ -149,46 +149,65 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
     }
   };
 
-  // Reset form when car prop changes (for editing)
+  const fetchExistingImages = useCallback(async (carId: string) => {
+    
+    const { data, error } = await supabase
+      .from("car_images")
+      .select("*")
+      .eq("car_id", carId)
+      .order("display_order", { ascending: true });
+
+    if (error) {
+      console.error("Error fetching images:", error);
+      return;
+    }
+
+    setExistingImages(data?.map(img => ({ id: img.id, url: img.image_url, order: img.display_order })) || []);
+  }, []);
+
+  const applyCarToState = useCallback((source: any) => {
+    setFormData({
+      make: source?.make || "",
+      model: source?.model || "",
+      year: source?.year || new Date().getFullYear(),
+      price: source?.price || 0,
+      mileage: source?.mileage || 0,
+      fuel_type: source?.fuel_type || "",
+      transmission: source?.transmission || "",
+      description: source?.description || "",
+      body_type: source?.body_type || "",
+      engine_capacity: source?.engine_capacity || 0,
+      power_kw: source?.power_kw || 0,
+      doors: source?.doors || 4,
+      seats: source?.seats || 5,
+      color: source?.color || "",
+      steering_wheel: source?.steering_wheel || "",
+      condition: source?.condition || "",
+      vin: source?.vin || "",
+      defects: source?.defects || "",
+      euro_standard: source?.euro_standard || "",
+      fuel_cons_urban: source?.fuel_cons_urban || 0,
+      fuel_cons_highway: source?.fuel_cons_highway || 0,
+      fuel_cons_combined: source?.fuel_cons_combined || 0,
+      origin_country: source?.origin_country || "",
+      wheel_drive: source?.wheel_drive || "",
+      co2_emission: source?.co2_emission || 0,
+      city: source?.city || "Vilnius",
+    });
+
+    setSelectedFeatures(source?.features || {});
+    setVisibleWeb(source?.visible_web ?? true);
+    setVisibleAutoplius(source?.visible_autoplius ?? false);
+    setIsCompanyCar(source?.is_company_car ?? false);
+    setIsFeatured(source?.is_featured ?? false);
+    setIsRecommended(source?.is_recommended ?? false);
+  }, []);
+
+  // Reset/hydrate form when switching between create/edit (keying off ID avoids noisy resets)
   useEffect(() => {
-    if (car) {
-      setFormData({
-        make: car.make || "",
-        model: car.model || "",
-        year: car.year || new Date().getFullYear(),
-        price: car.price || 0,
-        mileage: car.mileage || 0,
-        fuel_type: car.fuel_type || "",
-        transmission: car.transmission || "",
-        description: car.description || "",
-        body_type: car.body_type || "",
-        engine_capacity: car.engine_capacity || 0,
-        power_kw: car.power_kw || 0,
-        doors: car.doors || 4,
-        seats: car.seats || 5,
-        color: car.color || "",
-        steering_wheel: car.steering_wheel || "",
-        condition: car.condition || "",
-        vin: car.vin || "",
-        defects: car.defects || "",
-        euro_standard: car.euro_standard || "",
-        fuel_cons_urban: car.fuel_cons_urban || 0,
-        fuel_cons_highway: car.fuel_cons_highway || 0,
-        fuel_cons_combined: car.fuel_cons_combined || 0,
-        origin_country: car.origin_country || "",
-        wheel_drive: car.wheel_drive || "",
-        co2_emission: car.co2_emission || 0,
-        city: car.city || "Vilnius",
-      });
-      setSelectedFeatures(car.features || {});
-      setVisibleWeb(car.visible_web ?? true);
-      setVisibleAutoplius(car.visible_autoplius ?? false);
-      setIsCompanyCar(car.is_company_car ?? false);
-      setIsFeatured(car.is_featured ?? false);
-      setIsRecommended(car.is_recommended ?? false);
-      fetchExistingImages();
-    } else {
-      // Reset to defaults when creating new
+    let cancelled = false;
+
+    const resetToDefaults = () => {
       setFormData({
         make: "",
         model: "",
@@ -224,29 +243,82 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
       setIsFeatured(false);
       setIsRecommended(false);
       setExistingImages([]);
-    }
-    // Clear temp states
+    };
+
+    // Always clear temp states when switching listing
     setImageFiles([]);
     setImagePreviews([]);
     setImportedImageUrls([]);
-  }, [car]);
 
-  const fetchExistingImages = async () => {
-    if (!car?.id) return;
-    
-    const { data, error } = await supabase
-      .from("car_images")
-      .select("*")
-      .eq("car_id", car.id)
-      .order("display_order", { ascending: true });
-
-    if (error) {
-      console.error("Error fetching images:", error);
-      return;
+    if (!car?.id) {
+      resetToDefaults();
+      return () => {
+        cancelled = true;
+      };
     }
 
-    setExistingImages(data?.map(img => ({ id: img.id, url: img.image_url, order: img.display_order })) || []);
-  };
+    // 1) Apply whatever we already have (fast)
+    applyCarToState(car);
+    fetchExistingImages(car.id);
+
+    // 2) Then hydrate from DB to guarantee we didn't lose fields in the prop
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from("cars")
+          .select(
+            [
+              "id",
+              "make",
+              "model",
+              "year",
+              "price",
+              "mileage",
+              "fuel_type",
+              "transmission",
+              "description",
+              "body_type",
+              "engine_capacity",
+              "power_kw",
+              "doors",
+              "seats",
+              "color",
+              "steering_wheel",
+              "condition",
+              "vin",
+              "defects",
+              "features",
+              "visible_web",
+              "visible_autoplius",
+              "is_company_car",
+              "is_featured",
+              "is_recommended",
+              "euro_standard",
+              "fuel_cons_urban",
+              "fuel_cons_highway",
+              "fuel_cons_combined",
+              "origin_country",
+              "wheel_drive",
+              "co2_emission",
+              "city",
+            ].join(",")
+          )
+          .eq("id", car.id)
+          .single();
+
+        if (error) throw error;
+        if (cancelled) return;
+        if (data) applyCarToState(data);
+      } catch (e) {
+        // Don't block editing if hydrate fails; just log.
+        console.error("Failed to hydrate car for editing:", e);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [car?.id, applyCarToState, fetchExistingImages]);
 
   const processImageFiles = async (files: File[]) => {
     const validFiles = files.filter(file => {
@@ -419,7 +491,7 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
       };
 
       // Create or update car
-      if (car) {
+      if (car?.id) {
         const { error } = await supabase
           .from("cars")
           .update(carData)
@@ -543,7 +615,7 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
         }
       }
 
-      toast.success(car ? "Skelbimas atnaujintas!" : "Skelbimas sukurtas!");
+       toast.success(car?.id ? "Skelbimas atnaujintas!" : "Skelbimas sukurtas!");
       onSuccess();
     } catch (error: any) {
       toast.error(error.message || "Klaida saugant skelbimą");
@@ -1107,7 +1179,7 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
                     onCheckedChange={(checked) => setVisibleAutoplius(checked === true)}
                   />
                   <div className="flex items-center gap-2">
-                    <ExternalLink className="h-4 w-4 text-blue-600" />
+                    <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autoplius.lt</span>
                   </div>
                 </label>

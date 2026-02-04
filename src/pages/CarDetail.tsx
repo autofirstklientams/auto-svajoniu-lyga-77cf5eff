@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { OptimizedImage } from "@/components/OptimizedImage";
 import { toast } from "sonner";
 import { 
   ArrowLeft, 
@@ -227,12 +228,19 @@ const CarDetail = () => {
           {/* Main Image - Full width on mobile */}
           {allImages.length > 0 && (
             <div className="relative -mx-4 aspect-[4/3] sm:aspect-video bg-muted overflow-hidden sm:mx-0 sm:rounded-lg mb-4">
-              <img
-                src={allImages[currentImageIndex]}
-                alt={`${car.make} ${car.model}`}
-                className="w-full h-full object-cover cursor-pointer"
-                onClick={() => setLightboxOpen(true)}
-              />
+               <button
+                 type="button"
+                 onClick={() => setLightboxOpen(true)}
+                 className="block w-full h-full"
+                 aria-label="Atidaryti nuotrauką"
+               >
+                 <OptimizedImage
+                   src={allImages[currentImageIndex]}
+                   alt={`${car.make} ${car.model}`}
+                   className="w-full h-full"
+                   priority
+                 />
+               </button>
               {allImages.length > 1 && (
                 <>
                   <button
@@ -268,11 +276,11 @@ const CarDetail = () => {
                       : "border-transparent hover:border-muted-foreground/50"
                   }`}
                 >
-                  <img
-                    src={img}
-                    alt={`Thumbnail ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                   <OptimizedImage
+                     src={img}
+                     alt={`Nuotrauka ${index + 1}`}
+                     className="w-full h-full"
+                   />
                 </button>
               ))}
             </div>
@@ -312,12 +320,19 @@ const CarDetail = () => {
             <div className="hidden lg:block">
               {allImages.length > 0 && (
                 <div className="relative aspect-video bg-muted rounded-lg overflow-hidden">
-                  <img
-                    src={allImages[currentImageIndex]}
-                    alt={`${car.make} ${car.model}`}
-                    className="w-full h-full object-cover cursor-pointer"
-                    onClick={() => setLightboxOpen(true)}
-                  />
+                   <button
+                     type="button"
+                     onClick={() => setLightboxOpen(true)}
+                     className="block w-full h-full"
+                     aria-label="Atidaryti nuotrauką"
+                   >
+                     <OptimizedImage
+                       src={allImages[currentImageIndex]}
+                       alt={`${car.make} ${car.model}`}
+                       className="w-full h-full"
+                       priority
+                     />
+                   </button>
                   {allImages.length > 1 && (
                     <>
                       <button
@@ -354,11 +369,11 @@ const CarDetail = () => {
                         : "border-transparent hover:border-muted-foreground/50"
                     }`}
                   >
-                    <img
-                      src={img}
-                      alt={`Thumbnail ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
+                     <OptimizedImage
+                       src={img}
+                       alt={`Nuotrauka ${index + 1}`}
+                       className="w-full h-full"
+                     />
                   </button>
                 ))}
               </div>

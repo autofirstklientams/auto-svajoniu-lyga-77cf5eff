@@ -88,7 +88,7 @@ const FeaturedCars = () => {
             <div 
               key={car.id} 
               className="animate-fade-in"
-              style={{ animationDelay: `${Math.min(index * 0.05, 0.3)}s` }}
+              style={{ animationDelay: `${index * 0.03}s` }}
             >
               <CarCard
                 id={car.id}
@@ -100,6 +100,7 @@ const FeaturedCars = () => {
                 fuel={car.fuel_type || "-"}
                 image={car.image_url || "/placeholder.svg"}
                 isRecommended={car.is_recommended}
+                priority={index < 4}
               />
             </div>
           ))}

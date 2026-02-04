@@ -98,3 +98,55 @@ export const processImages = async (files: File[]): Promise<ResizedImage[]> => {
   const results = await Promise.all(files.map(resizeImageIfNeeded));
   return results;
 };
+
+// ============================================
+// Supabase Storage image transformation utilities
+// Uses Supabase's render API for optimized thumbnails
+// ============================================
+
+/**
+ * Transforms a Supabase storage URL to use the render API for resized images.
+ * Falls back to original URL if not a Supabase storage URL.
+ */
+export function getOptimizedImageUrl(
+  url: string | null | undefined,
+  options: { width?: number; quality?: number } = {}
+): string {
+  if (!url) return "/placeholder.svg";
+  
+  // Only transform Supabase storage URLs
+  if (!url.includes("supabase.co/storage/v1/object/public/")) {
+    return url;
+  }
+
+  const { width = 400, quality = 75 } = options;
+
+  // Transform: /storage/v1/object/public/bucket/path 
+  // To: /storage/v1/render/image/public/bucket/path?width=X&quality=Y
+  const transformedUrl = url
+    .replace("/storage/v1/object/public/", "/storage/v1/render/image/public/")
+    + `?width=${width}&quality=${quality}`;
+
+  return transformedUrl;
+}
+
+/**
+ * Get thumbnail URL (small, fast loading for cards/grids)
+ */
+export function getThumbnailUrl(url: string | null | undefined): string {
+  return getOptimizedImageUrl(url, { width: 400, quality: 70 });
+}
+
+/**
+ * Get medium-sized URL (for detail page)
+ */
+export function getMediumUrl(url: string | null | undefined): string {
+  return getOptimizedImageUrl(url, { width: 900, quality: 80 });
+}
+
+/**
+ * Get full-size URL (for lightbox/zoom)
+ */
+export function getFullUrl(url: string | null | undefined): string {
+  return url || "/placeholder.svg";
+}

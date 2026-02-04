@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { CarManagementDialog } from "./CarManagementDialog";
+import { getThumbnailUrl } from "@/utils/imageUtils";
 
 interface Car {
   id: string;
@@ -38,7 +39,7 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, isOwner =
         <div className="relative">
           {car.image_url ? (
             <OptimizedImage
-              src={car.image_url}
+              src={getThumbnailUrl(car.image_url)}
               alt={`${car.make} ${car.model}`}
               className="w-full h-48"
             />

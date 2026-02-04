@@ -17,25 +17,26 @@ function OptimizedImageComponent({
   aspectRatio,
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isInView, setIsInView] = useState(priority);
+  const [shouldLoad, setShouldLoad] = useState(priority);
   const imgRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (priority) {
-      setIsInView(true);
+      setShouldLoad(true);
       return;
     }
 
+    // Use native IntersectionObserver with aggressive rootMargin
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          setIsInView(true);
+          setShouldLoad(true);
           observer.disconnect();
         }
       },
       {
-        rootMargin: "200px",
-        threshold: 0.01,
+        rootMargin: "400px", // Load images 400px before they enter viewport
+        threshold: 0,
       }
     );
 
@@ -50,26 +51,28 @@ function OptimizedImageComponent({
     <div
       ref={imgRef}
       className={cn(
-        "relative overflow-hidden bg-muted/50",
+        "relative overflow-hidden bg-muted/30",
         className
       )}
       style={aspectRatio ? { aspectRatio } : undefined}
     >
-      {/* Placeholder skeleton */}
+      {/* Minimal placeholder */}
       {!isLoaded && (
-        <div className="absolute inset-0 bg-gradient-to-r from-muted/50 via-muted to-muted/50 animate-pulse" />
+        <div className="absolute inset-0 bg-muted/50" />
       )}
       
-      {isInView && (
+      {shouldLoad && (
         <img
           src={src}
           alt={alt}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
+          fetchPriority={priority ? "high" : "auto"}
           onLoad={() => setIsLoaded(true)}
           className={cn(
-            "w-full h-full object-cover transition-opacity duration-300",
-            isLoaded ? "opacity-100" : "opacity-0"
+            "w-full h-full object-cover",
+            isLoaded ? "opacity-100" : "opacity-0",
+            "transition-opacity duration-200"
           )}
         />
       )}

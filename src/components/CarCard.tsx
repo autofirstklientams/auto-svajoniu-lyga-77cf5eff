@@ -19,9 +19,10 @@ interface CarCardProps {
   fuel: string;
   featured?: boolean;
   isRecommended?: boolean;
+  priority?: boolean;
 }
 
-function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended }: CarCardProps) {
+function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, priority = false }: CarCardProps) {
   const { t } = useLanguage();
   const monthlyPayment = numericPrice ? calculateMonthlyPayment(numericPrice) : null;
   
@@ -52,6 +53,7 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
           src={image}
           alt={title}
           className={`w-full h-40 sm:h-48 md:h-56 transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
+          priority={priority}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       </div>

@@ -7,6 +7,7 @@ interface OptimizedImageProps {
   className?: string;
   priority?: boolean;
   aspectRatio?: string;
+  objectPosition?: string;
 }
 
 function OptimizedImageComponent({
@@ -15,6 +16,7 @@ function OptimizedImageComponent({
   className,
   priority = false,
   aspectRatio,
+  objectPosition = "center",
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(priority);
@@ -74,6 +76,7 @@ function OptimizedImageComponent({
             isLoaded ? "opacity-100" : "opacity-0",
             "transition-opacity duration-200"
           )}
+          style={{ objectPosition }}
         />
       )}
     </div>

@@ -53,8 +53,9 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
         <OptimizedImage
           src={getThumbnailUrl(image)}
           alt={title}
-          className={`w-full h-40 sm:h-48 md:h-56 transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
+          className={`w-full transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
           priority={priority}
+          aspectRatio="4/3"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       </div>

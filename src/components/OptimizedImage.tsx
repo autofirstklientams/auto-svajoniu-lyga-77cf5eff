@@ -51,7 +51,7 @@ function OptimizedImageComponent({
     <div
       ref={imgRef}
       className={cn(
-        "relative overflow-hidden bg-muted/30",
+        "relative overflow-hidden bg-muted/30 flex items-center justify-center",
         className
       )}
       style={aspectRatio ? { aspectRatio } : undefined}
@@ -70,7 +70,7 @@ function OptimizedImageComponent({
           fetchPriority={priority ? "high" : "auto"}
           onLoad={() => setIsLoaded(true)}
           className={cn(
-            "w-full h-full object-cover",
+            "w-full h-full object-contain",
             isLoaded ? "opacity-100" : "opacity-0",
             "transition-opacity duration-200"
           )}

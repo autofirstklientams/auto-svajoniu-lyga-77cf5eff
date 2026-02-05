@@ -70,7 +70,7 @@ function OptimizedImageComponent({
           fetchPriority={priority ? "high" : "auto"}
           onLoad={() => setIsLoaded(true)}
           className={cn(
-            "w-full h-full object-contain",
+            "w-full h-full object-cover",
             isLoaded ? "opacity-100" : "opacity-0",
             "transition-opacity duration-200"
           )}

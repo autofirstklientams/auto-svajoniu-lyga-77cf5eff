@@ -57,6 +57,7 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
           priority={priority}
           aspectRatio="3/2"
           objectPosition="center"
+          fit="contain-fill"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       </div>

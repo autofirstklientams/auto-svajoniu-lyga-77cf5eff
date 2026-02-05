@@ -8,6 +8,12 @@ interface OptimizedImageProps {
   priority?: boolean;
   aspectRatio?: string;
   objectPosition?: string;
+  /**
+   * - cover: fills frame, may crop
+   * - contain: shows full image, may letterbox
+   * - contain-fill: shows full image while still filling the frame using a blurred cover background
+   */
+  fit?: "cover" | "contain" | "contain-fill";
 }
 
 function OptimizedImageComponent({
@@ -17,6 +23,7 @@ function OptimizedImageComponent({
   priority = false,
   aspectRatio,
   objectPosition = "center",
+  fit = "cover",
 }: OptimizedImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
   const [shouldLoad, setShouldLoad] = useState(priority);
@@ -49,6 +56,9 @@ function OptimizedImageComponent({
     return () => observer.disconnect();
   }, [priority]);
 
+  const objectClass =
+    fit === "contain" || fit === "contain-fill" ? "object-contain" : "object-cover";
+
   return (
     <div
       ref={imgRef}
@@ -59,10 +69,25 @@ function OptimizedImageComponent({
       style={aspectRatio ? { aspectRatio } : undefined}
     >
       {/* Minimal placeholder */}
-      {!isLoaded && (
-        <div className="absolute inset-0 bg-muted/50" />
+      {!isLoaded && <div className="absolute inset-0 bg-muted/50" />}
+
+      {shouldLoad && fit === "contain-fill" && (
+        <img
+          aria-hidden="true"
+          src={src}
+          alt=""
+          loading={priority ? "eager" : "lazy"}
+          decoding="async"
+          fetchPriority={priority ? "high" : "auto"}
+          className={cn(
+            "absolute inset-0 w-full h-full object-cover scale-110 blur-md",
+            isLoaded ? "opacity-35" : "opacity-0",
+            "transition-opacity duration-200"
+          )}
+          style={{ objectPosition }}
+        />
       )}
-      
+
       {shouldLoad && (
         <img
           src={src}
@@ -72,7 +97,8 @@ function OptimizedImageComponent({
           fetchPriority={priority ? "high" : "auto"}
           onLoad={() => setIsLoaded(true)}
           className={cn(
-            "w-full h-full object-cover",
+            "w-full h-full",
+            objectClass,
             isLoaded ? "opacity-100" : "opacity-0",
             "transition-opacity duration-200"
           )}

@@ -55,7 +55,8 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
           alt={title}
           className={`w-full transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
           priority={priority}
-          aspectRatio="16/10"
+          aspectRatio="4/3"
+          objectPosition="center 40%"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       </div>

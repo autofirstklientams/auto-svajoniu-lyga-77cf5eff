@@ -315,7 +315,6 @@ const CarCatalog = () => {
                     <div
                       key={car.id}
                       className="animate-fade-in"
-                      style={{ animationDelay: `${index * 0.05}s` }}
                     >
                       <CarCard
                         id={car.id}

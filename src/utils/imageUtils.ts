@@ -122,10 +122,11 @@ export function getOptimizedImageUrl(
   const { width = 400, quality = 75 } = options;
 
   // Transform: /storage/v1/object/public/bucket/path 
-  // To: /storage/v1/render/image/public/bucket/path?width=X&quality=Y
+  // To: /storage/v1/render/image/public/bucket/path?width=X&quality=Y&resize=contain
+  // IMPORTANT: resize=contain prevents cropping (default is 'fill' which crops to square)
   const transformedUrl = url
     .replace("/storage/v1/object/public/", "/storage/v1/render/image/public/")
-    + `?width=${width}&quality=${quality}`;
+    + `?width=${width}&quality=${quality}&resize=contain`;
 
   return transformedUrl;
 }

@@ -44,7 +44,7 @@ export const calculateMonthlyPayment = (
 };
 
 const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorProps) => {
-  const [months, setMonths] = useState(60);
+  const [months, setMonths] = useState(144);
   const [downPaymentPercent, setDownPaymentPercent] = useState(0);
   const [customDownPayment, setCustomDownPayment] = useState<string>("");
   const [useCustomDownPayment, setUseCustomDownPayment] = useState(false);

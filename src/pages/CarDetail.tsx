@@ -58,6 +58,7 @@ interface Car {
   vin: string | null;
   defects: string | null;
   features: Record<string, string[]> | null;
+  is_reserved: boolean;
 }
 
 const CarDetail = () => {
@@ -85,7 +86,7 @@ const CarDetail = () => {
   const fetchCar = useCallback(async () => {
     const { data, error } = await supabase
       .from("cars")
-      .select("id, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features")
+      .select("id, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features, is_reserved")
       .eq("id", id)
       .eq("visible_web", true)
       .single();
@@ -288,9 +289,16 @@ const CarDetail = () => {
 
           {/* Title & Price - Mobile */}
           <div className="mb-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-foreground">
-              {car.make} {car.model}
-            </h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+                {car.make} {car.model}
+              </h1>
+              {car.is_reserved && (
+                <Badge className="bg-amber-500 text-white border-none text-xs">
+                  Rezervuotas
+                </Badge>
+              )}
+            </div>
             <div className="flex items-center justify-between mt-1">
               <p className="text-sm text-muted-foreground">{car.year} • {car.condition || "Naudotas"}</p>
               <div className="text-xl sm:text-2xl font-bold text-primary">
@@ -303,9 +311,16 @@ const CarDetail = () => {
         {/* Desktop: Title first */}
         <div className="hidden lg:flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">
-              {car.make} {car.model}
-            </h1>
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-bold text-foreground">
+                {car.make} {car.model}
+              </h1>
+              {car.is_reserved && (
+                <Badge className="bg-amber-500 text-white border-none">
+                  Rezervuotas
+                </Badge>
+              )}
+            </div>
             <p className="text-muted-foreground">{car.year} • {car.condition || "Naudotas"}</p>
           </div>
           <div className="text-3xl font-bold text-primary">

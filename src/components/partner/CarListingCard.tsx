@@ -1,11 +1,13 @@
 import { useState, memo } from "react";
-import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare } from "lucide-react";
+import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare, ShieldCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { CarManagementDialog } from "./CarManagementDialog";
 import { getThumbnailUrl } from "@/utils/imageUtils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface Car {
   id: string;
@@ -26,12 +28,34 @@ interface CarListingCardProps {
   onEdit: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
+  onRefresh?: () => void;
   isOwner?: boolean;
 }
 
-function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, isOwner = true }: CarListingCardProps) {
+function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh, isOwner = true }: CarListingCardProps) {
   const [showManagement, setShowManagement] = useState(false);
+  const [isReserved, setIsReserved] = useState(car.is_reserved ?? false);
+  const [isTogglingReserved, setIsTogglingReserved] = useState(false);
   const carTitle = `${car.make} ${car.model} (${car.year})`;
+
+  const toggleReserved = async () => {
+    setIsTogglingReserved(true);
+    const newValue = !isReserved;
+    try {
+      const { error } = await supabase
+        .from("cars")
+        .update({ is_reserved: newValue })
+        .eq("id", car.id);
+      if (error) throw error;
+      setIsReserved(newValue);
+      toast.success(newValue ? "Automobilis pažymėtas kaip rezervuotas" : "Rezervacija nuimta");
+      onRefresh?.();
+    } catch {
+      toast.error("Klaida keičiant rezervacijos statusą");
+    } finally {
+      setIsTogglingReserved(false);
+    }
+  };
 
   return (
     <>
@@ -50,7 +74,13 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, isOwner =
           )}
           
           {/* Status badges */}
-          <div className="absolute top-3 left-3 flex gap-1.5">
+          <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
+            {isReserved && (
+              <Badge className="bg-amber-500/90 text-white border-none shadow-sm">
+                <ShieldCheck className="h-3 w-3 mr-1" />
+                Rezervuotas
+              </Badge>
+            )}
             {car.visible_web && (
               <Badge className="bg-green-500/90 text-white border-none shadow-sm">
                 <Globe className="h-3 w-3 mr-1" />
@@ -63,7 +93,7 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, isOwner =
                 Autoplius
               </Badge>
             )}
-            {!car.visible_web && !car.visible_autoplius && (
+            {!car.visible_web && !car.visible_autoplius && !isReserved && (
               <Badge variant="secondary" className="bg-background/90 shadow-sm">
                 Nepublikuota
               </Badge>
@@ -72,6 +102,16 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, isOwner =
 
           {/* Quick actions - visible on hover */}
           <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="secondary"
+              size="icon"
+              className={`h-8 w-8 shadow-sm ${isReserved ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-background/90 hover:bg-background'}`}
+              onClick={toggleReserved}
+              disabled={isTogglingReserved}
+              title={isReserved ? "Nuimti rezervaciją" : "Rezervuoti"}
+            >
+              <ShieldCheck className="h-4 w-4" />
+            </Button>
             <Button
               variant="secondary"
               size="icon"

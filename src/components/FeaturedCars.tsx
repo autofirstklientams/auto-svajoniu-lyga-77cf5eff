@@ -17,12 +17,13 @@ interface Car {
   image_url: string | null;
   fuel_type: string | null;
   is_recommended: boolean;
+  is_reserved: boolean;
 }
 
 const fetchFeaturedCars = async (): Promise<Car[]> => {
   const { data, error } = await supabase
     .from("cars")
-    .select("id, make, model, year, price, mileage, image_url, fuel_type, is_recommended")
+    .select("id, make, model, year, price, mileage, image_url, fuel_type, is_recommended, is_reserved")
     .eq("visible_web", true)
     .eq("is_featured", true)
     .order("is_recommended", { ascending: false })
@@ -92,6 +93,7 @@ const FeaturedCars = () => {
                 fuel={car.fuel_type || "-"}
                 image={car.image_url || "/placeholder.svg"}
                 isRecommended={car.is_recommended}
+                isReserved={car.is_reserved}
                 priority={index < 4}
               />
             </div>

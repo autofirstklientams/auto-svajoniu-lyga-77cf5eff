@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useState, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Search, Filter, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Helmet } from "react-helmet";
+import { useQuery } from "@tanstack/react-query";
 
 interface Car {
   id: string;
@@ -44,61 +45,64 @@ const sortOptions: { value: SortOption; label: string }[] = [
   { value: "mileage_desc", label: "Rida didėjančia tvarka" },
 ];
 
+const fetchAllCars = async (): Promise<Car[]> => {
+  const { data, error } = await supabase
+    .from("cars")
+    .select("id, make, model, year, price, mileage, image_url, fuel_type, transmission, body_type, is_recommended")
+    .eq("visible_web", true);
+
+  if (error) throw error;
+  return data || [];
+};
+
 const CarCatalog = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [allCars, setAllCars] = useState<Car[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [makeCounts, setMakeCounts] = useState<MakeCount[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedMakes, setSelectedMakes] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
+  const [selectedMakes, setSelectedMakes] = useState<string[]>(() => {
+    const makes = searchParams.get("makes");
+    return makes ? makes.split(",") : [];
+  });
   const [sortBy, setSortBy] = useState<SortOption>((searchParams.get("sort") as SortOption) || "recommended");
   const [showAllMakes, setShowAllMakes] = useState(false);
 
-  useEffect(() => {
-    fetchCars();
-  }, []);
+  const { data: allCars = [], isLoading } = useQuery({
+    queryKey: ["catalog-cars"],
+    queryFn: fetchAllCars,
+  });
 
-  useEffect(() => {
+  // Sync URL params when filters change
+  const updateParams = (newSort: SortOption, newMakes: string[], newQuery: string) => {
     const newParams = new URLSearchParams();
-    if (sortBy !== "recommended") newParams.set("sort", sortBy);
-    if (selectedMakes.length > 0) newParams.set("makes", selectedMakes.join(","));
-    if (searchQuery) newParams.set("q", searchQuery);
+    if (newSort !== "recommended") newParams.set("sort", newSort);
+    if (newMakes.length > 0) newParams.set("makes", newMakes.join(","));
+    if (newQuery) newParams.set("q", newQuery);
     setSearchParams(newParams);
-  }, [sortBy, selectedMakes, searchQuery]);
+  };
 
-  const fetchCars = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from("cars")
-        .select("id, make, model, year, price, mileage, image_url, fuel_type, transmission, body_type, is_recommended")
-        .eq("visible_web", true);
+  const handleSortChange = (v: string) => {
+    const newSort = v as SortOption;
+    setSortBy(newSort);
+    updateParams(newSort, selectedMakes, searchQuery);
+  };
 
-      if (error) throw error;
+  const handleSearchChange = (v: string) => {
+    setSearchQuery(v);
+    updateParams(sortBy, selectedMakes, v);
+  };
 
-      setAllCars(data || []);
-
-      // Calculate make counts
-      const counts: Record<string, number> = {};
-      (data || []).forEach((car) => {
-        counts[car.make] = (counts[car.make] || 0) + 1;
-      });
-
-      const makeCountsArray = Object.entries(counts)
-        .map(([make, count]) => ({ make, count }))
-        .sort((a, b) => b.count - a.count);
-
-      setMakeCounts(makeCountsArray);
-    } catch (error) {
-      console.error("Error fetching cars:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const makeCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    allCars.forEach((car) => {
+      counts[car.make] = (counts[car.make] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([make, count]) => ({ make, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [allCars]);
 
   const filteredCars = useMemo(() => {
     let filtered = [...allCars];
 
-    // Apply search filter
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(
@@ -108,12 +112,10 @@ const CarCatalog = () => {
       );
     }
 
-    // Apply make filter
     if (selectedMakes.length > 0) {
       filtered = filtered.filter((car) => selectedMakes.includes(car.make));
     }
 
-    // Apply sorting
     switch (sortBy) {
       case "recommended":
         filtered.sort((a, b) => {
@@ -149,17 +151,18 @@ const CarCatalog = () => {
   }, [allCars, searchQuery, selectedMakes, sortBy]);
 
   const toggleMake = (make: string) => {
-    setSelectedMakes((prev) =>
-      prev.includes(make)
-        ? prev.filter((m) => m !== make)
-        : [...prev, make]
-    );
+    const newMakes = selectedMakes.includes(make)
+      ? selectedMakes.filter((m) => m !== make)
+      : [...selectedMakes, make];
+    setSelectedMakes(newMakes);
+    updateParams(sortBy, newMakes, searchQuery);
   };
 
   const clearFilters = () => {
     setSelectedMakes([]);
     setSearchQuery("");
     setSortBy("recommended");
+    setSearchParams(new URLSearchParams());
   };
 
   const displayedMakes = showAllMakes ? makeCounts : makeCounts.slice(0, 10);
@@ -245,13 +248,13 @@ const CarCatalog = () => {
                 <Input
                   placeholder="Paieška..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => handleSearchChange(e.target.value)}
                   className="pl-10 w-full sm:w-64"
                 />
               </div>
 
               {/* Sort */}
-              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+              <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-full sm:w-56">
                   <SelectValue />
                 </SelectTrigger>
@@ -311,7 +314,7 @@ const CarCatalog = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredCars.map((car, index) => (
+                  {filteredCars.map((car) => (
                     <div
                       key={car.id}
                       className="animate-fade-in"

@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import CarCard from "./CarCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ChevronRight } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useQuery } from "@tanstack/react-query";
 
 interface Car {
   id: string;
@@ -19,34 +19,27 @@ interface Car {
   is_recommended: boolean;
 }
 
+const fetchFeaturedCars = async (): Promise<Car[]> => {
+  const { data, error } = await supabase
+    .from("cars")
+    .select("id, make, model, year, price, mileage, image_url, fuel_type, is_recommended")
+    .eq("visible_web", true)
+    .eq("is_featured", true)
+    .order("is_recommended", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(6);
+
+  if (error) throw error;
+  return data || [];
+};
+
 const FeaturedCars = () => {
-  const [cars, setCars] = useState<Car[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { t } = useLanguage();
 
-  useEffect(() => {
-    fetchCars();
-  }, []);
-
-  const fetchCars = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("cars")
-        .select("id, make, model, year, price, mileage, image_url, fuel_type, is_recommended")
-        .eq("visible_web", true)
-        .eq("is_featured", true)
-        .order("is_recommended", { ascending: false })
-        .order("created_at", { ascending: false })
-        .limit(6);
-
-      if (error) throw error;
-      setCars(data || []);
-    } catch (error: any) {
-      toast.error(t("common.error"));
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { data: cars = [], isLoading } = useQuery({
+    queryKey: ["featured-cars"],
+    queryFn: fetchFeaturedCars,
+  });
 
   if (isLoading) {
     return (

@@ -135,6 +135,7 @@ export type Database = {
           is_company_car: boolean
           is_featured: boolean
           is_recommended: boolean
+          is_reserved: boolean
           make: string
           mileage: number | null
           model: string
@@ -178,6 +179,7 @@ export type Database = {
           is_company_car?: boolean
           is_featured?: boolean
           is_recommended?: boolean
+          is_reserved?: boolean
           make: string
           mileage?: number | null
           model: string
@@ -221,6 +223,7 @@ export type Database = {
           is_company_car?: boolean
           is_featured?: boolean
           is_recommended?: boolean
+          is_reserved?: boolean
           make?: string
           mileage?: number | null
           model?: string

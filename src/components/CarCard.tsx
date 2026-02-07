@@ -2,7 +2,7 @@ import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Gauge, Fuel, ChevronRight, Award } from "lucide-react";
+import { Calendar, Gauge, Fuel, ChevronRight, Award, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { calculateMonthlyPayment } from "@/components/LoanCalculator";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -20,10 +20,11 @@ interface CarCardProps {
   fuel: string;
   featured?: boolean;
   isRecommended?: boolean;
+  isReserved?: boolean;
   priority?: boolean;
 }
 
-function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, priority = false }: CarCardProps) {
+function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, isReserved, priority = false }: CarCardProps) {
   const { t } = useLanguage();
   const monthlyPayment = numericPrice ? calculateMonthlyPayment(numericPrice) : null;
   
@@ -48,6 +49,12 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
         {featured && !isRecommended && (
           <Badge className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 bg-accent text-accent-foreground text-xs">
             {t("listing.featured")}
+          </Badge>
+        )}
+        {isReserved && (
+          <Badge className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-amber-500 text-white border-none text-xs shadow-sm">
+            <ShieldCheck className="h-3 w-3 mr-1" />
+            Rezervuotas
           </Badge>
         )}
         <OptimizedImage

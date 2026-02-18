@@ -45,6 +45,7 @@ const PartnerDashboard = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [canExportAutoplius, setCanExportAutoplius] = useState(false);
   const [cars, setCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -118,7 +119,11 @@ const PartnerDashboard = () => {
       }
 
       const hasAdminRole = roles?.some((r) => r.role === "admin") ?? false;
+      const hasPartnerOrAdminRole =
+        roles?.some((r) => r.role === "admin" || r.role === "partner") ?? false;
+
       setIsAdmin(hasAdminRole);
+      setCanExportAutoplius(hasPartnerOrAdminRole);
     } catch (error) {
       console.error("Error checking user role:", error);
       scheduleRoleRetry(userId);
@@ -316,6 +321,7 @@ const PartnerDashboard = () => {
               fetchCars();
             }}
             isAdmin={isAdmin}
+            canExportAutoplius={canExportAutoplius}
           />
         )}
 

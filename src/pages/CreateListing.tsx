@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, Link, Loader2, Globe, ExternalLink, X } from "lucide-react";
+import { Upload, Link, Loader2, Globe, ExternalLink, X, Download } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
@@ -40,11 +40,19 @@ interface CreateListingProps {
   onClose: () => void;
   onSuccess: () => void;
   isAdmin?: boolean;
+  canExportAutoplius?: boolean;
 }
 
-const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListingProps) => {
+const CreateListing = ({
+  car,
+  onClose,
+  onSuccess,
+  isAdmin = false,
+  canExportAutoplius = false,
+}: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isExportingAutoplius, setIsExportingAutoplius] = useState(false);
   const [autopliusUrl, setAutopliusUrl] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -146,6 +154,110 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
       toast.error(error.message || "Klaida importuojant skelbimą");
     } finally {
       setIsImporting(false);
+    }
+  };
+
+  const handleDebugExportAutoplius = async () => {
+    if (isExportingAutoplius) return;
+
+    setIsExportingAutoplius(true);
+    try {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session?.access_token) {
+        throw new Error("Nepavyko gauti aktyvios sesijos");
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            action: "download",
+            include_car_id: car?.id || null,
+            include_not_visible: true,
+            expect_car_in_feed: true,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = "Nepavyko sugeneruoti Autoplius XML";
+
+        if (errorText) {
+          try {
+            const parsed = JSON.parse(errorText);
+            errorMessage = parsed.error || parsed.message || errorMessage;
+          } catch {
+            errorMessage = errorText;
+          }
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      const xmlBlob = await response.blob();
+      const objectUrl = URL.createObjectURL(xmlBlob);
+      const link = document.createElement("a");
+      const dateStamp = new Date().toISOString().slice(0, 10);
+
+      link.href = objectUrl;
+      link.download = `autoplius-feed-${dateStamp}.xml`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(objectUrl);
+
+      toast.success("Autoplius XML sėkmingai sugeneruotas");
+    } catch (error: unknown) {
+      console.error("Error exporting Autoplius feed:", error);
+      const errorMessage = error instanceof Error ? error.message : "Klaida generuojant Autoplius XML";
+      toast.error(errorMessage);
+    } finally {
+      setIsExportingAutoplius(false);
+    }
+  };
+
+  const syncAutopliusFeed = async (
+    options?: { includeCarId?: string; expectCarInFeed?: boolean }
+  ) => {
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-autoplius-xml", {
+        body: {
+          action: "push",
+          include_car_id: options?.includeCarId,
+          expect_car_in_feed: options?.expectCarInFeed === true,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message || "Nepavyko sinchronizuoti su Autoplius");
+      }
+
+      if (!data?.success) {
+        throw new Error(data?.error || "Autoplius sinchronizacija nepavyko");
+      }
+
+      return {
+        success: true,
+        message:
+          typeof data?.message === "string"
+            ? data.message
+            : "Autoplius sinchronizacija atlikta",
+      };
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Autoplius sinchronizacija nepavyko";
+      console.error("Autoplius sync error:", error);
+      return { success: false, message: errorMessage };
     }
   };
 
@@ -615,7 +727,24 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
         }
       }
 
-       toast.success(car?.id ? "Skelbimas atnaujintas!" : "Skelbimas sukurtas!");
+      const shouldSyncAutoplius =
+        canExportAutoplius && (visibleAutoplius || Boolean(car?.visible_autoplius));
+
+      if (shouldSyncAutoplius) {
+        const syncResult = await syncAutopliusFeed({
+          includeCarId: visibleAutoplius ? carId || undefined : undefined,
+          expectCarInFeed: Boolean(visibleAutoplius && carId),
+        });
+        if (syncResult.success) {
+          toast.success(syncResult.message);
+        } else {
+          toast.error(
+            `Skelbimas išsaugotas, bet Autoplius sinchronizacija nepavyko: ${syncResult.message}`
+          );
+        }
+      }
+
+      toast.success(car?.id ? "Skelbimas atnaujintas!" : "Skelbimas sukurtas!");
       onSuccess();
     } catch (error: any) {
       toast.error(error.message || "Klaida saugant skelbimą");
@@ -626,8 +755,29 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
 
   return (
     <Card className="mb-6">
-      <CardHeader>
+      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
+        {car?.id && isAdmin && (
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleDebugExportAutoplius}
+            disabled={isExportingAutoplius}
+            className="w-full sm:w-auto"
+          >
+            {isExportingAutoplius ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Generuojama...
+              </>
+            ) : (
+              <>
+                <Download className="h-4 w-4 mr-2" />
+                Debug: XML eksportas
+              </>
+            )}
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         {/* Autoplius Import Section */}
@@ -1171,8 +1321,8 @@ const CreateListing = ({ car, onClose, onSuccess, isAdmin = false }: CreateListi
                 </div>
               </label>
               
-              {/* Autoplius only for admins */}
-              {isAdmin && (
+              {/* Autoplius for admins and partners */}
+              {canExportAutoplius && (
                 <label className="flex items-center gap-3 cursor-pointer">
                   <Checkbox
                     checked={visibleAutoplius}

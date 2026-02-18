@@ -12,6 +12,7 @@ interface Car {
   model: string;
   year: number;
   price: number;
+  first_reg_date?: string;
   mileage?: number;
   fuel_type?: string;
   transmission?: string;
@@ -40,6 +41,19 @@ interface Car {
 interface CarImage {
   image_url: string;
   display_order: number;
+}
+
+interface RequestPayload {
+  action?: "download" | "push" | string;
+  include_car_id?: string;
+  include_not_visible?: boolean;
+  expect_car_in_feed?: boolean;
+}
+
+interface AutopliusPushResult {
+  status: number;
+  mode: "raw_xml" | "form_urlencoded";
+  responseText: string;
 }
 
 // Comprehensive Autoplius make ID mapping
@@ -250,6 +264,9 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    const payload = await getRequestPayload(req);
+    const action = payload.action === "push" ? "push" : "download";
+
     // Verify JWT authentication
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
@@ -308,17 +325,60 @@ const handler = async (req: Request): Promise<Response> => {
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log("Fetching cars from database...");
-    
-    // Only fetch cars that are visible on Autoplius
-    const { data: cars, error } = await supabase
-      .from("cars")
-      .select("*")
-      .eq("visible_autoplius", true)
-      .order("created_at", { ascending: false });
+
+    const includeCarId = normalizeUuid(payload.include_car_id);
+    const includeNotVisible = payload.include_not_visible === true;
+    const expectCarInFeed = payload.expect_car_in_feed === true;
+
+    let carsResponse;
+    if (includeCarId && includeNotVisible) {
+      carsResponse = await supabase
+        .from("cars")
+        .select("*")
+        .or(`visible_autoplius.eq.true,id.eq.${includeCarId}`)
+        .order("created_at", { ascending: false });
+    } else {
+      carsResponse = await supabase
+        .from("cars")
+        .select("*")
+        .eq("visible_autoplius", true)
+        .order("created_at", { ascending: false });
+    }
+
+    const { data: cars, error } = carsResponse;
 
     if (error) {
       console.error("Database error:", error);
       throw error;
+    }
+
+    let carsToExport: Car[] = (cars || []) as Car[];
+
+    // Deterministic include for requested car in debug/expected-feed paths.
+    let requestedCar: Car | null = null;
+    const shouldLoadRequestedCar =
+      includeCarId !== null && (includeNotVisible || expectCarInFeed);
+
+    if (shouldLoadRequestedCar && includeCarId) {
+      const { data: fallbackCar, error: fallbackError } = await supabase
+        .from("cars")
+        .select("*")
+        .eq("id", includeCarId)
+        .maybeSingle();
+
+      if (fallbackError) {
+        console.error("Requested car fetch error:", fallbackError);
+      } else if (fallbackCar) {
+        requestedCar = fallbackCar as Car;
+      }
+    }
+
+    if (requestedCar && !carsToExport.some((car) => car.id === requestedCar?.id)) {
+      carsToExport = [requestedCar, ...carsToExport];
+    }
+
+    if (expectCarInFeed && includeCarId && !carsToExport.some((car) => car.id === includeCarId)) {
+      throw new Error(`Requested car ${includeCarId} was not found for export`);
     }
 
     // Fetch all car images
@@ -342,15 +402,15 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log(`Found ${cars?.length || 0} cars for Autoplius export`);
+    console.log(`Found ${carsToExport.length} cars for Autoplius export`);
 
-    // Generate XML in Autoplius format for used cars (category_id=2)
+    // Generate XML in Autoplius Automobiliai format (used + new vehicles)
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<autoplius xmlns:xsi="https://www.w3.org/2001/XMLSchema-instance">\n';
     xml += '  <announcements>\n';
 
-    if (cars && cars.length > 0) {
-      for (const car of cars as Car[]) {
+    if (carsToExport.length > 0) {
+      for (const car of carsToExport) {
         xml += '    <cars>\n';
         
         // Required: external_id
@@ -367,7 +427,7 @@ const handler = async (req: Request): Promise<Response> => {
         xml += `      <sell_price>${car.price}</sell_price>\n`;
         
         // Required: is_condition_new (0 = used, 1 = new)
-        const isNew = car.condition === "Naujas" ? "1" : "0";
+        const isNew = isNewCar(car.condition) ? "1" : "0";
         xml += `      <is_condition_new>${isNew}</is_condition_new>\n`;
         
         // Required: contacts
@@ -383,7 +443,14 @@ const handler = async (req: Request): Promise<Response> => {
         xml += `      <fk_place_cities_id>${cityId}</fk_place_cities_id>\n`;
         
         // Required: make_date (format YYYY-MM)
-        xml += `      <make_date>${car.year}-01</make_date>\n`;
+        const makeDate = formatYearMonth(car.first_reg_date, car.year);
+        xml += `      <make_date>${makeDate}</make_date>\n`;
+
+        // Required by Autoplius when is_condition_new=0
+        if (isNew === "0") {
+          const firstRegDate = formatYearMonth(car.first_reg_date, car.year);
+          xml += `      <first_reg_date>${firstRegDate}</first_reg_date>\n`;
+        }
         
         // Required: body_type_id
         if (car.body_type && bodyTypeMapping[car.body_type]) {
@@ -525,6 +592,27 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("XML generated successfully");
 
+    if (action === "push") {
+      const pushResult = await pushXmlToAutoplius(xml);
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: "Autoplius feed buvo išsiųstas HTTP POST būdu",
+          upstream_status: pushResult.status,
+          transport_mode: pushResult.mode,
+          upstream_response_preview: pushResult.responseText.slice(0, 300),
+        }),
+        {
+          status: 200,
+          headers: {
+            "Content-Type": "application/json; charset=utf-8",
+            ...corsHeaders,
+          },
+        }
+      );
+    }
+
     return new Response(xml, {
       status: 200,
       headers: {
@@ -533,10 +621,11 @@ const handler = async (req: Request): Promise<Response> => {
         ...corsHeaders,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
     console.error("Error generating XML:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: errorMessage }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -544,6 +633,178 @@ const handler = async (req: Request): Promise<Response> => {
     );
   }
 };
+
+async function getRequestPayload(req: Request): Promise<RequestPayload> {
+  if (!["POST", "PUT", "PATCH"].includes(req.method)) {
+    return {};
+  }
+
+  const contentType = (req.headers.get("content-type") || "").toLowerCase();
+  if (!contentType.includes("application/json")) {
+    return {};
+  }
+
+  try {
+    const raw = await req.text();
+    if (!raw.trim()) {
+      return {};
+    }
+
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      return {};
+    }
+
+    return parsed as RequestPayload;
+  } catch {
+    return {};
+  }
+}
+
+async function pushXmlToAutoplius(xml: string): Promise<AutopliusPushResult> {
+  const endpoint = Deno.env.get("AUTOPLIUS_IMPORT_POST_URL");
+  if (!endpoint) {
+    throw new Error("Missing AUTOPLIUS_IMPORT_POST_URL secret");
+  }
+
+  const payloadMode = (Deno.env.get("AUTOPLIUS_IMPORT_PAYLOAD_MODE") || "raw_xml").toLowerCase();
+  const authMode = (Deno.env.get("AUTOPLIUS_IMPORT_AUTH_MODE") || "basic").toLowerCase();
+  const username = Deno.env.get("AUTOPLIUS_IMPORT_USERNAME") || "";
+  const password = Deno.env.get("AUTOPLIUS_IMPORT_PASSWORD") || "";
+  const xmlFieldName = Deno.env.get("AUTOPLIUS_IMPORT_XML_FIELD") || "xml";
+  const usernameFieldName = Deno.env.get("AUTOPLIUS_IMPORT_USERNAME_FIELD") || "username";
+  const passwordFieldName = Deno.env.get("AUTOPLIUS_IMPORT_PASSWORD_FIELD") || "password";
+  const extraHeaders = getExtraHeaders();
+
+  const modes: Array<"raw_xml" | "form_urlencoded"> =
+    payloadMode === "auto"
+      ? ["raw_xml", "form_urlencoded"]
+      : payloadMode === "form_urlencoded"
+      ? ["form_urlencoded"]
+      : ["raw_xml"];
+
+  let lastError: Error | null = null;
+
+  for (const mode of modes) {
+    try {
+      const headers = new Headers(extraHeaders);
+      headers.set("Accept", "application/json,text/plain,text/html,application/xml,*/*");
+
+      let body = "";
+
+      if (mode === "form_urlencoded") {
+        const params = new URLSearchParams();
+        params.set(xmlFieldName, xml);
+
+        if (authMode === "form") {
+          if (username) params.set(usernameFieldName, username);
+          if (password) params.set(passwordFieldName, password);
+        }
+
+        body = params.toString();
+        headers.set("Content-Type", "application/x-www-form-urlencoded; charset=utf-8");
+      } else {
+        body = xml;
+        headers.set("Content-Type", "application/xml; charset=utf-8");
+      }
+
+      if (authMode === "basic") {
+        if (!username || !password) {
+          throw new Error(
+            "AUTOPLIUS_IMPORT_AUTH_MODE=basic requires AUTOPLIUS_IMPORT_USERNAME and AUTOPLIUS_IMPORT_PASSWORD"
+          );
+        }
+        headers.set("Authorization", `Basic ${btoa(`${username}:${password}`)}`);
+      }
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers,
+        body,
+      });
+
+      const responseText = await response.text();
+      if (!response.ok) {
+        throw new Error(`Autoplius POST ${response.status}: ${responseText.slice(0, 500)}`);
+      }
+
+      return {
+        status: response.status,
+        mode,
+        responseText,
+      };
+    } catch (error: unknown) {
+      lastError =
+        error instanceof Error ? error : new Error("Autoplius feed POST failed with unknown error");
+      console.error(`Autoplius push attempt (${mode}) failed:`, lastError.message);
+    }
+  }
+
+  throw lastError || new Error("Autoplius feed POST failed");
+}
+
+function getExtraHeaders(): Record<string, string> {
+  const raw = Deno.env.get("AUTOPLIUS_IMPORT_HEADERS_JSON");
+  if (!raw) {
+    return {};
+  }
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+      throw new Error("AUTOPLIUS_IMPORT_HEADERS_JSON must be a JSON object");
+    }
+
+    const headers: Record<string, string> = {};
+    for (const [key, value] of Object.entries(parsed)) {
+      if (typeof value === "string") {
+        headers[key] = value;
+      }
+    }
+    return headers;
+  } catch (error) {
+    console.error("Failed to parse AUTOPLIUS_IMPORT_HEADERS_JSON", error);
+    return {};
+  }
+}
+
+function normalizeUuid(value?: string | null): string | null {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  const uuidRegex =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  return uuidRegex.test(trimmed) ? trimmed : null;
+}
+
+function isNewCar(condition?: string | null): boolean {
+  return condition?.trim().toLowerCase() === "naujas";
+}
+
+function formatYearMonth(dateValue?: string | null, fallbackYear?: number): string {
+  if (dateValue) {
+    const isoPrefixMatch = dateValue.match(/^(\d{4})-(\d{2})/);
+    if (isoPrefixMatch) {
+      return `${isoPrefixMatch[1]}-${isoPrefixMatch[2]}`;
+    }
+
+    const parsed = new Date(dateValue);
+    if (!Number.isNaN(parsed.getTime())) {
+      const month = String(parsed.getUTCMonth() + 1).padStart(2, "0");
+      return `${parsed.getUTCFullYear()}-${month}`;
+    }
+  }
+
+  const safeYear =
+    typeof fallbackYear === "number" && Number.isFinite(fallbackYear)
+      ? Math.max(1900, Math.trunc(fallbackYear))
+      : new Date().getUTCFullYear();
+
+  return `${safeYear}-01`;
+}
 
 function escapeXml(str: string): string {
   return str

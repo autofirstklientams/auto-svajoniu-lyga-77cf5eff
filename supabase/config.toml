@@ -12,9 +12,6 @@ verify_jwt = true
 [functions.send-car-purchase]
 verify_jwt = false
 
-[functions.generate-autoplius-xml]
-verify_jwt = true
-
 [functions.submit-inquiry]
 verify_jwt = false
 

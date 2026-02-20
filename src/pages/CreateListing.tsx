@@ -6,13 +6,25 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, Link, Loader2, Globe, ExternalLink, X, Download } from "lucide-react";
+import { Upload, Link, Loader2, Globe, ExternalLink, Download } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
 import { processImages } from "@/utils/imageUtils";
+import {
+  buildAutopliusXmlFromDatabase,
+  pushAutopliusXml,
+  uploadAutopliusXmlToStorage,
+} from "@/lib/autopliusXml";
 
 const carSchema = z.object({
   make: z.string().trim().min(1, "Markė privaloma"),
@@ -59,6 +71,10 @@ const CreateListing = ({
   const [existingImages, setExistingImages] = useState<Array<{id: string, url: string, order: number}>>([]);
   const [importedImageUrls, setImportedImageUrls] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [isDebugXmlModalOpen, setIsDebugXmlModalOpen] = useState(false);
+  const [debugXmlUrl, setDebugXmlUrl] = useState("");
+  const [debugXmlFileName, setDebugXmlFileName] = useState("");
+  const [debugXmlExpiresInSeconds, setDebugXmlExpiresInSeconds] = useState(0);
   const [selectedFeatures, setSelectedFeatures] = useState<CarFeatures>(
     car?.features || {}
   );
@@ -162,61 +178,20 @@ const CreateListing = ({
 
     setIsExportingAutoplius(true);
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const xml = await buildAutopliusXmlFromDatabase(supabase, {
+        includeCarId: car?.id,
+        includeNotVisible: true,
+        expectCarInFeed: Boolean(car?.id),
+      });
+      const uploadResult = await uploadAutopliusXmlToStorage(supabase, xml, {
+        carId: car?.id,
+      });
+      setDebugXmlUrl(uploadResult.url);
+      setDebugXmlFileName(uploadResult.fileName);
+      setDebugXmlExpiresInSeconds(uploadResult.expiresInSeconds);
+      setIsDebugXmlModalOpen(true);
 
-      if (!session?.access_token) {
-        throw new Error("Nepavyko gauti aktyvios sesijos");
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "download",
-            include_car_id: car?.id || null,
-            include_not_visible: true,
-            expect_car_in_feed: true,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = "Nepavyko sugeneruoti Autoplius XML";
-
-        if (errorText) {
-          try {
-            const parsed = JSON.parse(errorText);
-            errorMessage = parsed.error || parsed.message || errorMessage;
-          } catch {
-            errorMessage = errorText;
-          }
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      const xmlBlob = await response.blob();
-      const objectUrl = URL.createObjectURL(xmlBlob);
-      const link = document.createElement("a");
-      const dateStamp = new Date().toISOString().slice(0, 10);
-
-      link.href = objectUrl;
-      link.download = `autoplius-feed-${dateStamp}.xml`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(objectUrl);
-
-      toast.success("Autoplius XML sėkmingai sugeneruotas");
+      toast.success("Autoplius XML sugeneruotas ir įkeltas į saugyklą");
     } catch (error: unknown) {
       console.error("Error exporting Autoplius feed:", error);
       const errorMessage = error instanceof Error ? error.message : "Klaida generuojant Autoplius XML";
@@ -230,28 +205,16 @@ const CreateListing = ({
     options?: { includeCarId?: string; expectCarInFeed?: boolean }
   ) => {
     try {
-      const { data, error } = await supabase.functions.invoke("generate-autoplius-xml", {
-        body: {
-          action: "push",
-          include_car_id: options?.includeCarId,
-          expect_car_in_feed: options?.expectCarInFeed === true,
-        },
+      const xml = await buildAutopliusXmlFromDatabase(supabase, {
+        includeCarId: options?.includeCarId,
+        includeNotVisible: Boolean(options?.includeCarId),
+        expectCarInFeed: options?.expectCarInFeed === true,
       });
-
-      if (error) {
-        throw new Error(error.message || "Nepavyko sinchronizuoti su Autoplius");
-      }
-
-      if (!data?.success) {
-        throw new Error(data?.error || "Autoplius sinchronizacija nepavyko");
-      }
+      const pushResult = await pushAutopliusXml(xml);
 
       return {
         success: true,
-        message:
-          typeof data?.message === "string"
-            ? data.message
-            : "Autoplius sinchronizacija atlikta",
+        message: pushResult.message || "Autoplius sinchronizacija atlikta",
       };
     } catch (error: unknown) {
       const errorMessage =
@@ -754,6 +717,7 @@ const CreateListing = ({
   };
 
   return (
+    <>
     <Card className="mb-6">
       <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
@@ -1394,6 +1358,48 @@ const CreateListing = ({
         </form>
       </CardContent>
     </Card>
+    <Dialog open={isDebugXmlModalOpen} onOpenChange={setIsDebugXmlModalOpen}>
+      <DialogContent className="sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>Debug XML failas</DialogTitle>
+          <DialogDescription>
+            XML failas įkeltas į Supabase Storage. Nuoroda galioja{" "}
+            {Math.max(1, Math.floor(debugXmlExpiresInSeconds / 3600))} val.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-3">
+          <div className="text-sm text-muted-foreground break-all">
+            Failas: <span className="font-medium text-foreground">{debugXmlFileName || "-"}</span>
+          </div>
+          <Input
+            readOnly
+            value={debugXmlUrl}
+            className="font-mono text-xs"
+          />
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                if (debugXmlUrl) {
+                  navigator.clipboard.writeText(debugXmlUrl);
+                  toast.success("Nuoroda nukopijuota");
+                }
+              }}
+              disabled={!debugXmlUrl}
+            >
+              Kopijuoti nuorodą
+            </Button>
+            <Button asChild type="button" disabled={!debugXmlUrl}>
+              <a href={debugXmlUrl} target="_blank" rel="noreferrer">
+                Atidaryti failą
+              </a>
+            </Button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 };
 

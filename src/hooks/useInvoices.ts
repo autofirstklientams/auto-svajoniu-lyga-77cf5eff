@@ -106,10 +106,13 @@ export const useInvoices = () => {
         return false;
       }
 
-      const total = data.items.reduce(
-        (sum, item) => sum + item.quantity * item.price,
-        0
-      );
+      const total = data.items.reduce((sum, item) => {
+        const linePrice = item.quantity * item.price;
+        if (item.vatType === "with_vat") {
+          return sum + linePrice + (linePrice * 0.21);
+        }
+        return sum + linePrice;
+      }, 0);
 
       const { error } = await supabase.from("invoices").insert([
         {

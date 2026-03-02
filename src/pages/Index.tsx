@@ -23,6 +23,15 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Announcement banner */}
+      <a
+        href="https://maps.app.goo.gl/3HSKiXHLQmBC99e"
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block bg-primary text-primary-foreground text-center py-2 px-4 text-sm font-medium hover:bg-primary/90 transition-colors"
+      >
+        📍 Persikėlėme! Naujas adresas — Palemono g. 173, Kaunas →
+      </a>
       <Header />
       <main>
         <Hero />

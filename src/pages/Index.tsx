@@ -66,9 +66,9 @@ const Index = () => {
                 <div className="p-6 bg-background rounded-lg shadow-sm">
                   <MapPin className="h-8 w-8 mx-auto mb-4 text-primary" />
                   <h3 className="font-semibold mb-2">{t("contact.address")}</h3>
-                  <p className="text-muted-foreground">
-                    Varduvos g. 2, Kaunas
-                  </p>
+                  <a href="https://maps.app.goo.gl/3HSKiXHLQmBC99e" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    Palemono g. 173, Kaunas
+                  </a>
                 </div>
               </div>
             </div>

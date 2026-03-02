@@ -69,9 +69,11 @@ const Footer = () => {
                   labas@autokopers.lt
                 </a>
               </li>
-              <li className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" />
-                Varduvos g. 2, Kaunas
+              <li>
+                <a href="https://maps.app.goo.gl/3HSKiXHLQmBC99e" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-primary transition-colors">
+                  <MapPin className="h-4 w-4" />
+                  Palemono g. 173, Kaunas
+                </a>
               </li>
             </ul>
           </div>

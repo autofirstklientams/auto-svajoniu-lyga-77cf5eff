@@ -81,7 +81,7 @@ export const sellerInfo = {
   name: 'MB "Autodealeriai"',
   companyCode: "305825810",
   vatCode: "LT100015779014",
-  address: "Apės g. 11, Kaunas",
+  address: "Palemono g. 173, Kaunas",
 };
 
 export type VatType = "with_vat" | "with_vat_included" | "no_vat" | "vat_exempt" | "margin_scheme";

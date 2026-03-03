@@ -144,6 +144,7 @@ export type Database = {
           partner_id: string
           power_kw: number | null
           price: number
+          sdk_code: string | null
           seats: number | null
           steering_wheel: string | null
           transmission: string | null
@@ -188,6 +189,7 @@ export type Database = {
           partner_id: string
           power_kw?: number | null
           price: number
+          sdk_code?: string | null
           seats?: number | null
           steering_wheel?: string | null
           transmission?: string | null
@@ -232,6 +234,7 @@ export type Database = {
           partner_id?: string
           power_kw?: number | null
           price?: number
+          sdk_code?: string | null
           seats?: number | null
           steering_wheel?: string | null
           transmission?: string | null

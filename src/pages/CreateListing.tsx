@@ -94,7 +94,8 @@ const CreateListing = ({
     origin_country: car?.origin_country || "",
     wheel_drive: car?.wheel_drive || "",
     co2_emission: car?.co2_emission || 0,
-    city: car?.city || "Vilnius",
+    city: car?.city || "Kaunas",
+    sdk_code: car?.sdk_code || "",
   });
 
   const handleImportFromAutoplius = async () => {
@@ -304,7 +305,8 @@ const CreateListing = ({
       origin_country: source?.origin_country || "",
       wheel_drive: source?.wheel_drive || "",
       co2_emission: source?.co2_emission || 0,
-      city: source?.city || "Vilnius",
+      city: source?.city || "Kaunas",
+      sdk_code: source?.sdk_code || "",
     });
 
     setSelectedFeatures(source?.features || {});
@@ -346,7 +348,8 @@ const CreateListing = ({
         origin_country: "",
         wheel_drive: "",
         co2_emission: 0,
-        city: "Vilnius",
+        city: "Kaunas",
+        sdk_code: "",
       });
       setSelectedFeatures({});
       setVisibleWeb(true);
@@ -413,6 +416,7 @@ const CreateListing = ({
               "wheel_drive",
               "co2_emission",
               "city",
+              "sdk_code",
             ].join(",")
           )
           .eq("id", car.id)
@@ -593,7 +597,8 @@ const CreateListing = ({
         origin_country: formData.origin_country || null,
         wheel_drive: formData.wheel_drive || null,
         co2_emission: formData.co2_emission || null,
-        city: formData.city || "Vilnius",
+        city: formData.city || "Kaunas",
+        sdk_code: formData.sdk_code || null,
         features: selectedFeatures as any,
         visible_web: visibleWeb,
         visible_autoplius: visibleAutoplius,
@@ -780,41 +785,7 @@ const CreateListing = ({
         )}
       </CardHeader>
       <CardContent>
-        {/* Autoplius Import Section */}
-        {!car && (
-          <div className="mb-6 p-4 bg-muted/50 rounded-lg border border-dashed border-primary/30">
-            <div className="flex items-center gap-2 mb-3">
-              <Link className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold text-foreground">Importuoti iš Autoplius</h3>
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">
-              Įklijuokite skelbimo nuorodą iš autoplius.lt ir automatiškai užpildysime formą
-            </p>
-            <div className="flex gap-2">
-              <Input
-                value={autopliusUrl}
-                onChange={(e) => setAutopliusUrl(e.target.value)}
-                placeholder="https://autoplius.lt/skelbimai/..."
-                className="flex-1"
-              />
-              <Button
-                type="button"
-                onClick={handleImportFromAutoplius}
-                disabled={isImporting}
-                variant="secondary"
-              >
-                {isImporting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Importuojama...
-                  </>
-                ) : (
-                  "Importuoti"
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
+        {/* Autoplius import removed */}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Info */}
@@ -1085,8 +1056,8 @@ const CreateListing = ({
                     <SelectValue placeholder="Pasirinkite" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Vilnius">Vilnius</SelectItem>
                     <SelectItem value="Kaunas">Kaunas</SelectItem>
+                    <SelectItem value="Vilnius">Vilnius</SelectItem>
                     <SelectItem value="Klaipėda">Klaipėda</SelectItem>
                     <SelectItem value="Šiauliai">Šiauliai</SelectItem>
                     <SelectItem value="Panevėžys">Panevėžys</SelectItem>
@@ -1095,6 +1066,17 @@ const CreateListing = ({
                     <SelectItem value="Utena">Utena</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sdk_code">SDK kodas</Label>
+                <Input
+                  id="sdk_code"
+                  value={formData.sdk_code}
+                  onChange={(e) => setFormData({ ...formData, sdk_code: e.target.value })}
+                  placeholder="Pvz.: ABC123"
+                  maxLength={10}
+                />
               </div>
 
               <div className="space-y-2">

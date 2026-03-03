@@ -36,6 +36,9 @@ interface Car {
   wheel_drive?: string;
   co2_emission?: number;
   city?: string;
+  mot_date?: string;
+  is_reserved?: boolean;
+  sdk_code?: string;
 }
 
 interface CarImage {
@@ -564,6 +567,22 @@ const handler = async (req: Request): Promise<Response> => {
         // Optional: origin_country_id
         if (car.origin_country && originCountryMapping[car.origin_country]) {
           xml += `      <origin_country_id>${originCountryMapping[car.origin_country]}</origin_country_id>\n`;
+        }
+
+        // Optional: mot_date (tech. apžiūra)
+        if (car.mot_date) {
+          const motDate = formatYearMonth(car.mot_date);
+          xml += `      <mot_date>${motDate}</mot_date>\n`;
+        }
+
+        // Optional: reservation
+        if (car.is_reserved) {
+          xml += `      <reservation>1</reservation>\n`;
+        }
+
+        // Optional: sdk_code
+        if (car.sdk_code) {
+          xml += `      <sdk_code>${escapeXml(car.sdk_code)}</sdk_code>\n`;
         }
 
         // Photos

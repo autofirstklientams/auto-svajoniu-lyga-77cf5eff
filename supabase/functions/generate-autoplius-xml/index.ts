@@ -374,57 +374,49 @@ const handler = async (req: Request): Promise<Response> => {
     const payload = await getRequestPayload(req);
     const action = payload.action === "push" ? "push" : "download";
 
-    // Verify JWT authentication
-    const authHeader = req.headers.get("Authorization");
-    if (!authHeader?.startsWith("Bearer ")) {
-      console.log("Missing or invalid Authorization header");
-      return new Response(
-        JSON.stringify({ error: "Unauthorized: Missing or invalid token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    
-    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
-    const { data: { user }, error: authError } = await authClient.auth.getUser();
-    if (authError || !user) {
-      console.log("Authentication failed:", authError?.message);
-      return new Response(
-        JSON.stringify({ error: "Unauthorized: Invalid token" }),
-        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const { data: roles, error: roleError } = await authClient
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", user.id);
-
-    if (roleError) {
-      console.log("Role check error:", roleError.message);
-      return new Response(
-        JSON.stringify({ error: "Forbidden: Could not verify permissions" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const hasAccess = roles?.some((r) => r.role === "partner" || r.role === "admin");
-    if (!hasAccess) {
-      console.log("User lacks required role");
-      return new Response(
-        JSON.stringify({ error: "Forbidden: Insufficient permissions" }),
-        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    console.log(`Authenticated user ${user.id} generating XML feed`);
-
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    // For POST/push actions, require authentication
+    if (action === "push") {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized: Missing or invalid token" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+        global: { headers: { Authorization: authHeader } },
+      });
+
+      const { data: { user }, error: authError } = await authClient.auth.getUser();
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: "Unauthorized: Invalid token" }),
+          { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const { data: roles } = await authClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+
+      const hasAccess = roles?.some((r) => r.role === "partner" || r.role === "admin");
+      if (!hasAccess) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden: Insufficient permissions" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      console.log(`Authenticated user ${user.id} pushing XML feed`);
+    }
+
+    // GET requests are public (for Autoplius to fetch)
+    console.log(`Generating XML feed (action: ${action})`);
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log("Fetching cars from database...");

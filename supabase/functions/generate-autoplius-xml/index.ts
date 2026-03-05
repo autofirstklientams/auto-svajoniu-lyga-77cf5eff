@@ -788,8 +788,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(xml, {
       status: 200,
       headers: {
-        "Content-Type": "application/xml; charset=utf-8",
-        "Content-Disposition": 'attachment; filename="autoplius-feed.xml"',
+        "Content-Type": "text/xml; charset=utf-8",
         ...corsHeaders,
       },
     });

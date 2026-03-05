@@ -497,6 +497,37 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log(`Found ${carsToExport.length} cars for Autoplius export`);
 
+    // Fetch model IDs from Autoplius datacollector API
+    const uniqueMakeIds = new Set<string>();
+    for (const car of carsToExport) {
+      const mid = makeIdMapping[car.make] || makeIdMapping[car.make?.trim()];
+      if (mid) uniqueMakeIds.add(mid);
+    }
+
+    const modelIdCache: Record<string, Record<string, string>> = {};
+    for (const mId of uniqueMakeIds) {
+      try {
+        const resp = await fetch(`https://autoplius.lt/importhandler?datacollector=1&category_id=2&make_id=${mId}`);
+        if (resp.ok) {
+          const xmlText = await resp.text();
+          // Parse model IDs from datacollector XML response
+          // Format: <option value="ID">ModelName</option>
+          const modelMap: Record<string, string> = {};
+          const optionRegex = /<option\s+value="(\d+)"[^>]*>([^<]+)<\/option>/gi;
+          let match;
+          while ((match = optionRegex.exec(xmlText)) !== null) {
+            const modelId = match[1];
+            const modelName = match[2].trim();
+            modelMap[modelName.toLowerCase()] = modelId;
+          }
+          modelIdCache[mId] = modelMap;
+          console.log(`Loaded ${Object.keys(modelMap).length} models for make_id ${mId}`);
+        }
+      } catch (e) {
+        console.warn(`Failed to fetch models for make_id ${mId}:`, e);
+      }
+    }
+
     // Generate XML
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
     xml += '<autoplius>\n';
@@ -512,7 +543,7 @@ const handler = async (req: Request): Promise<Response> => {
       xml += `<sell_price>${car.price}</sell_price>\n`;
       
       // make_id (required)
-      const makeId = makeIdMapping[car.make] || "";
+      const makeId = makeIdMapping[car.make] || makeIdMapping[car.make?.trim()] || "";
       if (makeId) {
         xml += `<make_id>${makeId}</make_id>\n`;
       } else {
@@ -520,8 +551,27 @@ const handler = async (req: Request): Promise<Response> => {
         xml += `<make_id>${escapeXml(car.make)}</make_id>\n`;
       }
       
-      // model_id (required - should be numeric ID, sending text as fallback)
-      xml += `<model_id>${escapeXml(car.model)}</model_id>\n`;
+      // model_id (required - numeric ID from Autoplius datacollector)
+      let resolvedModelId = "";
+      if (makeId && modelIdCache[makeId]) {
+        const modelLower = car.model?.trim().toLowerCase() || "";
+        resolvedModelId = modelIdCache[makeId][modelLower] || "";
+        // Try partial match if exact match fails
+        if (!resolvedModelId) {
+          for (const [name, id] of Object.entries(modelIdCache[makeId])) {
+            if (name === modelLower || modelLower.startsWith(name) || name.startsWith(modelLower)) {
+              resolvedModelId = id;
+              break;
+            }
+          }
+        }
+      }
+      if (resolvedModelId) {
+        xml += `<model_id>${resolvedModelId}</model_id>\n`;
+      } else {
+        console.warn(`Could not resolve model_id for ${car.make} ${car.model}, sending text`);
+        xml += `<model_id>${escapeXml(car.model)}</model_id>\n`;
+      }
       
       // fk_place_countries_id (required) - 1 = Lietuva
       xml += `<fk_place_countries_id>1</fk_place_countries_id>\n`;

@@ -80,17 +80,26 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
 
   return (
     <>
-      <Card className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300">
+      <Card className={`group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 ${isSold ? 'opacity-75' : ''}`}>
         <div className="relative">
           {car.image_url ? (
             <OptimizedImage
               src={getThumbnailUrl(car.image_url)}
               alt={`${car.make} ${car.model}`}
-              className="w-full h-48"
+              className={`w-full h-48 ${isSold ? 'grayscale' : ''}`}
             />
           ) : (
             <div className="w-full h-48 bg-muted flex items-center justify-center">
               <span className="text-muted-foreground">Nėra nuotraukos</span>
+            </div>
+          )}
+          
+          {/* Sold overlay */}
+          {isSold && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+              <span className="text-white font-bold text-2xl tracking-widest uppercase rotate-[-15deg] bg-black/50 px-6 py-2 rounded-lg">
+                Parduotas
+              </span>
             </div>
           )}
           

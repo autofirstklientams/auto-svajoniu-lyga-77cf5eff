@@ -737,22 +737,7 @@ const CreateListing = ({
         }
       }
 
-      const shouldSyncAutoplius =
-        canExportAutoplius && (visibleAutoplius || Boolean(car?.visible_autoplius));
-
-      if (shouldSyncAutoplius) {
-        const syncResult = await syncAutopliusFeed({
-          includeCarId: visibleAutoplius ? carId || undefined : undefined,
-          expectCarInFeed: Boolean(visibleAutoplius && carId),
-        });
-        if (syncResult.success) {
-          toast.success(syncResult.message);
-        } else {
-          toast.error(
-            `Skelbimas išsaugotas, bet Autoplius sinchronizacija nepavyko: ${syncResult.message}`
-          );
-        }
-      }
+      // Autoplius sync removed – XML feed is pulled by Autoplius automatically
 
       toast.success(car?.id ? "Skelbimas atnaujintas!" : "Skelbimas sukurtas!");
       onSuccess();

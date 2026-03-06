@@ -577,7 +577,7 @@ const CreateListing = ({
 
       const carData = {
         ...formData,
-        partner_id: user.id,
+        partner_id: car?.partner_id || user.id,
         mileage: formData.mileage || null,
         fuel_type: formData.fuel_type || null,
         transmission: formData.transmission || null,

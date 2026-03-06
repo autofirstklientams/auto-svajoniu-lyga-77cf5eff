@@ -38,6 +38,8 @@ interface Car {
   features?: any;
   visible_web: boolean;
   visible_autoplius: boolean;
+  visible_autolizingas: boolean;
+  partner_id?: string;
 }
 
 const PartnerDashboard = () => {

@@ -146,7 +146,7 @@ const PartnerDashboard = () => {
     if (user) {
       fetchCars();
     }
-  }, [user]);
+  }, [user, isAdmin, fetchCars]);
 
   useEffect(() => {
     if (showCreateForm) {

@@ -1,0 +1,1 @@
+ALTER TABLE public.cars ADD COLUMN is_sold boolean NOT NULL DEFAULT false;

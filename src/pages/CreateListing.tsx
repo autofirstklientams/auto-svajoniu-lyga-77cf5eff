@@ -313,6 +313,7 @@ const CreateListing = ({
     setSelectedFeatures(source?.features || {});
     setVisibleWeb(source?.visible_web ?? true);
     setVisibleAutoplius(source?.visible_autoplius ?? false);
+    setVisibleAutolizingas(source?.visible_autolizingas ?? false);
     setIsCompanyCar(source?.is_company_car ?? false);
     setIsFeatured(source?.is_featured ?? false);
     setIsRecommended(source?.is_recommended ?? false);

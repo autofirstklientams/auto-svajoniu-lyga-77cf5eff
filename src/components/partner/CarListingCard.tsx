@@ -1,5 +1,5 @@
 import { useState, memo } from "react";
-import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare, ShieldCheck } from "lucide-react";
+import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

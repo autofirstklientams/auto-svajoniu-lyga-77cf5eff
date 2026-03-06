@@ -105,25 +105,31 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
           
           {/* Status badges */}
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-            {isReserved && (
+            {isSold && (
+              <Badge className="bg-foreground/90 text-background border-none shadow-sm">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Parduotas
+              </Badge>
+            )}
+            {isReserved && !isSold && (
               <Badge className="bg-amber-500/90 text-white border-none shadow-sm">
                 <ShieldCheck className="h-3 w-3 mr-1" />
                 Rezervuotas
               </Badge>
             )}
-            {car.visible_web && (
+            {car.visible_web && !isSold && (
               <Badge className="bg-green-500/90 text-white border-none shadow-sm">
                 <Globe className="h-3 w-3 mr-1" />
                 Web
               </Badge>
             )}
-            {car.visible_autoplius && (
+            {car.visible_autoplius && !isSold && (
               <Badge className="bg-blue-500/90 text-white border-none shadow-sm">
                 <ExternalLink className="h-3 w-3 mr-1" />
                 Autoplius
               </Badge>
             )}
-            {!car.visible_web && !car.visible_autoplius && !isReserved && (
+            {!car.visible_web && !car.visible_autoplius && !isReserved && !isSold && (
               <Badge variant="secondary" className="bg-background/90 shadow-sm">
                 Nepublikuota
               </Badge>

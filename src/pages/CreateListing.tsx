@@ -386,6 +386,7 @@ const CreateListing = ({
           .select(
             [
               "id",
+              "partner_id",
               "make",
               "model",
               "year",

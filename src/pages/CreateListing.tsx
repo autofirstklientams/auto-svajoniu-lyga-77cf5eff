@@ -407,6 +407,7 @@ const CreateListing = ({
               "features",
               "visible_web",
               "visible_autoplius",
+              "visible_autolizingas",
               "is_company_car",
               "is_featured",
               "is_recommended",

@@ -35,7 +35,9 @@ interface CarListingCardProps {
 function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh, isOwner = true }: CarListingCardProps) {
   const [showManagement, setShowManagement] = useState(false);
   const [isReserved, setIsReserved] = useState(car.is_reserved ?? false);
+  const [isSold, setIsSold] = useState(car.is_sold ?? false);
   const [isTogglingReserved, setIsTogglingReserved] = useState(false);
+  const [isTogglingSold, setIsTogglingSold] = useState(false);
   const carTitle = `${car.make} ${car.model} (${car.year})`;
 
   const toggleReserved = async () => {
@@ -54,6 +56,25 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
       toast.error("Klaida keičiant rezervacijos statusą");
     } finally {
       setIsTogglingReserved(false);
+    }
+  };
+
+  const toggleSold = async () => {
+    setIsTogglingSold(true);
+    const newValue = !isSold;
+    try {
+      const { error } = await supabase
+        .from("cars")
+        .update({ is_sold: newValue })
+        .eq("id", car.id);
+      if (error) throw error;
+      setIsSold(newValue);
+      toast.success(newValue ? "Automobilis pažymėtas kaip parduotas" : "Parduotas statusas nuimtas");
+      onRefresh?.();
+    } catch {
+      toast.error("Klaida keičiant statusą");
+    } finally {
+      setIsTogglingSold(false);
     }
   };
 

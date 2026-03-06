@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { calculateMonthlyPayment } from "@/components/LoanCalculator";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { OptimizedImage } from "@/components/OptimizedImage";
-import { getThumbnailUrl } from "@/utils/imageUtils";
+import { getThumbnailUrl, getOptimizedImageUrl } from "@/utils/imageUtils";
 
 interface CarCardProps {
   id?: string;

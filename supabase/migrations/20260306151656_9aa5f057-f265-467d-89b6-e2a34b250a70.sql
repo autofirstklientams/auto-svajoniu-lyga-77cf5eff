@@ -1,0 +1,1 @@
+ALTER TABLE public.cars ADD COLUMN visible_autolizingas boolean NOT NULL DEFAULT false;

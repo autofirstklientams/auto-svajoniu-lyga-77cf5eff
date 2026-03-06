@@ -150,6 +150,7 @@ export type Database = {
           transmission: string | null
           updated_at: string | null
           vin: string | null
+          visible_autolizingas: boolean
           visible_autoplius: boolean
           visible_web: boolean
           wheel_drive: string | null
@@ -195,6 +196,7 @@ export type Database = {
           transmission?: string | null
           updated_at?: string | null
           vin?: string | null
+          visible_autolizingas?: boolean
           visible_autoplius?: boolean
           visible_web?: boolean
           wheel_drive?: string | null
@@ -240,6 +242,7 @@ export type Database = {
           transmission?: string | null
           updated_at?: string | null
           vin?: string | null
+          visible_autolizingas?: boolean
           visible_autoplius?: boolean
           visible_web?: boolean
           wheel_drive?: string | null

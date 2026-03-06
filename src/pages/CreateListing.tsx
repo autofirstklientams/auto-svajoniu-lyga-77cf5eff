@@ -64,6 +64,7 @@ const CreateListing = ({
   );
   const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? true);
   const [visibleAutoplius, setVisibleAutoplius] = useState(car?.visible_autoplius ?? false);
+  const [visibleAutolizingas, setVisibleAutolizingas] = useState(car?.visible_autolizingas ?? false);
   const [isCompanyCar, setIsCompanyCar] = useState(car?.is_company_car ?? false);
   const [isFeatured, setIsFeatured] = useState(car?.is_featured ?? false);
   const [isRecommended, setIsRecommended] = useState(car?.is_recommended ?? false);
@@ -312,6 +313,7 @@ const CreateListing = ({
     setSelectedFeatures(source?.features || {});
     setVisibleWeb(source?.visible_web ?? true);
     setVisibleAutoplius(source?.visible_autoplius ?? false);
+    setVisibleAutolizingas(source?.visible_autolizingas ?? false);
     setIsCompanyCar(source?.is_company_car ?? false);
     setIsFeatured(source?.is_featured ?? false);
     setIsRecommended(source?.is_recommended ?? false);
@@ -384,6 +386,7 @@ const CreateListing = ({
           .select(
             [
               "id",
+              "partner_id",
               "make",
               "model",
               "year",
@@ -405,6 +408,7 @@ const CreateListing = ({
               "features",
               "visible_web",
               "visible_autoplius",
+              "visible_autolizingas",
               "is_company_car",
               "is_featured",
               "is_recommended",
@@ -575,7 +579,7 @@ const CreateListing = ({
 
       const carData = {
         ...formData,
-        partner_id: user.id,
+        partner_id: car?.partner_id || user.id,
         mileage: formData.mileage || null,
         fuel_type: formData.fuel_type || null,
         transmission: formData.transmission || null,
@@ -602,6 +606,7 @@ const CreateListing = ({
         features: selectedFeatures as any,
         visible_web: visibleWeb,
         visible_autoplius: visibleAutoplius,
+        visible_autolizingas: visibleAutolizingas,
         is_company_car: isCompanyCar,
         is_featured: isFeatured,
         is_recommended: isRecommended,
@@ -1313,6 +1318,20 @@ const CreateListing = ({
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autoplius.lt</span>
+                  </div>
+                </label>
+              )}
+
+              {/* Autolizingas for admins and partners */}
+              {canExportAutoplius && (
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={visibleAutolizingas}
+                    onCheckedChange={(checked) => setVisibleAutolizingas(checked === true)}
+                  />
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4 text-primary" />
+                    <span className="font-medium">Autolizingas.lt</span>
                   </div>
                 </label>
               )}

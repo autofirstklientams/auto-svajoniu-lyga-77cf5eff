@@ -143,12 +143,6 @@ const PartnerDashboard = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      fetchCars();
-    }
-  }, [user, isAdmin, fetchCars]);
-
-  useEffect(() => {
     if (showCreateForm) {
       window.scrollTo({ top: 0, behavior: "smooth" });
     }

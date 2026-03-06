@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 import { calculateMonthlyPayment } from "@/components/LoanCalculator";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { OptimizedImage } from "@/components/OptimizedImage";
-import { getThumbnailUrl } from "@/utils/imageUtils";
+import { getThumbnailUrl, getOptimizedImageUrl } from "@/utils/imageUtils";
 
 interface CarCardProps {
   id?: string;
@@ -58,7 +58,7 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
           </Badge>
         )}
         <OptimizedImage
-          src={getThumbnailUrl(image)}
+          src={getOptimizedImageUrl(image, { width: 600, quality: 80 })}
           alt={title}
           className={`w-full transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
           priority={priority}

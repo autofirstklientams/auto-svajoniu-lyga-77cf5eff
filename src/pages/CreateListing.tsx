@@ -64,6 +64,7 @@ const CreateListing = ({
   );
   const [visibleWeb, setVisibleWeb] = useState(car?.visible_web ?? true);
   const [visibleAutoplius, setVisibleAutoplius] = useState(car?.visible_autoplius ?? false);
+  const [visibleAutolizingas, setVisibleAutolizingas] = useState(car?.visible_autolizingas ?? false);
   const [isCompanyCar, setIsCompanyCar] = useState(car?.is_company_car ?? false);
   const [isFeatured, setIsFeatured] = useState(car?.is_featured ?? false);
   const [isRecommended, setIsRecommended] = useState(car?.is_recommended ?? false);

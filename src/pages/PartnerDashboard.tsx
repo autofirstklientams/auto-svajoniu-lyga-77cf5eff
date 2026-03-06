@@ -155,19 +155,24 @@ const PartnerDashboard = () => {
   const fetchCars = useCallback(async () => {
     if (!user?.id) return;
     try {
-      const { data, error } = await supabase
+      const query = supabase
         .from("cars")
         .select(`
           id, make, model, year, price, mileage, fuel_type, transmission, 
-          image_url, visible_web, visible_autoplius, description, body_type,
+          image_url, visible_web, visible_autoplius, visible_autolizingas, description, body_type,
           engine_capacity, power_kw, doors, seats, color, steering_wheel,
           condition, vin, defects, features, is_company_car, is_featured, 
           is_recommended, is_reserved, euro_standard, fuel_cons_urban, fuel_cons_highway,
           fuel_cons_combined, origin_country, wheel_drive, co2_emission, city
         `)
-        .eq("partner_id", user.id)
         .order("created_at", { ascending: false });
 
+      // Admin sees all cars, partner sees only their own
+      if (!isAdmin) {
+        query.eq("partner_id", user.id);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       setCars(data || []);
     } catch (error: any) {
@@ -177,7 +182,7 @@ const PartnerDashboard = () => {
         toast.error("Klaida užkraunant skelbimus");
       }
     }
-  }, [user?.id]);
+  }, [user?.id, isAdmin]);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Ar tikrai norite ištrinti šį skelbimą?")) return;

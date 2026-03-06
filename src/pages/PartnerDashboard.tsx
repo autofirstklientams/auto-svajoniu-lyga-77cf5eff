@@ -180,7 +180,12 @@ const PartnerDashboard = () => {
     }
   }, [user?.id, isAdmin]);
 
-  const handleDelete = async (id: string) => {
+  useEffect(() => {
+    if (user) {
+      fetchCars();
+    }
+  }, [user, isAdmin, fetchCars]);
+
     if (!confirm("Ar tikrai norite ištrinti šį skelbimą?")) return;
 
     try {

@@ -604,6 +604,7 @@ const CreateListing = ({
         features: selectedFeatures as any,
         visible_web: visibleWeb,
         visible_autoplius: visibleAutoplius,
+        visible_autolizingas: visibleAutolizingas,
         is_company_car: isCompanyCar,
         is_featured: isFeatured,
         is_recommended: isRecommended,

@@ -186,6 +186,7 @@ const PartnerDashboard = () => {
     }
   }, [user, isAdmin, fetchCars]);
 
+  const handleDelete = async (id: string) => {
     if (!confirm("Ar tikrai norite ištrinti šį skelbimą?")) return;
 
     try {

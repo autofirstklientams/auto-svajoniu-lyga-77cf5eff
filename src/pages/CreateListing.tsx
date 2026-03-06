@@ -1320,6 +1320,20 @@ const CreateListing = ({
                   </div>
                 </label>
               )}
+
+              {/* Autolizingas for admins and partners */}
+              {canExportAutoplius && (
+                <label className="flex items-center gap-3 cursor-pointer">
+                  <Checkbox
+                    checked={visibleAutolizingas}
+                    onCheckedChange={(checked) => setVisibleAutolizingas(checked === true)}
+                  />
+                  <div className="flex items-center gap-2">
+                    <ExternalLink className="h-4 w-4 text-primary" />
+                    <span className="font-medium">Autolizingas.lt</span>
+                  </div>
+                </label>
+              )}
             </div>
             
             {/* Admin-only options */}

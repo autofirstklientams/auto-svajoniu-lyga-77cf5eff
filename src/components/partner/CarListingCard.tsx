@@ -1,5 +1,5 @@
 import { useState, memo } from "react";
-import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare, ShieldCheck } from "lucide-react";
+import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare, ShieldCheck, CheckCircle2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +35,9 @@ interface CarListingCardProps {
 function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh, isOwner = true }: CarListingCardProps) {
   const [showManagement, setShowManagement] = useState(false);
   const [isReserved, setIsReserved] = useState(car.is_reserved ?? false);
+  const [isSold, setIsSold] = useState(car.is_sold ?? false);
   const [isTogglingReserved, setIsTogglingReserved] = useState(false);
+  const [isTogglingSold, setIsTogglingSold] = useState(false);
   const carTitle = `${car.make} ${car.model} (${car.year})`;
 
   const toggleReserved = async () => {
@@ -57,15 +59,34 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
     }
   };
 
+  const toggleSold = async () => {
+    setIsTogglingSold(true);
+    const newValue = !isSold;
+    try {
+      const { error } = await supabase
+        .from("cars")
+        .update({ is_sold: newValue })
+        .eq("id", car.id);
+      if (error) throw error;
+      setIsSold(newValue);
+      toast.success(newValue ? "Automobilis pažymėtas kaip parduotas" : "Parduotas statusas nuimtas");
+      onRefresh?.();
+    } catch {
+      toast.error("Klaida keičiant statusą");
+    } finally {
+      setIsTogglingSold(false);
+    }
+  };
+
   return (
     <>
-      <Card className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300">
+      <Card className={`group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 ${isSold ? 'opacity-75' : ''}`}>
         <div className="relative">
           {car.image_url ? (
             <OptimizedImage
               src={getThumbnailUrl(car.image_url)}
               alt={`${car.make} ${car.model}`}
-              className="w-full h-48"
+              className={`w-full h-48 ${isSold ? 'grayscale' : ''}`}
             />
           ) : (
             <div className="w-full h-48 bg-muted flex items-center justify-center">
@@ -73,27 +94,42 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
             </div>
           )}
           
+          {/* Sold overlay */}
+          {isSold && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+              <span className="text-white font-bold text-2xl tracking-widest uppercase rotate-[-15deg] bg-black/50 px-6 py-2 rounded-lg">
+                Parduotas
+              </span>
+            </div>
+          )}
+          
           {/* Status badges */}
           <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-            {isReserved && (
+            {isSold && (
+              <Badge className="bg-foreground/90 text-background border-none shadow-sm">
+                <CheckCircle2 className="h-3 w-3 mr-1" />
+                Parduotas
+              </Badge>
+            )}
+            {isReserved && !isSold && (
               <Badge className="bg-amber-500/90 text-white border-none shadow-sm">
                 <ShieldCheck className="h-3 w-3 mr-1" />
                 Rezervuotas
               </Badge>
             )}
-            {car.visible_web && (
+            {car.visible_web && !isSold && (
               <Badge className="bg-green-500/90 text-white border-none shadow-sm">
                 <Globe className="h-3 w-3 mr-1" />
                 Web
               </Badge>
             )}
-            {car.visible_autoplius && (
+            {car.visible_autoplius && !isSold && (
               <Badge className="bg-blue-500/90 text-white border-none shadow-sm">
                 <ExternalLink className="h-3 w-3 mr-1" />
                 Autoplius
               </Badge>
             )}
-            {!car.visible_web && !car.visible_autoplius && !isReserved && (
+            {!car.visible_web && !car.visible_autoplius && !isReserved && !isSold && (
               <Badge variant="secondary" className="bg-background/90 shadow-sm">
                 Nepublikuota
               </Badge>
@@ -102,6 +138,16 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
 
           {/* Quick actions - visible on hover */}
           <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="secondary"
+              size="icon"
+              className={`h-8 w-8 shadow-sm ${isSold ? 'bg-foreground text-background hover:bg-foreground/80' : 'bg-background/90 hover:bg-background'}`}
+              onClick={toggleSold}
+              disabled={isTogglingSold}
+              title={isSold ? "Nuimti parduota statusą" : "Pažymėti kaip parduotą"}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+            </Button>
             <Button
               variant="secondary"
               size="icon"

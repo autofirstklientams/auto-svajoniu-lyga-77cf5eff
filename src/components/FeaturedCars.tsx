@@ -26,6 +26,7 @@ const fetchFeaturedCars = async (): Promise<Car[]> => {
     .select("id, make, model, year, price, mileage, image_url, fuel_type, is_recommended, is_reserved")
     .eq("visible_web", true)
     .eq("is_featured", true)
+    .eq("is_sold", false)
     .order("is_recommended", { ascending: false })
     .order("created_at", { ascending: false })
     .limit(6);

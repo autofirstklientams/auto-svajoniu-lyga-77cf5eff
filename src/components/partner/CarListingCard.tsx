@@ -141,6 +141,16 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
             <Button
               variant="secondary"
               size="icon"
+              className={`h-8 w-8 shadow-sm ${isSold ? 'bg-foreground text-background hover:bg-foreground/80' : 'bg-background/90 hover:bg-background'}`}
+              onClick={toggleSold}
+              disabled={isTogglingSold}
+              title={isSold ? "Nuimti parduota statusą" : "Pažymėti kaip parduotą"}
+            >
+              <CheckCircle2 className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="secondary"
+              size="icon"
               className={`h-8 w-8 shadow-sm ${isReserved ? 'bg-amber-500 text-white hover:bg-amber-600' : 'bg-background/90 hover:bg-background'}`}
               onClick={toggleReserved}
               disabled={isTogglingReserved}

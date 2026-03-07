@@ -63,6 +63,10 @@ const CreateListing = ({
   const [existingImages, setExistingImages] = useState<Array<{id: string, url: string, order: number}>>([]);
   const [importedImageUrls, setImportedImageUrls] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
+  const [makeOpen, setMakeOpen] = useState(false);
+  const [modelOpen, setModelOpen] = useState(false);
+  const [availableModels, setAvailableModels] = useState<string[]>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState<CarFeatures>(
     car?.features || {}
   );

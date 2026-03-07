@@ -513,12 +513,15 @@ const handler = async (req: Request): Promise<Response> => {
           // Parse model IDs from datacollector XML response
           // Format: <option value="ID">ModelName</option>
           const modelMap: Record<string, string> = {};
-          const optionRegex = /<option\s+value="(\d+)"[^>]*>([^<]+)<\/option>/gi;
+          // Parse <item><id>ID</id><title>NAME</title></item> format
+          const itemRegex = /<item>\s*<id>(\d+)<\/id>\s*<title>([^<]+)<\/title>\s*<\/item>/gi;
           let match;
-          while ((match = optionRegex.exec(xmlText)) !== null) {
+          while ((match = itemRegex.exec(xmlText)) !== null) {
             const modelId = match[1];
             const modelName = match[2].trim();
-            modelMap[modelName.toLowerCase()] = modelId;
+            if (modelName !== '-kita-') {
+              modelMap[modelName.toLowerCase()] = modelId;
+            }
           }
           modelIdCache[mId] = modelMap;
           console.log(`Loaded ${Object.keys(modelMap).length} models for make_id ${mId}`);

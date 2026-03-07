@@ -568,12 +568,29 @@ const handler = async (req: Request): Promise<Response> => {
             }
           }
         }
+        // Try matching first word only (e.g. "Golf" from "Golf Plus")
+        if (!resolvedModelId && modelLower.includes(' ')) {
+          const firstWord = modelLower.split(' ')[0];
+          if (modelIdCache[makeId][firstWord]) {
+            resolvedModelId = modelIdCache[makeId][firstWord];
+          }
+        }
       }
       if (resolvedModelId) {
         xml += `<model_id>${resolvedModelId}</model_id>\n`;
       } else {
-        console.warn(`Could not resolve model_id for ${car.make} ${car.model}, sending text`);
-        xml += `<model_id>${escapeXml(car.model)}</model_id>\n`;
+        // Use "-kita-" (other) model ID as fallback - fetch it from cache
+        let kitaId = "";
+        if (makeId && modelIdCache[makeId]) {
+          kitaId = modelIdCache[makeId]["-kita-"] || "";
+        }
+        if (kitaId) {
+          console.warn(`Could not resolve model_id for ${car.make} ${car.model}, using -kita- (${kitaId})`);
+          xml += `<model_id>${kitaId}</model_id>\n`;
+        } else {
+          console.warn(`Could not resolve model_id for ${car.make} ${car.model}, no fallback available`);
+          xml += `<model_id>0</model_id>\n`;
+        }
       }
       
       // fk_place_countries_id (required) - 1 = Lietuva

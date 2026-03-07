@@ -818,23 +818,84 @@ const CreateListing = ({
             <h3 className="text-lg font-semibold mb-4 text-foreground">Pagrindinė informacija</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="make">Markė *</Label>
-                <Input
-                  id="make"
-                  value={formData.make}
-                  onChange={(e) => setFormData({ ...formData, make: e.target.value })}
-                  required
-                />
+                <Label>Markė *</Label>
+                <Popover open={makeOpen} onOpenChange={setMakeOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={makeOpen}
+                      className="w-full justify-between font-normal"
+                    >
+                      {formData.make || "Pasirinkite markę..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[280px] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Ieškoti markės..." />
+                      <CommandList>
+                        <CommandEmpty>Nerasta.</CommandEmpty>
+                        <CommandGroup>
+                          {CAR_MAKES.map((make) => (
+                            <CommandItem
+                              key={make}
+                              value={make}
+                              onSelect={() => {
+                                setFormData({ ...formData, make, model: "" });
+                                setMakeOpen(false);
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", formData.make === make ? "opacity-100" : "opacity-0")} />
+                              {make}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="model">Modelis *</Label>
-                <Input
-                  id="model"
-                  value={formData.model}
-                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                  required
-                />
+                <Label>Modelis *</Label>
+                <Popover open={modelOpen} onOpenChange={setModelOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={modelOpen}
+                      className="w-full justify-between font-normal"
+                      disabled={!formData.make}
+                    >
+                      {formData.model || (isLoadingModels ? "Kraunama..." : "Pasirinkite modelį...")}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[280px] p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Ieškoti modelio..." />
+                      <CommandList>
+                        <CommandEmpty>Nerasta.</CommandEmpty>
+                        <CommandGroup>
+                          {availableModels.map((model) => (
+                            <CommandItem
+                              key={model}
+                              value={model}
+                              onSelect={() => {
+                                setFormData({ ...formData, model });
+                                setModelOpen(false);
+                              }}
+                            >
+                              <Check className={cn("mr-2 h-4 w-4", formData.model === model ? "opacity-100" : "opacity-0")} />
+                              {model}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
 
               <div className="space-y-2">

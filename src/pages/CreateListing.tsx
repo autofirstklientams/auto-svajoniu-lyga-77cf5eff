@@ -8,15 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, Link, Loader2, Globe, ExternalLink, X, Download, Check, ChevronsUpDown } from "lucide-react";
+import { Upload, Link, Loader2, Globe, ExternalLink, X, Download } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
 import { processImages } from "@/utils/imageUtils";
-import { CAR_MAKES } from "@/data/carMakes";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
-import { cn } from "@/lib/utils";
 
 const carSchema = z.object({
   make: z.string().trim().min(1, "Markė privaloma"),
@@ -63,10 +59,6 @@ const CreateListing = ({
   const [existingImages, setExistingImages] = useState<Array<{id: string, url: string, order: number}>>([]);
   const [importedImageUrls, setImportedImageUrls] = useState<string[]>([]);
   const [isDragging, setIsDragging] = useState(false);
-  const [makeOpen, setMakeOpen] = useState(false);
-  const [modelOpen, setModelOpen] = useState(false);
-  const [availableModels, setAvailableModels] = useState<string[]>([]);
-  const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [selectedFeatures, setSelectedFeatures] = useState<CarFeatures>(
     car?.features || {}
   );
@@ -107,34 +99,7 @@ const CreateListing = ({
     sdk_code: car?.sdk_code || "",
   });
 
-  // Fetch models when make changes
-  const fetchModels = useCallback(async (make: string) => {
-    if (!make) {
-      setAvailableModels([]);
-      return;
-    }
-    setIsLoadingModels(true);
-    try {
-      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-      const resp = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/get-autoplius-models?make=${encodeURIComponent(make)}`
-      );
-      const data = await resp.json();
-      setAvailableModels(data.models || []);
-    } catch (e) {
-      console.error("Failed to fetch models:", e);
-      setAvailableModels([]);
-    } finally {
-      setIsLoadingModels(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (formData.make) {
-      fetchModels(formData.make);
-    }
-  }, [formData.make, fetchModels]);
-
+  const handleImportFromAutoplius = async () => {
     if (!autopliusUrl.trim()) {
       toast.error("Įveskite Autoplius nuorodą");
       return;
@@ -818,84 +783,23 @@ const CreateListing = ({
             <h3 className="text-lg font-semibold mb-4 text-foreground">Pagrindinė informacija</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label>Markė *</Label>
-                <Popover open={makeOpen} onOpenChange={setMakeOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={makeOpen}
-                      className="w-full justify-between font-normal"
-                    >
-                      {formData.make || "Pasirinkite markę..."}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[280px] p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Ieškoti markės..." />
-                      <CommandList>
-                        <CommandEmpty>Nerasta.</CommandEmpty>
-                        <CommandGroup>
-                          {CAR_MAKES.map((make) => (
-                            <CommandItem
-                              key={make}
-                              value={make}
-                              onSelect={() => {
-                                setFormData({ ...formData, make, model: "" });
-                                setMakeOpen(false);
-                              }}
-                            >
-                              <Check className={cn("mr-2 h-4 w-4", formData.make === make ? "opacity-100" : "opacity-0")} />
-                              {make}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="make">Markė *</Label>
+                <Input
+                  id="make"
+                  value={formData.make}
+                  onChange={(e) => setFormData({ ...formData, make: e.target.value })}
+                  required
+                />
               </div>
 
               <div className="space-y-2">
-                <Label>Modelis *</Label>
-                <Popover open={modelOpen} onOpenChange={setModelOpen}>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      role="combobox"
-                      aria-expanded={modelOpen}
-                      className="w-full justify-between font-normal"
-                      disabled={!formData.make}
-                    >
-                      {formData.model || (isLoadingModels ? "Kraunama..." : "Pasirinkite modelį...")}
-                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[280px] p-0" align="start">
-                    <Command>
-                      <CommandInput placeholder="Ieškoti modelio..." />
-                      <CommandList>
-                        <CommandEmpty>Nerasta.</CommandEmpty>
-                        <CommandGroup>
-                          {availableModels.map((model) => (
-                            <CommandItem
-                              key={model}
-                              value={model}
-                              onSelect={() => {
-                                setFormData({ ...formData, model });
-                                setModelOpen(false);
-                              }}
-                            >
-                              <Check className={cn("mr-2 h-4 w-4", formData.model === model ? "opacity-100" : "opacity-0")} />
-                              {model}
-                            </CommandItem>
-                          ))}
-                        </CommandGroup>
-                      </CommandList>
-                    </Command>
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="model">Modelis *</Label>
+                <Input
+                  id="model"
+                  value={formData.model}
+                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
+                  required
+                />
               </div>
 
               <div className="space-y-2">

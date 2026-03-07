@@ -23,6 +23,3 @@ verify_jwt = false
 
 [functions.send-invoice-email]
 verify_jwt = false
-
-[functions.get-autoplius-models]
-verify_jwt = false

@@ -519,9 +519,7 @@ const handler = async (req: Request): Promise<Response> => {
           while ((match = itemRegex.exec(xmlText)) !== null) {
             const modelId = match[1];
             const modelName = match[2].trim();
-            if (modelName !== '-kita-') {
-              modelMap[modelName.toLowerCase()] = modelId;
-            }
+            modelMap[modelName.toLowerCase()] = modelId;
           }
           modelIdCache[mId] = modelMap;
           console.log(`Loaded ${Object.keys(modelMap).length} models for make_id ${mId}`);

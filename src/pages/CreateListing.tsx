@@ -107,7 +107,34 @@ const CreateListing = ({
     sdk_code: car?.sdk_code || "",
   });
 
-  const handleImportFromAutoplius = async () => {
+  // Fetch models when make changes
+  const fetchModels = useCallback(async (make: string) => {
+    if (!make) {
+      setAvailableModels([]);
+      return;
+    }
+    setIsLoadingModels(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const resp = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/get-autoplius-models?make=${encodeURIComponent(make)}`
+      );
+      const data = await resp.json();
+      setAvailableModels(data.models || []);
+    } catch (e) {
+      console.error("Failed to fetch models:", e);
+      setAvailableModels([]);
+    } finally {
+      setIsLoadingModels(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (formData.make) {
+      fetchModels(formData.make);
+    }
+  }, [formData.make, fetchModels]);
+
     if (!autopliusUrl.trim()) {
       toast.error("Įveskite Autoplius nuorodą");
       return;

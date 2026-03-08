@@ -13,9 +13,10 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <Link to="/" className="flex items-center mb-4">
+            <Link to="/" className="flex items-center mb-2">
               <img src={logo} alt="AutoKOPERS" className="h-10" />
             </Link>
+            <img src={financeLogo} alt="AutoKOPERS Finance" className="h-7 mb-4" />
             <p className="text-muted-foreground mb-4">
               {t("footer.companyDesc")}
             </p>
@@ -100,10 +101,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
-              <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. {t("footer.rights")}</p>
-              <img src={financeLogo} alt="AutoKOPERS Finance" className="h-8" />
-            </div>
+            <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. {t("footer.rights")}</p>
             <Button 
               onClick={() => window.location.href = '/partner-login'}
               variant="outline"

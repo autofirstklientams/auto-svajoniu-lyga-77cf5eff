@@ -24,7 +24,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const { imageUrl, carId } = await req.json();
+    const { imageUrl, carId, isMainPhoto = false } = await req.json();
     if (!imageUrl || !carId) {
       return new Response(JSON.stringify({ error: 'Missing imageUrl or carId' }), {
         status: 400,

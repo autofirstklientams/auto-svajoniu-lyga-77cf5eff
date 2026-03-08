@@ -13,6 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
 import { processImages } from "@/utils/imageUtils";
+import { SearchableCombobox } from "@/components/SearchableCombobox";
+import { autopliusMakes } from "@/data/autopliusMakes";
 
 const carSchema = z.object({
   make: z.string().trim().min(1, "Markė privaloma"),

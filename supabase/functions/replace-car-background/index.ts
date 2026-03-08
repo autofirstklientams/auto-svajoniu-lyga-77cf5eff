@@ -74,6 +74,23 @@ ${forbiddenSigns}
 - No gradients on walls (keep solid flat white)
 
 Output one photorealistic image.`;
+
+    // Call Lovable AI Gateway with the image
+    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'google/gemini-3-pro-image-preview',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: prompt,
               },
               {
                 type: 'image_url',

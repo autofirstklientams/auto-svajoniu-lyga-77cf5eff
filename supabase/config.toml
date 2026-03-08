@@ -26,3 +26,6 @@ verify_jwt = false
 
 [functions.get-autoplius-models]
 verify_jwt = false
+
+[functions.replace-car-background]
+verify_jwt = true

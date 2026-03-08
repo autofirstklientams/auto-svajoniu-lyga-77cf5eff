@@ -823,22 +823,30 @@ const CreateListing = ({
             <h3 className="text-lg font-semibold mb-4 text-foreground">Pagrindinė informacija</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="make">Markė *</Label>
-                <Input
-                  id="make"
+                <Label>Markė *</Label>
+                <SearchableCombobox
+                  options={autopliusMakes.map((m) => ({ value: m.name, label: m.name }))}
                   value={formData.make}
-                  onChange={(e) => setFormData({ ...formData, make: e.target.value })}
-                  required
+                  onValueChange={(val) => {
+                    setFormData({ ...formData, make: val, model: "" });
+                  }}
+                  placeholder="Pasirinkite markę"
+                  searchPlaceholder="Ieškoti markės..."
+                  emptyMessage="Markė nerasta"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="model">Modelis *</Label>
-                <Input
-                  id="model"
+                <Label>Modelis *</Label>
+                <SearchableCombobox
+                  options={modelOptions.map((m) => ({ value: m.name, label: m.name }))}
                   value={formData.model}
-                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                  required
+                  onValueChange={(val) => setFormData({ ...formData, model: val })}
+                  placeholder="Pasirinkite modelį"
+                  searchPlaceholder="Ieškoti modelio..."
+                  emptyMessage="Modelis nerastas"
+                  isLoading={isLoadingModels}
+                  disabled={!formData.make}
                 />
               </div>
 

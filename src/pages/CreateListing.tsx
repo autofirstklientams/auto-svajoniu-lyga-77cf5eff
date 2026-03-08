@@ -715,12 +715,10 @@ const CreateListing = ({
               ? importedUrls[0]
               : null;
 
-        if (firstImageUrl) {
-          await supabase
-            .from("cars")
-            .update({ image_url: firstImageUrl })
-            .eq("id", carId);
-        }
+        await supabase
+          .from("cars")
+          .update({ image_url: firstImageUrl })
+          .eq("id", carId);
       }
 
       // Autoplius sync removed – XML feed is pulled by Autoplius automatically

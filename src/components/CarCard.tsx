@@ -59,7 +59,7 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
             {t("listing.featured")}
           </Badge>
         )}
-        {isReserved && (
+        {isReserved && !isSold && (
           <Badge className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-amber-500 text-white border-none text-xs shadow-sm">
             <ShieldCheck className="h-3 w-3 mr-1" />
             Rezervuotas

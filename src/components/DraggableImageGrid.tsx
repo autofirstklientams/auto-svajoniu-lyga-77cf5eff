@@ -222,7 +222,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                   )}
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); handleAiBackground(img); }}
+                    onClick={(e) => { e.stopPropagation(); handleAiBackground(img, index); }}
                     className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1 sm:p-1.5 rounded flex items-center gap-1 text-xs"
                     title="AI: pakeisti foną į saloną"
                   >

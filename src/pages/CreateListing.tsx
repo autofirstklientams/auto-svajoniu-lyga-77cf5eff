@@ -470,6 +470,9 @@ const CreateListing = ({
               "co2_emission",
               "city",
               "sdk_code",
+              "first_reg_date",
+              "mot_date",
+              "wheel_size",
             ].join(",")
           )
           .eq("id", car.id)

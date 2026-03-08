@@ -820,7 +820,7 @@ const CreateListing = ({
             ) : (
               <>
                 <Download className="h-4 w-4 mr-2" />
-                Debug: XML eksportas
+                Autoplius XML peržiūra
               </>
             )}
           </Button>

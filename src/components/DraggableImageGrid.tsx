@@ -90,6 +90,15 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     setProcessingIds(prev => new Set(prev).add(img.id));
     
     try {
+      // Save original URL before replacement
+      setOriginalUrls(prev => {
+        const next = new Map(prev);
+        if (!next.has(img.id)) {
+          next.set(img.id, img.url);
+        }
+        return next;
+      });
+
       const { data, error } = await supabase.functions.invoke('replace-car-background', {
         body: { imageUrl: img.url, carId },
       });
@@ -98,9 +107,15 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
       if (!data?.success) throw new Error(data?.error || 'Nepavyko pakeisti fono');
 
       onReplaceUrl(img.id, data.url);
-      toast.success('Fonas pakeistas į salono stilių!');
+      toast.success('Fonas pakeistas! Galite atsaukti paspaudę ↩ mygtuką.');
     } catch (err: any) {
       console.error('AI background error:', err);
+      // Remove saved original on failure
+      setOriginalUrls(prev => {
+        const next = new Map(prev);
+        next.delete(img.id);
+        return next;
+      });
       toast.error(err.message || 'Klaida keičiant foną');
     } finally {
       setProcessingIds(prev => {
@@ -110,6 +125,20 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
       });
     }
   }, [carId, onReplaceUrl]);
+
+  const handleUndoBackground = useCallback((img: DraggableImage) => {
+    if (!onReplaceUrl) return;
+    const originalUrl = originalUrls.get(img.id);
+    if (!originalUrl) return;
+    
+    onReplaceUrl(img.id, originalUrl);
+    setOriginalUrls(prev => {
+      const next = new Map(prev);
+      next.delete(img.id);
+      return next;
+    });
+    toast.success('Originalus fonas grąžintas!');
+  }, [onReplaceUrl, originalUrls]);
 
   if (images.length === 0) return null;
 

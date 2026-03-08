@@ -398,6 +398,9 @@ const CreateListing = ({
         co2_emission: 0,
         city: "Kaunas",
         sdk_code: "",
+        first_reg_date: "",
+        mot_date: "",
+        wheel_size: "",
       });
       setSelectedFeatures({});
       setVisibleWeb(true);

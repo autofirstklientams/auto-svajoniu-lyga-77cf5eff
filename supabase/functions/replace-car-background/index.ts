@@ -42,14 +42,31 @@ Deno.serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image',
+        model: 'google/gemini-3-pro-image-preview',
         messages: [
           {
             role: 'user',
             content: [
               {
                 type: 'text',
-                text: 'Replace ONLY the background of this car photo. Keep the car EXACTLY as it is — do not change the car shape, color, angle, reflections, or any detail. Place the car in a premium indoor car dealership showroom with these EXACT characteristics: polished light grey concrete floor with subtle reflections, clean white walls, bright even LED ceiling lighting with no harsh shadows, minimal modern showroom environment. The floor should show a soft reflection of the car. The lighting should be bright, even, and professional. No other cars, no people, no text, no logos, no watermarks. The style must be consistent: always the same showroom look regardless of the input photo angle.',
+                text: `You are a professional automotive photographer. Edit this car photo by replacing ONLY the background. 
+
+CRITICAL RULES:
+- DO NOT modify the car in any way — keep exact shape, color, proportions, angle, wheels, reflections, shadows on the car body
+- DO NOT crop, resize, distort, or reposition the car
+- DO NOT add any text, watermarks, logos, or other cars
+- The car must remain photorealistic and unaltered
+
+BACKGROUND REQUIREMENTS (must be identical every time):
+- Setting: Modern premium car dealership indoor showroom
+- Floor: Polished light grey epoxy/concrete floor with a subtle mirror-like reflection of the car
+- Walls: Clean white/light grey walls, minimal and uncluttered
+- Ceiling: Bright, even, diffused LED panel lighting — no harsh spotlights or dramatic shadows
+- Atmosphere: Bright, clean, professional — like a luxury brand showroom (BMW, Mercedes style)
+- No windows, no outdoor elements, no other objects or people visible
+- The lighting on the car should appear natural and match the showroom environment
+
+Output a high-quality photorealistic image.`,
               },
               {
                 type: 'image_url',

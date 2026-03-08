@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Car {
   id: string;

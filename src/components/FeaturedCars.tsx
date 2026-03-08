@@ -18,6 +18,7 @@ interface Car {
   fuel_type: string | null;
   is_recommended: boolean;
   is_reserved: boolean;
+  is_sold: boolean;
 }
 
 const fetchFeaturedCars = async (): Promise<Car[]> => {

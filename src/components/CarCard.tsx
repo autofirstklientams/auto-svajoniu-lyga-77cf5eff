@@ -21,10 +21,11 @@ interface CarCardProps {
   featured?: boolean;
   isRecommended?: boolean;
   isReserved?: boolean;
+  isSold?: boolean;
   priority?: boolean;
 }
 
-function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, isReserved, priority = false }: CarCardProps) {
+function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, isReserved, isSold, priority = false }: CarCardProps) {
   const { t } = useLanguage();
   const monthlyPayment = numericPrice ? calculateMonthlyPayment(numericPrice) : null;
   
@@ -38,20 +39,27 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
   };
 
   const content = (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-border/50 h-full">
+    <Card className={`overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-border/50 h-full ${isSold ? 'opacity-75' : ''}`}>
       <div className="relative overflow-hidden">
-        {isRecommended && (
+        {isSold && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30">
+            <span className="text-white font-bold text-xl tracking-widest uppercase rotate-[-15deg] bg-black/50 px-5 py-1.5 rounded-lg">
+              Parduota
+            </span>
+          </div>
+        )}
+        {isRecommended && !isSold && (
           <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-1.5 sm:py-2 px-2 sm:px-3 flex items-center justify-center gap-1.5 sm:gap-2 shadow-md">
             <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs sm:text-sm font-bold tracking-wide">{t("featured.recommended")}</span>
           </div>
         )}
-        {featured && !isRecommended && (
+        {featured && !isRecommended && !isSold && (
           <Badge className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 bg-accent text-accent-foreground text-xs">
             {t("listing.featured")}
           </Badge>
         )}
-        {isReserved && (
+        {isReserved && !isSold && (
           <Badge className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-amber-500 text-white border-none text-xs shadow-sm">
             <ShieldCheck className="h-3 w-3 mr-1" />
             Rezervuotas
@@ -60,7 +68,7 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
         <OptimizedImage
           src={getOptimizedImageUrl(image, { width: 600, quality: 80 })}
           alt={title}
-          className={`w-full transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
+          className={`w-full transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''} ${isSold ? 'grayscale' : ''}`}
           priority={priority}
           aspectRatio="4/3"
           objectPosition="center"

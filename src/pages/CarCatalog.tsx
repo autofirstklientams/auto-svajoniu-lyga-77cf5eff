@@ -26,6 +26,7 @@ interface Car {
   body_type: string | null;
   is_recommended: boolean;
   is_reserved: boolean;
+  is_sold: boolean;
 }
 
 interface MakeCount {
@@ -49,9 +50,8 @@ const sortOptions: { value: SortOption; label: string }[] = [
 const fetchAllCars = async (): Promise<Car[]> => {
   const { data, error } = await supabase
     .from("cars")
-    .select("id, make, model, year, price, mileage, image_url, fuel_type, transmission, body_type, is_recommended, is_reserved")
-    .eq("visible_web", true)
-    .eq("is_sold", false);
+    .select("id, make, model, year, price, mileage, image_url, fuel_type, transmission, body_type, is_recommended, is_reserved, is_sold")
+    .eq("visible_web", true);
 
   if (error) throw error;
   return data || [];
@@ -332,6 +332,7 @@ const CarCatalog = () => {
                         image={car.image_url || "/placeholder.svg"}
                         isRecommended={car.is_recommended}
                         isReserved={car.is_reserved}
+                        isSold={car.is_sold}
                       />
                     </div>
                   ))}

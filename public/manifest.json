@@ -2,7 +2,7 @@
   "name": "AutoKOPERS",
   "short_name": "AutoKOPERS",
   "description": "Automobilių pardavimas ir finansavimas",
-  "start_url": "/",
+  "start_url": "/partner-dashboard",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#1e88e5",

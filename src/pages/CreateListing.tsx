@@ -1164,7 +1164,27 @@ const CreateListing = ({
                     <SelectItem value="Italija">Italija</SelectItem>
                     <SelectItem value="Nyderlandai">Nyderlandai</SelectItem>
                     <SelectItem value="Belgija">Belgija</SelectItem>
+                    <SelectItem value="Suomija">Suomija</SelectItem>
+                    <SelectItem value="Švedija">Švedija</SelectItem>
+                    <SelectItem value="Danija">Danija</SelectItem>
+                    <SelectItem value="Norvegija">Norvegija</SelectItem>
+                    <SelectItem value="Latvija">Latvija</SelectItem>
+                    <SelectItem value="Estija">Estija</SelectItem>
+                    <SelectItem value="Anglija">Anglija</SelectItem>
+                    <SelectItem value="Airija">Airija</SelectItem>
+                    <SelectItem value="Ispanija">Ispanija</SelectItem>
+                    <SelectItem value="Austrija">Austrija</SelectItem>
+                    <SelectItem value="Šveicarija">Šveicarija</SelectItem>
+                    <SelectItem value="Čekija">Čekija</SelectItem>
+                    <SelectItem value="Slovakija">Slovakija</SelectItem>
+                    <SelectItem value="Vengrija">Vengrija</SelectItem>
+                    <SelectItem value="Rumunija">Rumunija</SelectItem>
                     <SelectItem value="JAV">JAV</SelectItem>
+                    <SelectItem value="Kanada">Kanada</SelectItem>
+                    <SelectItem value="Japonija">Japonija</SelectItem>
+                    <SelectItem value="Rusija">Rusija</SelectItem>
+                    <SelectItem value="Baltarusija">Baltarusija</SelectItem>
+                    <SelectItem value="Ukraina">Ukraina</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

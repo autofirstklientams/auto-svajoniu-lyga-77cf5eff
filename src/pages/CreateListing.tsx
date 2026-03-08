@@ -736,28 +736,6 @@ const CreateListing = ({
     <Card className="mb-6">
       <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
         <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
-        {car?.id && isAdmin && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleDebugExportAutoplius}
-            disabled={isExportingAutoplius}
-            className="w-full sm:w-auto"
-          >
-            {isExportingAutoplius ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Generuojama...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4 mr-2" />
-                Autoplius XML peržiūra
-              </>
-            )}
-          </Button>
-        )}
-      </CardHeader>
       <CardContent>
         {/* Autoplius import removed */}
 

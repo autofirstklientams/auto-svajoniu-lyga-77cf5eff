@@ -40,6 +40,8 @@ interface Car {
   visible_web: boolean;
   visible_autoplius: boolean;
   visible_autolizingas: boolean;
+  is_sold: boolean;
+  is_reserved: boolean;
   partner_id?: string;
 }
 

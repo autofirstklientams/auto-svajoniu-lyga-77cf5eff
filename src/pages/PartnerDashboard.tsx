@@ -53,7 +53,7 @@ const PartnerDashboard = () => {
   const [canExportAutoplius, setCanExportAutoplius] = useState(false);
   const [cars, setCars] = useState<Car[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCreateForm, setShowCreateFormRaw] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);

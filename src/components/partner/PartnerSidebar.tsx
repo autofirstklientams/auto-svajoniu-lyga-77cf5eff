@@ -35,6 +35,7 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

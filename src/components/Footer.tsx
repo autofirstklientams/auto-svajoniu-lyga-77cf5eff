@@ -1,7 +1,6 @@
 import { Mail, Phone, MapPin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/autokopers-logo.jpeg";
-import financeLogo from "@/assets/autokopers-finance-logo.png";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -13,10 +12,9 @@ const Footer = () => {
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <Link to="/" className="flex items-center mb-2">
+            <Link to="/" className="flex items-center mb-4">
               <img src={logo} alt="AutoKOPERS" className="h-10" />
             </Link>
-            <img src={financeLogo} alt="AutoKOPERS Finance" className="h-8 mb-4" />
             <p className="text-muted-foreground mb-4">
               {t("footer.companyDesc")}
             </p>

@@ -42,6 +42,7 @@ interface CreateListingProps {
   onClose: () => void;
   onSuccess: () => void;
   isAdmin?: boolean;
+  isSuperAdmin?: boolean;
   canExportAutoplius?: boolean;
 }
 
@@ -50,6 +51,7 @@ const CreateListing = ({
   onClose,
   onSuccess,
   isAdmin = false,
+  isSuperAdmin = false,
   canExportAutoplius = false,
 }: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);

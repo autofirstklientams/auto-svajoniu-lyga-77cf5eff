@@ -55,6 +55,26 @@ const PartnerDashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showCreateForm, setShowCreateFormRaw] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
+
+  // Wrap setShowCreateForm to manage browser history
+  const setShowCreateForm = useCallback((show: boolean) => {
+    if (show && !showCreateForm) {
+      window.history.pushState({ formOpen: true }, "");
+    }
+    setShowCreateFormRaw(show);
+  }, [showCreateForm]);
+
+  // Close form on browser back button
+  useEffect(() => {
+    const handlePopState = (e: PopStateEvent) => {
+      if (showCreateForm) {
+        setShowCreateFormRaw(false);
+        setEditingCar(null);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [showCreateForm]);
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");

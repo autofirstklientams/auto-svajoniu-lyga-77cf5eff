@@ -51,7 +51,8 @@ const fetchAllCars = async (): Promise<Car[]> => {
   const { data, error } = await supabase
     .from("cars")
     .select("id, make, model, year, price, mileage, image_url, fuel_type, transmission, body_type, is_recommended, is_reserved, is_sold")
-    .eq("visible_web", true);
+    .eq("visible_web", true)
+    .eq("is_sold", false);
 
   if (error) throw error;
   return data || [];

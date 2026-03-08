@@ -87,7 +87,7 @@ const CarDetail = () => {
   const fetchCar = useCallback(async () => {
     const { data, error } = await supabase
       .from("cars")
-      .select("id, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features, is_reserved")
+      .select("id, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features, is_reserved, is_sold")
       .eq("id", id)
       .eq("visible_web", true)
       .single();

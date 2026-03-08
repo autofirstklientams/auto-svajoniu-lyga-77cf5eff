@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn } from "lucide-react";
+import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,8 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  // Store original URLs before AI replacement for undo
+  const [originalUrls, setOriginalUrls] = useState<Map<string, string>>(new Map());
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const handleDragStart = useCallback((e: React.DragEvent, index: number) => {

@@ -59,6 +59,7 @@ const PartnerDashboard = () => {
   const isMobile = useIsMobile();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+  const { canInstall, install } = usePWAInstall();
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const userIdRef = React.useRef<string | null>(null);

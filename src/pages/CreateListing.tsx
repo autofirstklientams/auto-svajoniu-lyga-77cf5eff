@@ -101,6 +101,9 @@ const CreateListing = ({
     co2_emission: car?.co2_emission || 0,
     city: car?.city || "Kaunas",
     sdk_code: car?.sdk_code || "",
+    first_reg_date: car?.first_reg_date || "",
+    mot_date: car?.mot_date || "",
+    wheel_size: car?.wheel_size || "",
   });
 
   // Fetch models when make changes
@@ -348,6 +351,9 @@ const CreateListing = ({
       co2_emission: source?.co2_emission || 0,
       city: source?.city || "Kaunas",
       sdk_code: source?.sdk_code || "",
+      first_reg_date: source?.first_reg_date || "",
+      mot_date: source?.mot_date || "",
+      wheel_size: source?.wheel_size || "",
     });
 
     setSelectedFeatures(source?.features || {});
@@ -392,6 +398,9 @@ const CreateListing = ({
         co2_emission: 0,
         city: "Kaunas",
         sdk_code: "",
+        first_reg_date: "",
+        mot_date: "",
+        wheel_size: "",
       });
       setSelectedFeatures({});
       setVisibleWeb(true);
@@ -461,6 +470,9 @@ const CreateListing = ({
               "co2_emission",
               "city",
               "sdk_code",
+              "first_reg_date",
+              "mot_date",
+              "wheel_size",
             ].join(",")
           )
           .eq("id", car.id)
@@ -643,6 +655,9 @@ const CreateListing = ({
         co2_emission: formData.co2_emission || null,
         city: formData.city || "Kaunas",
         sdk_code: formData.sdk_code || null,
+        first_reg_date: formData.first_reg_date || null,
+        mot_date: formData.mot_date || null,
+        wheel_size: formData.wheel_size || null,
         features: selectedFeatures as any,
         visible_web: visibleWeb,
         visible_autoplius: visibleAutoplius,
@@ -933,11 +948,12 @@ const CreateListing = ({
                     <SelectItem value="Benzinas">Benzinas</SelectItem>
                     <SelectItem value="Dyzelinas">Dyzelinas</SelectItem>
                     <SelectItem value="Elektra">Elektra</SelectItem>
-                    <SelectItem value="Hibridinis">Hibridinis</SelectItem>
                     <SelectItem value="Benzinas/Elektra">Benzinas/Elektra</SelectItem>
                     <SelectItem value="Dyzelinas/Elektra">Dyzelinas/Elektra</SelectItem>
-                    <SelectItem value="Dujos">Dujos</SelectItem>
                     <SelectItem value="Benzinas/Dujos">Benzinas/Dujos</SelectItem>
+                    <SelectItem value="Dujos">Dujos</SelectItem>
+                    <SelectItem value="Bioetanolis (E85)">Bioetanolis (E85)</SelectItem>
+                    <SelectItem value="Vandenilis">Vandenilis</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1163,7 +1179,27 @@ const CreateListing = ({
                     <SelectItem value="Italija">Italija</SelectItem>
                     <SelectItem value="Nyderlandai">Nyderlandai</SelectItem>
                     <SelectItem value="Belgija">Belgija</SelectItem>
+                    <SelectItem value="Suomija">Suomija</SelectItem>
+                    <SelectItem value="Švedija">Švedija</SelectItem>
+                    <SelectItem value="Danija">Danija</SelectItem>
+                    <SelectItem value="Norvegija">Norvegija</SelectItem>
+                    <SelectItem value="Latvija">Latvija</SelectItem>
+                    <SelectItem value="Estija">Estija</SelectItem>
+                    <SelectItem value="Anglija">Anglija</SelectItem>
+                    <SelectItem value="Airija">Airija</SelectItem>
+                    <SelectItem value="Ispanija">Ispanija</SelectItem>
+                    <SelectItem value="Austrija">Austrija</SelectItem>
+                    <SelectItem value="Šveicarija">Šveicarija</SelectItem>
+                    <SelectItem value="Čekija">Čekija</SelectItem>
+                    <SelectItem value="Slovakija">Slovakija</SelectItem>
+                    <SelectItem value="Vengrija">Vengrija</SelectItem>
+                    <SelectItem value="Rumunija">Rumunija</SelectItem>
                     <SelectItem value="JAV">JAV</SelectItem>
+                    <SelectItem value="Kanada">Kanada</SelectItem>
+                    <SelectItem value="Japonija">Japonija</SelectItem>
+                    <SelectItem value="Rusija">Rusija</SelectItem>
+                    <SelectItem value="Baltarusija">Baltarusija</SelectItem>
+                    <SelectItem value="Ukraina">Ukraina</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -1213,6 +1249,49 @@ const CreateListing = ({
                   onChange={(e) => setFormData({ ...formData, fuel_cons_combined: parseFloat(e.target.value) || 0 })}
                   placeholder="Pvz.: 6.5"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="first_reg_date">Pirmoji registracija</Label>
+                <Input
+                  id="first_reg_date"
+                  type="date"
+                  value={formData.first_reg_date}
+                  onChange={(e) => setFormData({ ...formData, first_reg_date: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mot_date">TA galiojimas iki</Label>
+                <Input
+                  id="mot_date"
+                  type="date"
+                  value={formData.mot_date}
+                  onChange={(e) => setFormData({ ...formData, mot_date: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="wheel_size">Ratų dydis</Label>
+                <Select
+                  value={formData.wheel_size}
+                  onValueChange={(value) => setFormData({ ...formData, wheel_size: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="R14">R14</SelectItem>
+                    <SelectItem value="R15">R15</SelectItem>
+                    <SelectItem value="R16">R16</SelectItem>
+                    <SelectItem value="R17">R17</SelectItem>
+                    <SelectItem value="R18">R18</SelectItem>
+                    <SelectItem value="R19">R19</SelectItem>
+                    <SelectItem value="R20">R20</SelectItem>
+                    <SelectItem value="R21">R21</SelectItem>
+                    <SelectItem value="R22">R22</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           </div>

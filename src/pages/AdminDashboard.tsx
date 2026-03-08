@@ -437,6 +437,7 @@ const AdminDashboard = () => {
                   fetchAllCars();
                 }}
                 isAdmin={true}
+                isSuperAdmin={currentUserId === SUPER_ADMIN_ID}
                 canExportAutoplius={true}
               />
             ) : (

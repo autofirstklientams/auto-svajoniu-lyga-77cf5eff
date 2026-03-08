@@ -734,8 +734,9 @@ const CreateListing = ({
 
   return (
     <Card className="mb-6">
-      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <CardHeader>
         <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
+      </CardHeader>
       <CardContent>
         {/* Autoplius import removed */}
 

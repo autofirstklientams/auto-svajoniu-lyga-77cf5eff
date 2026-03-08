@@ -208,7 +208,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
               </button>
 
               {/* AI Background button */}
-              {showAiBackground && index === 0 && carId && onReplaceUrl && !isProcessing && (
+              {showAiBackground && carId && onReplaceUrl && !isProcessing && (
                 <div className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   {originalUrls.has(img.id) && (
                     <button

@@ -332,6 +332,7 @@ const CarCatalog = () => {
                         image={car.image_url || "/placeholder.svg"}
                         isRecommended={car.is_recommended}
                         isReserved={car.is_reserved}
+                        isSold={car.is_sold}
                       />
                     </div>
                   ))}

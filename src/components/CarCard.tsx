@@ -68,7 +68,7 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
         <OptimizedImage
           src={getOptimizedImageUrl(image, { width: 600, quality: 80 })}
           alt={title}
-          className={`w-full transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''}`}
+          className={`w-full transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''} ${isSold ? 'grayscale' : ''}`}
           priority={priority}
           aspectRatio="4/3"
           objectPosition="center"

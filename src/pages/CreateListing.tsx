@@ -70,6 +70,8 @@ const CreateListing = ({
   const [isCompanyCar, setIsCompanyCar] = useState(car?.is_company_car ?? false);
   const [isFeatured, setIsFeatured] = useState(car?.is_featured ?? false);
   const [isRecommended, setIsRecommended] = useState(car?.is_recommended ?? false);
+  const [modelOptions, setModelOptions] = useState<Array<{ name: string; id: string }>>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
@@ -100,6 +102,42 @@ const CreateListing = ({
     city: car?.city || "Kaunas",
     sdk_code: car?.sdk_code || "",
   });
+
+  // Fetch models when make changes
+  const fetchModels = useCallback(async (makeName: string) => {
+    const makeEntry = autopliusMakes.find((m) => m.name === makeName);
+    if (!makeEntry) {
+      setModelOptions([]);
+      return;
+    }
+    setIsLoadingModels(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const resp = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/get-autoplius-models?make_id=${makeEntry.id}`
+      );
+      if (resp.ok) {
+        const models = await resp.json();
+        setModelOptions(models);
+      } else {
+        console.error("Failed to fetch models");
+        setModelOptions([]);
+      }
+    } catch (e) {
+      console.error("Error fetching models:", e);
+      setModelOptions([]);
+    } finally {
+      setIsLoadingModels(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (formData.make) {
+      fetchModels(formData.make);
+    } else {
+      setModelOptions([]);
+    }
+  }, [formData.make, fetchModels]);
 
   const handleImportFromAutoplius = async () => {
     if (!autopliusUrl.trim()) {

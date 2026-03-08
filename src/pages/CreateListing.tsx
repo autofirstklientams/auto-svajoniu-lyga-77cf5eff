@@ -54,7 +54,7 @@ const CreateListing = ({
 }: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [isExportingAutoplius, setIsExportingAutoplius] = useState(false);
+  
   const [autopliusUrl, setAutopliusUrl] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);

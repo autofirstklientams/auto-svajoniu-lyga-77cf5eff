@@ -498,18 +498,20 @@ const AdminDashboard = () => {
                             )}
                           </div>
                           <div className="flex gap-2">
-                            <Button
-                              variant="default"
-                              size="sm"
-                              className="flex-1"
-                              onClick={() => {
-                                setEditingCar(car);
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
-                            >
-                              <Pencil className="h-4 w-4 mr-1" />
-                              Redaguoti
-                            </Button>
+                            {currentUserId === SUPER_ADMIN_ID && (
+                              <Button
+                                variant="default"
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => {
+                                  setEditingCar(car);
+                                  window.scrollTo({ top: 0, behavior: "smooth" });
+                                }}
+                              >
+                                <Pencil className="h-4 w-4 mr-1" />
+                                Redaguoti
+                              </Button>
+                            )}
                             <Button
                               variant="outline"
                               size="sm"
@@ -517,13 +519,15 @@ const AdminDashboard = () => {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleDeleteCar(car.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
+                            {currentUserId === SUPER_ADMIN_ID && (
+                              <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={() => handleDeleteCar(car.id)}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            )}
                           </div>
                         </div>
                       </Card>

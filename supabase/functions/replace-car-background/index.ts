@@ -49,24 +49,31 @@ Deno.serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: `You are a professional automotive photographer. Edit this car photo by replacing ONLY the background. 
+                text: `You are an expert photo compositor. Your ONLY task: remove the existing background and replace it with a SPECIFIC showroom environment. Do NOT alter the car.
 
-CRITICAL RULES:
-- DO NOT modify the car in any way — keep exact shape, color, proportions, angle, wheels, reflections, shadows on the car body
-- DO NOT crop, resize, distort, or reposition the car
-- DO NOT add any text, watermarks, logos, or other cars
-- The car must remain photorealistic and unaltered
+=== CAR PRESERVATION (ABSOLUTE) ===
+- The car pixels must remain 100% unchanged: shape, color, reflections, dirt, scratches, wheels, license plate, angle, size, position in frame
+- Do NOT relight, recolor, sharpen, blur, crop, scale, or reposition the car
+- Preserve the exact pixel boundary/silhouette of the car
 
-BACKGROUND REQUIREMENTS (must be identical every time):
-- Setting: Modern premium car dealership indoor showroom
-- Floor: Polished light grey epoxy/concrete floor with a subtle mirror-like reflection of the car
-- Walls: Clean white/light grey walls, minimal and uncluttered
-- Ceiling: Bright, even, diffused LED panel lighting — no harsh spotlights or dramatic shadows
-- Atmosphere: Bright, clean, professional — like a luxury brand showroom (BMW, Mercedes style)
-- No windows, no outdoor elements, no other objects or people visible
-- The lighting on the car should appear natural and match the showroom environment
+=== SHOWROOM SPECIFICATION (MUST MATCH EXACTLY) ===
+Environment: A single large empty rectangular room, no columns, no furniture, no decorations
+Floor: Smooth polished LIGHT GREY epoxy (hex ~#D0D0D0), perfectly flat, extends to walls. Shows a soft diffused reflection of the car (not mirror-sharp, ~30% opacity)
+Walls: Flat matte white (#F0F0F0), completely blank, no panels, no windows, no doors, no trim
+Ceiling: Not visible or implied by even overhead lighting
+Lighting: Bright diffused overhead LED panels creating EVEN illumination with NO visible light sources, NO spotlights, NO directional shadows. Soft ambient fill from all sides
+Color temperature: Neutral daylight ~5500K, no warm/cool tint
+Atmosphere: Clean, minimal, sterile — like a white photography studio with grey floor
+Shadow: The car casts a single soft contact shadow directly beneath it on the grey floor
 
-Output a high-quality photorealistic image.`,
+=== FORBIDDEN ===
+- No other cars, people, plants, signs, logos, text, watermarks
+- No windows, glass walls, outdoor scenery, sky reflections
+- No colored accent lighting, neon, spotlights
+- No visible ceiling structure, beams, or vents
+- No gradients on walls (keep solid flat white)
+
+Output one photorealistic image.`,
               },
               {
                 type: 'image_url',

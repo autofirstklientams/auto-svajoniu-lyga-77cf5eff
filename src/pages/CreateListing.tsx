@@ -1250,6 +1250,49 @@ const CreateListing = ({
                   placeholder="Pvz.: 6.5"
                 />
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="first_reg_date">Pirmoji registracija</Label>
+                <Input
+                  id="first_reg_date"
+                  type="date"
+                  value={formData.first_reg_date}
+                  onChange={(e) => setFormData({ ...formData, first_reg_date: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mot_date">TA galiojimas iki</Label>
+                <Input
+                  id="mot_date"
+                  type="date"
+                  value={formData.mot_date}
+                  onChange={(e) => setFormData({ ...formData, mot_date: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="wheel_size">Ratų dydis</Label>
+                <Select
+                  value={formData.wheel_size}
+                  onValueChange={(value) => setFormData({ ...formData, wheel_size: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Pasirinkite" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="R14">R14</SelectItem>
+                    <SelectItem value="R15">R15</SelectItem>
+                    <SelectItem value="R16">R16</SelectItem>
+                    <SelectItem value="R17">R17</SelectItem>
+                    <SelectItem value="R18">R18</SelectItem>
+                    <SelectItem value="R19">R19</SelectItem>
+                    <SelectItem value="R20">R20</SelectItem>
+                    <SelectItem value="R21">R21</SelectItem>
+                    <SelectItem value="R22">R22</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 

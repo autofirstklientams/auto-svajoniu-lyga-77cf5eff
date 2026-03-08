@@ -318,11 +318,54 @@ const PartnerDashboard = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="animate-pulse flex flex-col items-center gap-4">
-          <div className="h-12 w-12 rounded-full bg-primary/20"></div>
-          <p className="text-muted-foreground">Kraunama...</p>
-        </div>
+      <div className="min-h-screen bg-background">
+        <PartnerSidebar 
+          isCollapsed={sidebarCollapsed} 
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          isAdmin={isAdmin}
+        />
+        <main
+          className={cn(
+            "min-h-screen transition-all duration-300 p-4 pt-16 md:p-6 lg:p-8",
+            isMobile ? "ml-0" : (sidebarCollapsed ? "ml-16" : "ml-64")
+          )}
+        >
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+            <div>
+              <Skeleton className="h-10 w-64 mb-2" />
+              <Skeleton className="h-5 w-48" />
+            </div>
+            <Skeleton className="h-10 w-40" />
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6 sm:mb-8">
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+            <Skeleton className="h-24 w-full rounded-xl" />
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
+            <Skeleton className="h-10 w-full sm:w-96" />
+            <Skeleton className="h-10 flex-1 max-w-md hidden sm:block" />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Card key={i} className="flex flex-col overflow-hidden">
+                <Skeleton className="h-48 w-full rounded-none" />
+                <CardContent className="p-4 space-y-3 flex-1">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                  <div className="flex gap-2 pt-2">
+                    <Skeleton className="h-6 w-16" />
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }

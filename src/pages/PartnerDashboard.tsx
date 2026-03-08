@@ -335,22 +335,6 @@ const PartnerDashboard = () => {
           </Button>
         </div>
 
-        {/* PWA Install Banner */}
-        {canInstall && (
-          <div className="mb-6 p-4 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <Download className="h-5 w-5 text-primary flex-shrink-0" />
-              <div>
-                <p className="font-medium text-foreground text-sm">Įsidiekite AutoKOPERS app'ą</p>
-                <p className="text-xs text-muted-foreground">Greita prieiga prie partnerio zonos tiesiai iš telefono</p>
-              </div>
-            </div>
-            <Button size="sm" onClick={install}>
-              Įdiegti
-            </Button>
-          </div>
-        )}
-
         {/* Stats */}
         <div className="mb-6 sm:mb-8">
           <StatsCards

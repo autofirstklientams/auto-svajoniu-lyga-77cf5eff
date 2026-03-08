@@ -1,6 +1,7 @@
 import { Mail, Phone, MapPin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/autokopers-logo.jpeg";
+import financeLogo from "@/assets/autokopers-finance-logo.png";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 

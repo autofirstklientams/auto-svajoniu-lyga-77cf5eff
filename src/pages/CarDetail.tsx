@@ -203,6 +203,62 @@ const CarDetail = () => {
     );
   }
 
+  // Sold car — minimal view
+  if (car.is_sold) {
+    const firstImage = allImages[0] || car.image_url;
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container mx-auto px-4 py-8 max-w-2xl">
+          <Link to="/automobiliai" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Grįžti į katalogą
+          </Link>
+
+          {firstImage && (
+            <div className="relative aspect-video bg-muted rounded-lg overflow-hidden mb-6">
+              <OptimizedImage
+                src={firstImage}
+                alt={`${car.make} ${car.model}`}
+                className="w-full h-full grayscale"
+                priority
+              />
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <span className="text-white font-bold text-2xl tracking-widest uppercase rotate-[-15deg] bg-black/50 px-6 py-2 rounded-lg">
+                  Parduota
+                </span>
+              </div>
+            </div>
+          )}
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            {car.make} {car.model}
+          </h1>
+          <p className="text-muted-foreground mb-4">
+            {car.year} • {car.mileage ? `${car.mileage.toLocaleString()} km` : ""} {car.fuel_type ? `• ${car.fuel_type}` : ""}
+          </p>
+          <div className="text-2xl font-bold text-muted-foreground line-through mb-8">
+            {formatPrice(car.price)}
+          </div>
+
+          <Card>
+            <CardContent className="py-8 text-center">
+              <p className="text-muted-foreground text-lg mb-4">
+                Šis automobilis jau parduotas.
+              </p>
+              <Link to="/automobiliai">
+                <Button>
+                  Peržiūrėti kitus automobilius
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   const specs = [
     { icon: Calendar, label: "Metai", value: car.year },
     { icon: Gauge, label: "Rida", value: car.mileage ? `${car.mileage.toLocaleString()} km` : "-" },

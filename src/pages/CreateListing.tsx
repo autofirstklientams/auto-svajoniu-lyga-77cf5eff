@@ -933,11 +933,12 @@ const CreateListing = ({
                     <SelectItem value="Benzinas">Benzinas</SelectItem>
                     <SelectItem value="Dyzelinas">Dyzelinas</SelectItem>
                     <SelectItem value="Elektra">Elektra</SelectItem>
-                    <SelectItem value="Hibridinis">Hibridinis</SelectItem>
                     <SelectItem value="Benzinas/Elektra">Benzinas/Elektra</SelectItem>
                     <SelectItem value="Dyzelinas/Elektra">Dyzelinas/Elektra</SelectItem>
-                    <SelectItem value="Dujos">Dujos</SelectItem>
                     <SelectItem value="Benzinas/Dujos">Benzinas/Dujos</SelectItem>
+                    <SelectItem value="Dujos">Dujos</SelectItem>
+                    <SelectItem value="Bioetanolis (E85)">Bioetanolis (E85)</SelectItem>
+                    <SelectItem value="Vandenilis">Vandenilis</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

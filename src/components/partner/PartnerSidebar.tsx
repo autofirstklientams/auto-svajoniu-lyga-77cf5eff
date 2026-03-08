@@ -140,7 +140,17 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
               </nav>
 
               {/* Footer */}
-              <div className="p-3 border-t border-sidebar-border">
+              <div className="p-3 border-t border-sidebar-border space-y-2">
+                <div className="flex items-center justify-between px-3 py-2">
+                  <div className="flex items-center gap-3 text-sidebar-foreground">
+                    {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                    <span className="font-medium">Tamsus režimas</span>
+                  </div>
+                  <Switch 
+                    checked={theme === "dark"} 
+                    onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                  />
+                </div>
                 <Button
                   variant="ghost"
                   onClick={handleLogout}

@@ -16,7 +16,7 @@ const Footer = () => {
             <Link to="/" className="flex items-center mb-2">
               <img src={logo} alt="AutoKOPERS" className="h-10" />
             </Link>
-            <img src={financeLogo} alt="AutoKOPERS Finance" className="h-4 mb-4" />
+            <img src={financeLogo} alt="AutoKOPERS Finance" className="h-8 mb-4" />
             <p className="text-muted-foreground mb-4">
               {t("footer.companyDesc")}
             </p>

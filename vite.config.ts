@@ -24,7 +24,7 @@ export default defineConfig(({ mode }) => ({
         background_color: "#ffffff",
         display: "standalone",
         orientation: "portrait-primary",
-        start_url: "/",
+        start_url: "/partner-dashboard",
         icons: [
           {
             src: "pwa-192x192.png",

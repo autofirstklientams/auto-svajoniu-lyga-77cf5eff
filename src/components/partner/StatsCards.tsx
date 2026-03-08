@@ -1,55 +1,64 @@
-import { Car, Globe, ExternalLink, Eye } from "lucide-react";
+import { Car, Globe, ExternalLink, Eye, CheckCircle2, ShieldCheck } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface StatsCardsProps {
   totalCars: number;
   webVisible: number;
   autopliusVisible: number;
+  soldCount?: number;
+  reservedCount?: number;
 }
 
-export function StatsCards({ totalCars, webVisible, autopliusVisible }: StatsCardsProps) {
+export function StatsCards({ totalCars, webVisible, autopliusVisible, soldCount = 0, reservedCount = 0 }: StatsCardsProps) {
   const stats = [
     {
       title: "Viso skelbimų",
       value: totalCars,
       icon: Car,
-      color: "text-primary",
-      bgColor: "bg-primary/10",
+      gradient: "from-primary/15 to-primary/5",
+      iconColor: "text-primary",
     },
     {
       title: "Rodomi Web",
       value: webVisible,
       icon: Globe,
-      color: "text-green-600",
-      bgColor: "bg-green-100",
+      gradient: "from-emerald-500/15 to-emerald-500/5",
+      iconColor: "text-emerald-600",
     },
     {
-      title: "Rodomi Autoplius",
+      title: "Autoplius",
       value: autopliusVisible,
       icon: ExternalLink,
-      color: "text-blue-600",
-      bgColor: "bg-blue-100",
+      gradient: "from-blue-500/15 to-blue-500/5",
+      iconColor: "text-blue-600",
     },
     {
-      title: "Nepublikuota",
-      value: totalCars - Math.max(webVisible, autopliusVisible),
-      icon: Eye,
-      color: "text-muted-foreground",
-      bgColor: "bg-muted",
+      title: "Rezervuoti",
+      value: reservedCount,
+      icon: ShieldCheck,
+      gradient: "from-amber-500/15 to-amber-500/5",
+      iconColor: "text-amber-600",
+    },
+    {
+      title: "Parduoti",
+      value: soldCount,
+      icon: CheckCircle2,
+      gradient: "from-muted-foreground/15 to-muted-foreground/5",
+      iconColor: "text-muted-foreground",
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-3">
       {stats.map((stat) => (
-        <Card key={stat.title} className="border-none shadow-md hover:shadow-lg transition-shadow">
-          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
-            <div className={`p-2 sm:p-3 rounded-xl ${stat.bgColor}`}>
-              <stat.icon className={`h-4 w-4 sm:h-6 sm:w-6 ${stat.color}`} />
-            </div>
-            <div>
-              <p className="text-lg sm:text-2xl font-bold text-foreground">{stat.value}</p>
-              <p className="text-xs sm:text-sm text-muted-foreground line-clamp-1">{stat.title}</p>
+        <Card key={stat.title} className="border-none shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden">
+          <CardContent className={`p-3 sm:p-4 bg-gradient-to-br ${stat.gradient}`}>
+            <div className="flex items-center gap-2 sm:gap-3">
+              <stat.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.iconColor} flex-shrink-0`} />
+              <div className="min-w-0">
+                <p className="text-xl sm:text-2xl font-bold text-foreground leading-none">{stat.value}</p>
+                <p className="text-[11px] sm:text-xs text-muted-foreground mt-0.5 truncate">{stat.title}</p>
+              </div>
             </div>
           </CardContent>
         </Card>

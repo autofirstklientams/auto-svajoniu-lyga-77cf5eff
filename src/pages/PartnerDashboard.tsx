@@ -441,11 +441,11 @@ const PartnerDashboard = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
           <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
             <TabsList className="w-full sm:w-auto grid grid-cols-5 sm:flex">
-              <TabsTrigger value="all" className="text-xs sm:text-sm">Visi ({cars.length})</TabsTrigger>
-              <TabsTrigger value="active" className="text-xs sm:text-sm">Aktyvūs</TabsTrigger>
-              <TabsTrigger value="reserved" className="text-xs sm:text-sm">Rezervuoti</TabsTrigger>
-              <TabsTrigger value="sold" className="text-xs sm:text-sm">Parduoti</TabsTrigger>
-              <TabsTrigger value="draft" className="text-xs sm:text-sm">Juodraščiai</TabsTrigger>
+              <TabsTrigger value="all" className="text-xs sm:text-sm">Visi ({counts.all})</TabsTrigger>
+              <TabsTrigger value="active" className="text-xs sm:text-sm">Aktyvūs ({counts.active})</TabsTrigger>
+              <TabsTrigger value="reserved" className="text-xs sm:text-sm">Rezervuoti ({counts.reserved})</TabsTrigger>
+              <TabsTrigger value="sold" className="text-xs sm:text-sm">Parduoti ({counts.sold})</TabsTrigger>
+              <TabsTrigger value="draft" className="text-xs sm:text-sm">Juodraščiai ({counts.draft})</TabsTrigger>
             </TabsList>
           </Tabs>
           <div className="relative flex-1 max-w-md w-full">

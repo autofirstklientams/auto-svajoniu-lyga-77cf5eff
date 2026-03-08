@@ -45,6 +45,8 @@ const AdminDashboard = () => {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [allCars, setAllCars] = useState<CarListing[]>([]);
+  const [editingCar, setEditingCar] = useState<CarListing | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     checkAdminAccess();

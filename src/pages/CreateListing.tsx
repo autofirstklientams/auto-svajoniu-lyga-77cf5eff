@@ -613,6 +613,12 @@ const CreateListing = ({
     setImportedImageUrls(reorderedImages.map(img => img.url));
   }, []);
 
+  const handleReplaceExistingImageUrl = useCallback(async (id: string, newUrl: string) => {
+    // Update in DB
+    await supabase.from("car_images").update({ image_url: newUrl }).eq("id", id);
+    setExistingImages(prev => prev.map(img => img.id === id ? { ...img, url: newUrl } : img));
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     

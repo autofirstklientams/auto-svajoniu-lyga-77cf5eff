@@ -7,13 +7,17 @@ import {
   ChevronLeft,
   Shield,
   Menu,
-  X
+  X,
+  Moon,
+  Sun
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/autokopers-logo.jpeg";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface PartnerSidebarProps {
   isCollapsed: boolean;

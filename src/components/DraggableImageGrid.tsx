@@ -209,15 +209,27 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
 
               {/* AI Background button */}
               {showAiBackground && carId && onReplaceUrl && !isProcessing && (
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); handleAiBackground(img); }}
-                  className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1 sm:p-1.5 rounded sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
-                  title="AI: pakeisti foną į saloną"
-                >
-                  <Sparkles className="h-3 w-3" />
-                  <span className="hidden sm:inline">Salonas</span>
-                </button>
+                <div className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  {originalUrls.has(img.id) && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleUndoBackground(img); }}
+                      className="bg-muted text-foreground p-1 sm:p-1.5 rounded flex items-center gap-1 text-xs shadow-sm"
+                      title="Atsaukti AI foną"
+                    >
+                      <Undo2 className="h-3 w-3" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleAiBackground(img); }}
+                    className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1 sm:p-1.5 rounded flex items-center gap-1 text-xs"
+                    title="AI: pakeisti foną į saloną"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    <span className="hidden sm:inline">Salonas</span>
+                  </button>
+                </div>
               )}
 
               {/* Mobile move buttons */}

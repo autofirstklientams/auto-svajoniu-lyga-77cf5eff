@@ -246,18 +246,42 @@ const PartnerDashboard = () => {
 
 
   const filteredCars = useMemo(() => {
-    if (!searchQuery) return cars;
-    const query = searchQuery.toLowerCase();
-    return cars.filter(car =>
-      car.make.toLowerCase().includes(query) ||
-      car.model.toLowerCase().includes(query) ||
-      car.year.toString().includes(query)
-    );
-  }, [cars, searchQuery]);
+    let filtered = [...cars];
+    
+    // Status filter
+    switch (statusFilter) {
+      case "active":
+        filtered = filtered.filter(c => !c.is_sold && !c.is_reserved);
+        break;
+      case "reserved":
+        filtered = filtered.filter(c => c.is_reserved && !c.is_sold);
+        break;
+      case "sold":
+        filtered = filtered.filter(c => c.is_sold);
+        break;
+      case "draft":
+        filtered = filtered.filter(c => !c.visible_web && !c.visible_autoplius && !c.is_sold);
+        break;
+    }
 
-  const { webVisibleCount, autopliusVisibleCount } = useMemo(() => ({
+    // Search filter
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(car =>
+        car.make.toLowerCase().includes(query) ||
+        car.model.toLowerCase().includes(query) ||
+        car.year.toString().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [cars, searchQuery, statusFilter]);
+
+  const { webVisibleCount, autopliusVisibleCount, soldCount, reservedCount } = useMemo(() => ({
     webVisibleCount: cars.filter(c => c.visible_web).length,
     autopliusVisibleCount: cars.filter(c => c.visible_autoplius).length,
+    soldCount: cars.filter(c => c.is_sold).length,
+    reservedCount: cars.filter(c => c.is_reserved && !c.is_sold).length,
   }), [cars]);
 
   if (isLoading) {

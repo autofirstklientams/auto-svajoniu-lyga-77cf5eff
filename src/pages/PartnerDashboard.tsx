@@ -11,9 +11,9 @@ import { PartnerSidebar } from "@/components/partner/PartnerSidebar";
 import { StatsCards } from "@/components/partner/StatsCards";
 import { CarListingCard } from "@/components/partner/CarListingCard";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Car {
   id: string;

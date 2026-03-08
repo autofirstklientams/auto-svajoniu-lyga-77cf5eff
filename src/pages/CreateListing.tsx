@@ -670,14 +670,6 @@ const CreateListing = ({
               .eq("id", img.id);
           }
         }
-        
-        // Update main car image if first image changed
-        if (existingImages.length > 0) {
-          await supabase
-            .from("cars")
-            .update({ image_url: existingImages[0].url })
-            .eq("id", car.id);
-        }
       } else {
         const { data: newCar, error } = await supabase
           .from("cars")
@@ -688,15 +680,14 @@ const CreateListing = ({
         carId = newCar.id;
       }
 
-      // Upload new images
+      // Upload new images (parallel for speed)
+      let uploadedImageUrls: string[] = [];
       if (imageFiles.length > 0 && carId) {
         const startOrder = existingImages.length;
-        let firstImageUrl: string | null = null;
         
-        for (let i = 0; i < imageFiles.length; i++) {
-          const file = imageFiles[i];
+        const uploadPromises = imageFiles.map(async (file, i) => {
           const fileExt = file.name.split('.').pop();
-          const fileName = `${user.id}/${Date.now()}_${i}.${fileExt}`;
+          const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${i}.${fileExt}`;
 
           const { error: uploadError } = await supabase.storage
             .from('car-images')
@@ -708,8 +699,6 @@ const CreateListing = ({
             .from('car-images')
             .getPublicUrl(fileName);
 
-          if (i === 0) firstImageUrl = publicUrl;
-
           // Save image reference to database
           const { error: dbError } = await supabase
             .from("car_images")
@@ -720,15 +709,10 @@ const CreateListing = ({
             });
 
           if (dbError) throw dbError;
-        }
+          return publicUrl;
+        });
 
-        // Update main car image_url if this is the first image
-        if (!car?.image_url && firstImageUrl) {
-          await supabase
-            .from("cars")
-            .update({ image_url: firstImageUrl })
-            .eq("id", carId);
-        }
+        uploadedImageUrls = await Promise.all(uploadPromises);
       }
 
       // Handle imported images from Autoplius using edge function

@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, Link, Loader2, Globe, ExternalLink, X, Download } from "lucide-react";
+import { Upload, Link, Loader2, Globe, ExternalLink, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
@@ -54,7 +54,7 @@ const CreateListing = ({
 }: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [isExportingAutoplius, setIsExportingAutoplius] = useState(false);
+  
   const [autopliusUrl, setAutopliusUrl] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
@@ -202,74 +202,6 @@ const CreateListing = ({
     }
   };
 
-  const handleDebugExportAutoplius = async () => {
-    if (isExportingAutoplius) return;
-
-    setIsExportingAutoplius(true);
-    try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-
-      if (!session?.access_token) {
-        throw new Error("Nepavyko gauti aktyvios sesijos");
-      }
-
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-autoplius-xml`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            action: "download",
-            include_car_id: car?.id || null,
-            include_not_visible: true,
-            expect_car_in_feed: true,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = "Nepavyko sugeneruoti Autoplius XML";
-
-        if (errorText) {
-          try {
-            const parsed = JSON.parse(errorText);
-            errorMessage = parsed.error || parsed.message || errorMessage;
-          } catch {
-            errorMessage = errorText;
-          }
-        }
-
-        throw new Error(errorMessage);
-      }
-
-      const xmlBlob = await response.blob();
-      const objectUrl = URL.createObjectURL(xmlBlob);
-      const link = document.createElement("a");
-      const dateStamp = new Date().toISOString().slice(0, 10);
-
-      link.href = objectUrl;
-      link.download = `autoplius-feed-${dateStamp}.xml`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      URL.revokeObjectURL(objectUrl);
-
-      toast.success("Autoplius XML sėkmingai sugeneruotas");
-    } catch (error: unknown) {
-      console.error("Error exporting Autoplius feed:", error);
-      const errorMessage = error instanceof Error ? error.message : "Klaida generuojant Autoplius XML";
-      toast.error(errorMessage);
-    } finally {
-      setIsExportingAutoplius(false);
-    }
-  };
 
   const syncAutopliusFeed = async (
     options?: { includeCarId?: string; expectCarInFeed?: boolean }
@@ -802,29 +734,8 @@ const CreateListing = ({
 
   return (
     <Card className="mb-6">
-      <CardHeader className="gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <CardHeader>
         <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
-        {car?.id && isAdmin && (
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleDebugExportAutoplius}
-            disabled={isExportingAutoplius}
-            className="w-full sm:w-auto"
-          >
-            {isExportingAutoplius ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Generuojama...
-              </>
-            ) : (
-              <>
-                <Download className="h-4 w-4 mr-2" />
-                Autoplius XML peržiūra
-              </>
-            )}
-          </Button>
-        )}
       </CardHeader>
       <CardContent>
         {/* Autoplius import removed */}

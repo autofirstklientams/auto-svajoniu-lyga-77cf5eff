@@ -26,6 +26,7 @@ interface Car {
   body_type: string | null;
   is_recommended: boolean;
   is_reserved: boolean;
+  is_sold: boolean;
 }
 
 interface MakeCount {

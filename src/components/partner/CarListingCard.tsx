@@ -137,7 +137,7 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
           </div>
 
           {/* Quick actions - visible on hover */}
-          <div className="absolute top-3 right-3 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="absolute top-3 right-3 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <Button
               variant="secondary"
               size="icon"

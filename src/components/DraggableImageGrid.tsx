@@ -1,9 +1,10 @@
 import { useState, useCallback } from "react";
-import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2 } from "lucide-react";
+import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 export interface DraggableImage {
   id: string;
@@ -26,6 +27,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
@@ -163,6 +165,16 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                 <GripVertical className="h-3 w-3" />
               </div>
 
+              {/* Zoom button */}
+              <button
+                type="button"
+                onClick={(e) => { e.stopPropagation(); setPreviewIndex(index); }}
+                className="absolute top-1 left-1 sm:left-8 bg-black/50 text-white p-1 rounded sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                title="Padidinti"
+              >
+                <ZoomIn className="h-3 w-3" />
+              </button>
+
               {/* AI Background button */}
               {showAiBackground && carId && onReplaceUrl && !isProcessing && (
                 <button
@@ -213,6 +225,44 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
           );
         })}
       </div>
+
+      {/* Lightbox dialog */}
+      <Dialog open={previewIndex !== null} onOpenChange={(open) => { if (!open) setPreviewIndex(null); }}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-2 sm:p-4 flex flex-col items-center justify-center bg-black/95 border-none">
+          {previewIndex !== null && images[previewIndex] && (
+            <>
+              <img
+                src={images[previewIndex].url}
+                alt={`Image ${previewIndex + 1}`}
+                className="max-w-full max-h-[80vh] object-contain rounded"
+              />
+              <div className="flex items-center gap-4 mt-3">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  disabled={previewIndex === 0}
+                  onClick={() => setPreviewIndex(prev => prev !== null ? prev - 1 : null)}
+                >
+                  <ChevronLeft className="h-5 w-5" />
+                </Button>
+                <span className="text-white text-sm">
+                  {previewIndex + 1} / {images.length}
+                </span>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-9 w-9 bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  disabled={previewIndex === images.length - 1}
+                  onClick={() => setPreviewIndex(prev => prev !== null ? prev + 1 : null)}
+                >
+                  <ChevronRight className="h-5 w-5" />
+                </Button>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

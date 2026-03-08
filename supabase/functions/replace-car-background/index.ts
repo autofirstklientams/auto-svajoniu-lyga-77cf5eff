@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
             content: [
               {
                 type: 'text',
-                text: 'Replace the background of this car photo with a clean, professional car dealership showroom background. Keep the car exactly as it is - same angle, same lighting on the car, same reflections. Only change the background to look like a modern, bright car showroom with polished floors and soft lighting. The result should look like a professional car dealership photo. Do not add any text or watermarks.',
+                text: 'Replace ONLY the background of this car photo. Keep the car EXACTLY as it is — do not change the car shape, color, angle, reflections, or any detail. Place the car in a premium indoor car dealership showroom with these EXACT characteristics: polished light grey concrete floor with subtle reflections, clean white walls, bright even LED ceiling lighting with no harsh shadows, minimal modern showroom environment. The floor should show a soft reflection of the car. The lighting should be bright, even, and professional. No other cars, no people, no text, no logos, no watermarks. The style must be consistent: always the same showroom look regardless of the input photo angle.',
               },
               {
                 type: 'image_url',

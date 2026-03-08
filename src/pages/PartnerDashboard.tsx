@@ -301,12 +301,20 @@ const PartnerDashboard = () => {
     return filtered;
   }, [cars, searchQuery, statusFilter]);
 
+  const counts = useMemo(() => ({
+    all: cars.length,
+    active: cars.filter(c => !c.is_sold && !c.is_reserved).length,
+    reserved: cars.filter(c => c.is_reserved && !c.is_sold).length,
+    sold: cars.filter(c => c.is_sold).length,
+    draft: cars.filter(c => !c.visible_web && !c.visible_autoplius && !c.is_sold).length,
+  }), [cars]);
+
   const { webVisibleCount, autopliusVisibleCount, soldCount, reservedCount } = useMemo(() => ({
     webVisibleCount: cars.filter(c => c.visible_web).length,
     autopliusVisibleCount: cars.filter(c => c.visible_autoplius).length,
     soldCount: cars.filter(c => c.is_sold).length,
-    reservedCount: cars.filter(c => c.is_reserved && !c.is_sold).length,
-  }), [cars]);
+    reservedCount: counts.reserved,
+  }), [cars, counts]);
 
   if (isLoading) {
     return (

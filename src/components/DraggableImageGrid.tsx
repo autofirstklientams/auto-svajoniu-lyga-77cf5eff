@@ -84,7 +84,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     onReorder(newImages);
   }, [images, onReorder]);
 
-  const handleAiBackground = useCallback(async (img: DraggableImage) => {
+  const handleAiBackground = useCallback(async (img: DraggableImage, imageIndex: number) => {
     if (!carId || !onReplaceUrl) return;
     
     setProcessingIds(prev => new Set(prev).add(img.id));
@@ -100,7 +100,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
       });
 
       const { data, error } = await supabase.functions.invoke('replace-car-background', {
-        body: { imageUrl: img.url, carId },
+        body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
       });
 
       if (error) throw error;
@@ -208,7 +208,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
               </button>
 
               {/* AI Background button */}
-              {showAiBackground && index === 0 && carId && onReplaceUrl && !isProcessing && (
+              {showAiBackground && carId && onReplaceUrl && !isProcessing && (
                 <div className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
                   {originalUrls.has(img.id) && (
                     <button
@@ -222,7 +222,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                   )}
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); handleAiBackground(img); }}
+                    onClick={(e) => { e.stopPropagation(); handleAiBackground(img, index); }}
                     className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1 sm:p-1.5 rounded flex items-center gap-1 text-xs"
                     title="AI: pakeisti foną į saloną"
                   >

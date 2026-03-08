@@ -39,9 +39,16 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
   };
 
   const content = (
-    <Card className="overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-border/50 h-full">
+    <Card className={`overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 group border-border/50 h-full ${isSold ? 'opacity-75' : ''}`}>
       <div className="relative overflow-hidden">
-        {isRecommended && (
+        {isSold && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30">
+            <span className="text-white font-bold text-xl tracking-widest uppercase rotate-[-15deg] bg-black/50 px-5 py-1.5 rounded-lg">
+              Parduota
+            </span>
+          </div>
+        )}
+        {isRecommended && !isSold && (
           <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground py-1.5 sm:py-2 px-2 sm:px-3 flex items-center justify-center gap-1.5 sm:gap-2 shadow-md">
             <Award className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             <span className="text-xs sm:text-sm font-bold tracking-wide">{t("featured.recommended")}</span>

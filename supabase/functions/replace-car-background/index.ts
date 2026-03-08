@@ -32,24 +32,24 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Processing background replacement for car ${carId}`);
+    console.log(`Processing background replacement for car ${carId}, isMainPhoto: ${isMainPhoto}`);
 
-    // Call Lovable AI Gateway with the image
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3-pro-image-preview',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: `You are an expert photo compositor. Your ONLY task: remove the existing background and replace it with a SPECIFIC showroom environment. Do NOT alter the car.
+    const brandingSection = isMainPhoto ? `
+=== BRANDING ON WALL ===
+On the back wall behind the car, place a company logo/sign reading "AUTOKOPERS" in large dark blue capital letters (hex #2B5A8C). The text should be:
+- Centered horizontally on the wall
+- Positioned in the upper third of the wall (above car roof level)
+- Clean sans-serif bold font
+- The word "AUTO" should have a dark blue rounded rectangle background behind it, and "KOPERS" should be dark grey (#4A4A4A) without background — like a professional dealership sign
+- Size: large enough to be clearly readable but not overwhelming — approximately 15-20% of wall width
+- Flat on the wall surface, not floating
+` : '';
+
+    const forbiddenSigns = isMainPhoto 
+      ? '- No other cars, people, plants, signs (except the AUTOKOPERS sign), text, watermarks'
+      : '- No other cars, people, plants, signs, logos, text, watermarks';
+
+    const prompt = `You are an expert photo compositor. Your ONLY task: remove the existing background and replace it with a SPECIFIC showroom environment. Do NOT alter the car.
 
 === CAR PRESERVATION (ABSOLUTE) ===
 - The car pixels must remain 100% unchanged: shape, color, reflections, dirt, scratches, wheels, license plate, angle, size, position in frame
@@ -65,24 +65,15 @@ Lighting: Bright diffused overhead LED panels creating EVEN illumination with NO
 Color temperature: Neutral daylight ~5500K, no warm/cool tint
 Atmosphere: Clean, minimal, sterile — like a white photography studio with grey floor
 Shadow: The car casts a single soft contact shadow directly beneath it on the grey floor
-
-=== BRANDING ON WALL ===
-On the back wall behind the car, place a company logo/sign reading "AUTOKOPERS" in large dark blue capital letters (hex #2B5A8C). The text should be:
-- Centered horizontally on the wall
-- Positioned in the upper third of the wall (above car roof level)
-- Clean sans-serif bold font
-- The word "AUTO" should have a dark blue rounded rectangle background behind it, and "KOPERS" should be dark grey (#4A4A4A) without background — like a professional dealership sign
-- Size: large enough to be clearly readable but not overwhelming — approximately 15-20% of wall width
-- Flat on the wall surface, not floating
-
+${brandingSection}
 === FORBIDDEN ===
-- No other cars, people, plants, signs (except the AUTOKOPERS sign), text, watermarks
+${forbiddenSigns}
 - No windows, glass walls, outdoor scenery, sky reflections
 - No colored accent lighting, neon, spotlights
 - No visible ceiling structure, beams, or vents
 - No gradients on walls (keep solid flat white)
 
-Output one photorealistic image.`,
+Output one photorealistic image.`;
               },
               {
                 type: 'image_url',

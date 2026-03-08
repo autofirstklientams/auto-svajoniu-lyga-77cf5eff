@@ -54,7 +54,7 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
             <span className="text-xs sm:text-sm font-bold tracking-wide">{t("featured.recommended")}</span>
           </div>
         )}
-        {featured && !isRecommended && (
+        {featured && !isRecommended && !isSold && (
           <Badge className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 bg-accent text-accent-foreground text-xs">
             {t("listing.featured")}
           </Badge>

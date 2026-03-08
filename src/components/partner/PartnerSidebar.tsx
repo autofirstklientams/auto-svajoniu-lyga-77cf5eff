@@ -7,13 +7,17 @@ import {
   ChevronLeft,
   Shield,
   Menu,
-  X
+  X,
+  Moon,
+  Sun
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 import logo from "@/assets/autokopers-logo.jpeg";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useTheme } from "@/components/ThemeProvider";
 
 interface PartnerSidebarProps {
   isCollapsed: boolean;
@@ -31,6 +35,7 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { theme, setTheme } = useTheme();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -135,7 +140,17 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
               </nav>
 
               {/* Footer */}
-              <div className="p-3 border-t border-sidebar-border">
+              <div className="p-3 border-t border-sidebar-border space-y-2">
+                <div className="flex items-center justify-between px-3 py-2">
+                  <div className="flex items-center gap-3 text-sidebar-foreground">
+                    {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                    <span className="font-medium">Tamsus režimas</span>
+                  </div>
+                  <Switch 
+                    checked={theme === "dark"} 
+                    onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                  />
+                </div>
                 <Button
                   variant="ghost"
                   onClick={handleLogout}
@@ -234,7 +249,33 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-sidebar-border space-y-1">
+      <div className="p-3 border-t border-sidebar-border space-y-2">
+        <div className={cn(
+          "flex items-center px-3 py-2 text-sidebar-foreground",
+          isCollapsed ? "justify-center px-0" : "justify-between"
+        )}>
+          {!isCollapsed ? (
+            <>
+              <div className="flex items-center gap-3">
+                {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                <span className="font-medium">Tamsus režimas</span>
+              </div>
+              <Switch 
+                checked={theme === "dark"} 
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+              />
+            </>
+          ) : (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-9 w-9" 
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+            </Button>
+          )}
+        </div>
         <Button
           variant="ghost"
           onClick={handleLogout}

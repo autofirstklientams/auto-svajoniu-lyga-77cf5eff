@@ -1256,7 +1256,7 @@ const CreateListing = ({
                 onReplaceUrl={handleReplaceExistingImageUrl}
                 title="Esamos nuotraukos:"
                 carId={car?.id}
-                showAiBackground={!!car?.id}
+                showAiBackground={isSuperAdmin && !!car?.id}
               />
 
               {/* New images with drag-and-drop */}

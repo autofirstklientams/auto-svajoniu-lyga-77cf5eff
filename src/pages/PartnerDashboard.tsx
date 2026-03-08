@@ -360,6 +360,7 @@ const PartnerDashboard = () => {
               fetchCars();
             }}
             isAdmin={isAdmin}
+            isSuperAdmin={user?.id === "02984778-7f5d-4547-9581-f3f81d8c87e0"}
             canExportAutoplius={canExportAutoplius}
           />
         )}

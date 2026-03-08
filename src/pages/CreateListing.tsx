@@ -716,13 +716,12 @@ const CreateListing = ({
       }
 
       // Handle imported images from Autoplius using edge function
+      let importedUrls: string[] = [];
       if (importedImageUrls.length > 0 && carId) {
         const startOrder = existingImages.length + imageFiles.length;
-        let firstImageUrl: string | null = null;
 
         for (let i = 0; i < importedImageUrls.length; i++) {
           try {
-            // Use edge function to fetch and upload image (avoids CORS issues)
             const { data: uploadResult, error: uploadError } = await supabase.functions.invoke('add-watermark', {
               body: { 
                 imageUrl: importedImageUrls[i],
@@ -736,10 +735,8 @@ const CreateListing = ({
             }
 
             const publicUrl = uploadResult.data.url;
+            importedUrls.push(publicUrl);
 
-            if (i === 0 && !firstImageUrl) firstImageUrl = publicUrl;
-
-            // Save image reference to database
             await supabase
               .from("car_images")
               .insert({
@@ -751,9 +748,19 @@ const CreateListing = ({
             console.error('Error processing imported image:', imgError);
           }
         }
+      }
 
-        // Update main car image_url if no images existed before
-        if (!car?.image_url && imageFiles.length === 0 && firstImageUrl) {
+      // Always update image_url to the first image in the final order
+      if (carId) {
+        const firstImageUrl = existingImages.length > 0
+          ? existingImages[0].url
+          : uploadedImageUrls.length > 0
+            ? uploadedImageUrls[0]
+            : importedUrls.length > 0
+              ? importedUrls[0]
+              : null;
+
+        if (firstImageUrl) {
           await supabase
             .from("cars")
             .update({ image_url: firstImageUrl })

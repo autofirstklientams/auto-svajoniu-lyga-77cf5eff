@@ -1340,7 +1340,10 @@ const CreateListing = ({
                 }))}
                 onReorder={handleReorderExistingImages}
                 onRemove={handleRemoveExistingImage}
+                onReplaceUrl={handleReplaceExistingImageUrl}
                 title="Esamos nuotraukos:"
+                carId={car?.id}
+                showAiBackground={!!car?.id}
               />
 
               {/* New images with drag-and-drop */}

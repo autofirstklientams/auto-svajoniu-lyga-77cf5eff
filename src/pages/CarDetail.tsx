@@ -59,6 +59,7 @@ interface Car {
   defects: string | null;
   features: Record<string, string[]> | null;
   is_reserved: boolean;
+  is_sold: boolean;
 }
 
 const CarDetail = () => {

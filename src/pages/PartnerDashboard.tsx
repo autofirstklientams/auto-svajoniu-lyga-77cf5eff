@@ -339,6 +339,8 @@ const PartnerDashboard = () => {
             totalCars={cars.length}
             webVisible={webVisibleCount}
             autopliusVisible={autopliusVisibleCount}
+            soldCount={soldCount}
+            reservedCount={reservedCount}
           />
         </div>
 
@@ -360,9 +362,18 @@ const PartnerDashboard = () => {
           />
         )}
 
-        {/* Search */}
-        <div className="flex items-center gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6">
+          <Tabs value={statusFilter} onValueChange={setStatusFilter} className="w-full sm:w-auto">
+            <TabsList className="w-full sm:w-auto grid grid-cols-5 sm:flex">
+              <TabsTrigger value="all" className="text-xs sm:text-sm">Visi ({cars.length})</TabsTrigger>
+              <TabsTrigger value="active" className="text-xs sm:text-sm">Aktyvūs</TabsTrigger>
+              <TabsTrigger value="reserved" className="text-xs sm:text-sm">Rezervuoti</TabsTrigger>
+              <TabsTrigger value="sold" className="text-xs sm:text-sm">Parduoti</TabsTrigger>
+              <TabsTrigger value="draft" className="text-xs sm:text-sm">Juodraščiai</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <div className="relative flex-1 max-w-md w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Ieškoti pagal markę, modelį..."
@@ -371,8 +382,8 @@ const PartnerDashboard = () => {
               className="pl-10"
             />
           </div>
-          <p className="text-sm text-muted-foreground">
-            Rasta: {filteredCars.length} skelbimų
+          <p className="text-sm text-muted-foreground whitespace-nowrap hidden sm:block">
+            {filteredCars.length} skelbimų
           </p>
         </div>
 

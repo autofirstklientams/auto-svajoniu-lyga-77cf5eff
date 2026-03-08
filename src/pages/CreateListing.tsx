@@ -101,6 +101,9 @@ const CreateListing = ({
     co2_emission: car?.co2_emission || 0,
     city: car?.city || "Kaunas",
     sdk_code: car?.sdk_code || "",
+    first_reg_date: car?.first_reg_date || "",
+    mot_date: car?.mot_date || "",
+    wheel_size: car?.wheel_size || "",
   });
 
   // Fetch models when make changes

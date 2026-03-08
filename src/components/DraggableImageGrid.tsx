@@ -1,7 +1,9 @@
 import { useState, useCallback } from "react";
-import { X, GripVertical, ChevronLeft, ChevronRight } from "lucide-react";
+import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 export interface DraggableImage {
   id: string;
@@ -14,12 +16,16 @@ interface DraggableImageGridProps {
   images: DraggableImage[];
   onReorder: (images: DraggableImage[]) => void;
   onRemove: (id: string) => void;
+  onReplaceUrl?: (id: string, newUrl: string) => void;
   title: string;
+  carId?: string;
+  showAiBackground?: boolean;
 }
 
-export function DraggableImageGrid({ images, onReorder, onRemove, title }: DraggableImageGridProps) {
+export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, title, carId, showAiBackground = false }: DraggableImageGridProps) {
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
 
   const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
     setDraggedIndex(index);
@@ -73,6 +79,33 @@ export function DraggableImageGrid({ images, onReorder, onRemove, title }: Dragg
     onReorder(newImages);
   }, [images, onReorder]);
 
+  const handleAiBackground = useCallback(async (img: DraggableImage) => {
+    if (!carId || !onReplaceUrl) return;
+    
+    setProcessingIds(prev => new Set(prev).add(img.id));
+    
+    try {
+      const { data, error } = await supabase.functions.invoke('replace-car-background', {
+        body: { imageUrl: img.url, carId },
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Nepavyko pakeisti fono');
+
+      onReplaceUrl(img.id, data.url);
+      toast.success('Fonas pakeistas į salono stilių!');
+    } catch (err: any) {
+      console.error('AI background error:', err);
+      toast.error(err.message || 'Klaida keičiant foną');
+    } finally {
+      setProcessingIds(prev => {
+        const next = new Set(prev);
+        next.delete(img.id);
+        return next;
+      });
+    }
+  }, [carId, onReplaceUrl]);
+
   if (images.length === 0) return null;
 
   return (
@@ -87,73 +120,98 @@ export function DraggableImageGrid({ images, onReorder, onRemove, title }: Dragg
         </span>
       </p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-        {images.map((img, index) => (
-          <div
-            key={img.id}
-            draggable
-            onDragStart={(e) => handleDragStart(e, index)}
-            onDragEnd={handleDragEnd}
-            onDragOver={(e) => handleDragOver(e, index)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, index)}
-            className={cn(
-              "relative aspect-square rounded-lg overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-200 group",
-              draggedIndex === index && "opacity-50 scale-95",
-              dragOverIndex === index && "ring-2 ring-primary ring-offset-2 scale-105"
-            )}
-          >
-            <img
-              src={img.url}
-              alt={`Image ${index + 1}`}
-              className="w-full h-full object-cover pointer-events-none"
-              draggable={false}
-            />
-            
-            {/* Order badge */}
-            <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
-              {index + 1}
-            </div>
-            
-            {/* Drag handle - desktop */}
-            <div className="absolute top-1 left-1 bg-black/50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
-              <GripVertical className="h-3 w-3" />
-            </div>
-
-            {/* Mobile move buttons - always visible */}
-            <div className="flex sm:hidden absolute bottom-1 right-1 gap-0.5">
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); moveImage(index, -1); }}
-                disabled={index === 0}
-                className="bg-black/60 text-white p-1 rounded disabled:opacity-30 active:bg-black/80"
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </button>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); moveImage(index, 1); }}
-                disabled={index === images.length - 1}
-                className="bg-black/60 text-white p-1 rounded disabled:opacity-30 active:bg-black/80"
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </button>
-            </div>
-            
-            {/* Remove button - always visible on mobile, hover on desktop */}
-            <Button
-              type="button"
-              variant="destructive"
-              size="icon"
-              className="absolute top-1 right-1 h-6 w-6 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove(img.id);
-              }}
+        {images.map((img, index) => {
+          const isProcessing = processingIds.has(img.id);
+          return (
+            <div
+              key={img.id}
+              draggable={!isProcessing}
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
+              className={cn(
+                "relative aspect-square rounded-lg overflow-hidden border cursor-grab active:cursor-grabbing transition-all duration-200 group",
+                draggedIndex === index && "opacity-50 scale-95",
+                dragOverIndex === index && "ring-2 ring-primary ring-offset-2 scale-105",
+                isProcessing && "cursor-wait"
+              )}
             >
-              <X className="h-3 w-3" />
-            </Button>
-          </div>
-        ))}
+              <img
+                src={img.url}
+                alt={`Image ${index + 1}`}
+                className={cn("w-full h-full object-cover pointer-events-none", isProcessing && "opacity-50")}
+                draggable={false}
+              />
+
+              {/* Processing overlay */}
+              {isProcessing && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 z-10">
+                  <Loader2 className="h-6 w-6 text-white animate-spin mb-1" />
+                  <span className="text-white text-xs font-medium">AI fonas...</span>
+                </div>
+              )}
+              
+              {/* Order badge */}
+              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+                {index + 1}
+              </div>
+              
+              {/* Drag handle - desktop */}
+              <div className="absolute top-1 left-1 bg-black/50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
+                <GripVertical className="h-3 w-3" />
+              </div>
+
+              {/* AI Background button */}
+              {showAiBackground && carId && onReplaceUrl && !isProcessing && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); handleAiBackground(img); }}
+                  className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1 sm:p-1.5 rounded sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
+                  title="AI: pakeisti foną į saloną"
+                >
+                  <Sparkles className="h-3 w-3" />
+                  <span className="hidden sm:inline">Salonas</span>
+                </button>
+              )}
+
+              {/* Mobile move buttons */}
+              <div className="flex sm:hidden absolute bottom-1 right-8 gap-0.5">
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); moveImage(index, -1); }}
+                  disabled={index === 0}
+                  className="bg-black/60 text-white p-1 rounded disabled:opacity-30 active:bg-black/80"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); moveImage(index, 1); }}
+                  disabled={index === images.length - 1}
+                  className="bg-black/60 text-white p-1 rounded disabled:opacity-30 active:bg-black/80"
+                >
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              
+              {/* Remove button */}
+              <Button
+                type="button"
+                variant="destructive"
+                size="icon"
+                className="absolute top-1 right-1 h-6 w-6 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRemove(img.id);
+                }}
+              >
+                <X className="h-3 w-3" />
+              </Button>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

@@ -351,6 +351,9 @@ const CreateListing = ({
       co2_emission: source?.co2_emission || 0,
       city: source?.city || "Kaunas",
       sdk_code: source?.sdk_code || "",
+      first_reg_date: source?.first_reg_date || "",
+      mot_date: source?.mot_date || "",
+      wheel_size: source?.wheel_size || "",
     });
 
     setSelectedFeatures(source?.features || {});

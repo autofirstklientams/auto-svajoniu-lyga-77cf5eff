@@ -428,64 +428,110 @@ const AdminDashboard = () => {
           </TabsContent>
 
           <TabsContent value="cars">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Visi automobilių skelbimai</h2>
-              
-              {allCars.length === 0 ? (
-                <p className="text-muted-foreground text-center py-8">
-                  Skelbimų nerasta
-                </p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {allCars.map((car) => (
-                    <Card key={car.id} className="overflow-hidden">
-                      {car.image_url && (
-                        <img
-                          src={car.image_url}
-                          alt={`${car.make} ${car.model}`}
-                          className="w-full h-48 object-cover"
-                        />
-                      )}
-                      <div className="p-4">
-                        <h3 className="font-bold text-lg mb-1">
-                          {car.make} {car.model}
-                        </h3>
-                        <p className="text-2xl font-bold text-primary mb-2">
-                          {car.price.toLocaleString()} €
-                        </p>
-                        <div className="text-sm text-muted-foreground space-y-1 mb-3">
-                          <p>Metai: {car.year}</p>
-                          <p>Rida: {car.mileage?.toLocaleString() || "N/A"} km</p>
-                          {car.profiles && (
-                            <p className="text-xs mt-2 pt-2 border-t border-border">
-                              Partneris: {car.profiles.full_name}
-                            </p>
-                          )}
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => window.open(`/car/${car.id}`, '_blank')}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            Peržiūrėti
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => handleDeleteCar(car.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+            {editingCar ? (
+              <CreateListing
+                car={editingCar}
+                onClose={() => setEditingCar(null)}
+                onSuccess={() => {
+                  setEditingCar(null);
+                  fetchAllCars();
+                }}
+                isAdmin={true}
+                canExportAutoplius={true}
+              />
+            ) : (
+              <Card className="p-6">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-4">
+                  <h2 className="text-xl font-semibold">Visi automobilių skelbimai</h2>
+                  <div className="relative w-full sm:w-64">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Ieškoti..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-9"
+                    />
+                  </div>
                 </div>
-              )}
-            </Card>
+                
+                {allCars.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-8">
+                    Skelbimų nerasta
+                  </p>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {allCars
+                      .filter((car) => {
+                        if (!searchQuery) return true;
+                        const q = searchQuery.toLowerCase();
+                        return (
+                          car.make.toLowerCase().includes(q) ||
+                          car.model.toLowerCase().includes(q) ||
+                          car.profiles?.full_name?.toLowerCase().includes(q) ||
+                          car.profiles?.email?.toLowerCase().includes(q) ||
+                          String(car.year).includes(q)
+                        );
+                      })
+                      .map((car) => (
+                      <Card key={car.id} className="overflow-hidden">
+                        {car.image_url && (
+                          <img
+                            src={car.image_url}
+                            alt={`${car.make} ${car.model}`}
+                            className="w-full h-48 object-cover"
+                          />
+                        )}
+                        <div className="p-4">
+                          <h3 className="font-bold text-lg mb-1">
+                            {car.make} {car.model}
+                          </h3>
+                          <p className="text-2xl font-bold text-primary mb-2">
+                            {car.price.toLocaleString()} €
+                          </p>
+                          <div className="text-sm text-muted-foreground space-y-1 mb-3">
+                            <p>Metai: {car.year}</p>
+                            <p>Rida: {car.mileage?.toLocaleString() || "N/A"} km</p>
+                            {car.profiles && (
+                              <p className="text-xs mt-2 pt-2 border-t border-border">
+                                Partneris: {car.profiles.full_name}
+                              </p>
+                            )}
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="default"
+                              size="sm"
+                              className="flex-1"
+                              onClick={() => {
+                                setEditingCar(car);
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
+                            >
+                              <Pencil className="h-4 w-4 mr-1" />
+                              Redaguoti
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => window.open(`/car/${car.id}`, '_blank')}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => handleDeleteCar(car.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </main>

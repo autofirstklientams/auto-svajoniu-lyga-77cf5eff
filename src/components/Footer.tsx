@@ -1,6 +1,7 @@
 import { Mail, Phone, MapPin, Facebook, Instagram } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/autokopers-logo.jpeg";
+import financeLogo from "@/assets/autokopers-finance-logo.png";
 import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -99,7 +100,10 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. {t("footer.rights")}</p>
+            <div className="flex items-center gap-6">
+              <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. {t("footer.rights")}</p>
+              <img src={financeLogo} alt="AutoKOPERS Finance" className="h-8" />
+            </div>
             <Button 
               onClick={() => window.location.href = '/partner-login'}
               variant="outline"

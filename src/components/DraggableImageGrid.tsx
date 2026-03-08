@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn } from "lucide-react";
+import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +28,8 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  // Store original URLs before AI replacement for undo
+  const [originalUrls, setOriginalUrls] = useState<Map<string, string>>(new Map());
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
@@ -88,6 +90,15 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     setProcessingIds(prev => new Set(prev).add(img.id));
     
     try {
+      // Save original URL before replacement
+      setOriginalUrls(prev => {
+        const next = new Map(prev);
+        if (!next.has(img.id)) {
+          next.set(img.id, img.url);
+        }
+        return next;
+      });
+
       const { data, error } = await supabase.functions.invoke('replace-car-background', {
         body: { imageUrl: img.url, carId },
       });
@@ -96,9 +107,15 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
       if (!data?.success) throw new Error(data?.error || 'Nepavyko pakeisti fono');
 
       onReplaceUrl(img.id, data.url);
-      toast.success('Fonas pakeistas į salono stilių!');
+      toast.success('Fonas pakeistas! Galite atsaukti paspaudę ↩ mygtuką.');
     } catch (err: any) {
       console.error('AI background error:', err);
+      // Remove saved original on failure
+      setOriginalUrls(prev => {
+        const next = new Map(prev);
+        next.delete(img.id);
+        return next;
+      });
       toast.error(err.message || 'Klaida keičiant foną');
     } finally {
       setProcessingIds(prev => {
@@ -108,6 +125,20 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
       });
     }
   }, [carId, onReplaceUrl]);
+
+  const handleUndoBackground = useCallback((img: DraggableImage) => {
+    if (!onReplaceUrl) return;
+    const originalUrl = originalUrls.get(img.id);
+    if (!originalUrl) return;
+    
+    onReplaceUrl(img.id, originalUrl);
+    setOriginalUrls(prev => {
+      const next = new Map(prev);
+      next.delete(img.id);
+      return next;
+    });
+    toast.success('Originalus fonas grąžintas!');
+  }, [onReplaceUrl, originalUrls]);
 
   if (images.length === 0) return null;
 
@@ -178,15 +209,27 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
 
               {/* AI Background button */}
               {showAiBackground && carId && onReplaceUrl && !isProcessing && (
-                <button
-                  type="button"
-                  onClick={(e) => { e.stopPropagation(); handleAiBackground(img); }}
-                  className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1 sm:p-1.5 rounded sm:opacity-0 sm:group-hover:opacity-100 transition-opacity flex items-center gap-1 text-xs"
-                  title="AI: pakeisti foną į saloną"
-                >
-                  <Sparkles className="h-3 w-3" />
-                  <span className="hidden sm:inline">Salonas</span>
-                </button>
+                <div className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                  {originalUrls.has(img.id) && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleUndoBackground(img); }}
+                      className="bg-muted text-foreground p-1 sm:p-1.5 rounded flex items-center gap-1 text-xs shadow-sm"
+                      title="Atsaukti AI foną"
+                    >
+                      <Undo2 className="h-3 w-3" />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); handleAiBackground(img); }}
+                    className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1 sm:p-1.5 rounded flex items-center gap-1 text-xs"
+                    title="AI: pakeisti foną į saloną"
+                  >
+                    <Sparkles className="h-3 w-3" />
+                    <span className="hidden sm:inline">Salonas</span>
+                  </button>
+                </div>
               )}
 
               {/* Mobile move buttons */}

@@ -13,6 +13,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
 import { processImages } from "@/utils/imageUtils";
+import { SearchableCombobox } from "@/components/SearchableCombobox";
+import { autopliusMakes } from "@/data/autopliusMakes";
 
 const carSchema = z.object({
   make: z.string().trim().min(1, "Markė privaloma"),
@@ -68,6 +70,8 @@ const CreateListing = ({
   const [isCompanyCar, setIsCompanyCar] = useState(car?.is_company_car ?? false);
   const [isFeatured, setIsFeatured] = useState(car?.is_featured ?? false);
   const [isRecommended, setIsRecommended] = useState(car?.is_recommended ?? false);
+  const [modelOptions, setModelOptions] = useState<Array<{ name: string; id: string }>>([]);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
@@ -98,6 +102,42 @@ const CreateListing = ({
     city: car?.city || "Kaunas",
     sdk_code: car?.sdk_code || "",
   });
+
+  // Fetch models when make changes
+  const fetchModels = useCallback(async (makeName: string) => {
+    const makeEntry = autopliusMakes.find((m) => m.name === makeName);
+    if (!makeEntry) {
+      setModelOptions([]);
+      return;
+    }
+    setIsLoadingModels(true);
+    try {
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const resp = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/get-autoplius-models?make_id=${makeEntry.id}`
+      );
+      if (resp.ok) {
+        const models = await resp.json();
+        setModelOptions(models);
+      } else {
+        console.error("Failed to fetch models");
+        setModelOptions([]);
+      }
+    } catch (e) {
+      console.error("Error fetching models:", e);
+      setModelOptions([]);
+    } finally {
+      setIsLoadingModels(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (formData.make) {
+      fetchModels(formData.make);
+    } else {
+      setModelOptions([]);
+    }
+  }, [formData.make, fetchModels]);
 
   const handleImportFromAutoplius = async () => {
     if (!autopliusUrl.trim()) {
@@ -783,22 +823,30 @@ const CreateListing = ({
             <h3 className="text-lg font-semibold mb-4 text-foreground">Pagrindinė informacija</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="make">Markė *</Label>
-                <Input
-                  id="make"
+                <Label>Markė *</Label>
+                <SearchableCombobox
+                  options={autopliusMakes.map((m) => ({ value: m.name, label: m.name }))}
                   value={formData.make}
-                  onChange={(e) => setFormData({ ...formData, make: e.target.value })}
-                  required
+                  onValueChange={(val) => {
+                    setFormData({ ...formData, make: val, model: "" });
+                  }}
+                  placeholder="Pasirinkite markę"
+                  searchPlaceholder="Ieškoti markės..."
+                  emptyMessage="Markė nerasta"
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="model">Modelis *</Label>
-                <Input
-                  id="model"
+                <Label>Modelis *</Label>
+                <SearchableCombobox
+                  options={modelOptions.map((m) => ({ value: m.name, label: m.name }))}
                   value={formData.model}
-                  onChange={(e) => setFormData({ ...formData, model: e.target.value })}
-                  required
+                  onValueChange={(val) => setFormData({ ...formData, model: val })}
+                  placeholder="Pasirinkite modelį"
+                  searchPlaceholder="Ieškoti modelio..."
+                  emptyMessage="Modelis nerastas"
+                  isLoading={isLoadingModels}
+                  disabled={!formData.make}
                 />
               </div>
 

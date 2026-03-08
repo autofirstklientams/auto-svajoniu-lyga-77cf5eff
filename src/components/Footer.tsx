@@ -101,10 +101,7 @@ const Footer = () => {
 
         <div className="border-t border-border mt-8 pt-8">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-6">
-              <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. {t("footer.rights")}</p>
-              <img src={financeLogo} alt="AutoKOPERS Finance" className="h-8" />
-            </div>
+            <p className="text-muted-foreground text-sm">&copy; 2026 AUTOKOPERS. {t("footer.rights")}</p>
             <Button 
               onClick={() => window.location.href = '/partner-login'}
               variant="outline"

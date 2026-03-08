@@ -84,7 +84,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     onReorder(newImages);
   }, [images, onReorder]);
 
-  const handleAiBackground = useCallback(async (img: DraggableImage) => {
+  const handleAiBackground = useCallback(async (img: DraggableImage, imageIndex: number) => {
     if (!carId || !onReplaceUrl) return;
     
     setProcessingIds(prev => new Set(prev).add(img.id));
@@ -100,7 +100,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
       });
 
       const { data, error } = await supabase.functions.invoke('replace-car-background', {
-        body: { imageUrl: img.url, carId },
+        body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
       });
 
       if (error) throw error;

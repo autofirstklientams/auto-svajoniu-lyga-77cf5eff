@@ -99,11 +99,31 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
         return next;
       });
 
-      const { data, error } = await supabase.functions.invoke('replace-car-background', {
-        body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
-      });
+      // Retry logic for rate limits
+      let attempts = 0;
+      let data: any = null;
+      while (attempts < 3) {
+        const result = await supabase.functions.invoke('replace-car-background', {
+          body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
+        });
 
-      if (error) throw error;
+        if (result.error) {
+          // Check if it's a rate limit (429)
+          const errorBody = result.data;
+          if (errorBody?.error?.includes('Per daug') || result.error.message?.includes('non-2xx')) {
+            attempts++;
+            if (attempts < 3) {
+              await new Promise(r => setTimeout(r, 3000 * attempts)); // wait 3s, 6s
+              continue;
+            }
+          }
+          throw new Error(errorBody?.error || result.error.message || 'Nepavyko pakeisti fono');
+        }
+
+        data = result.data;
+        break;
+      }
+
       if (!data?.success) throw new Error(data?.error || 'Nepavyko pakeisti fono');
 
       onReplaceUrl(img.id, data.url);

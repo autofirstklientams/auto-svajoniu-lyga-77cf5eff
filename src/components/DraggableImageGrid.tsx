@@ -86,6 +86,14 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     onReorder(newImages);
   }, [images, onReorder]);
 
+  const makeMainPhoto = useCallback((index: number) => {
+    if (index === 0) return;
+    const newImages = [...images];
+    const [image] = newImages.splice(index, 1);
+    newImages.unshift(image);
+    onReorder(newImages);
+  }, [images, onReorder]);
+
   const handleAiBackground = useCallback(async (img: DraggableImage, imageIndex: number) => {
     if (!carId || !onReplaceUrl) return;
     

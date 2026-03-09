@@ -300,22 +300,57 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
         </p>
         
         {showAiBackground && carId && onReplaceUrl && images.length > 0 && (
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm" 
-            onClick={handleBulkAiBackground}
-            disabled={processingIds.size > 0}
-            className="h-8 text-xs bg-gradient-to-r from-violet-600/10 to-indigo-600/10 border-violet-200 hover:border-violet-300"
-          >
-            <Sparkles className="h-3.5 w-3.5 mr-1.5 text-violet-600" />
-            <span className="text-violet-700 dark:text-violet-300 font-medium">Masinis fono keitimas (AI)</span>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedForAi.size > 0 ? (
+              <>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={clearSelectionForAi}
+                  className="h-8 text-xs"
+                >
+                  Atšaukti ({selectedForAi.size})
+                </Button>
+                <Button 
+                  type="button" 
+                  size="sm" 
+                  onClick={handleBulkAiBackground}
+                  disabled={processingIds.size > 0}
+                  className="h-8 text-xs bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white"
+                >
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  Keisti foną ({selectedForAi.size})
+                </Button>
+              </>
+            ) : (
+              <>
+                {unprocessedCount > 0 && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={selectAllForAi}
+                    className="h-8 text-xs"
+                  >
+                    <CheckSquare className="h-3.5 w-3.5 mr-1.5" />
+                    Pasirinkti visas ({unprocessedCount})
+                  </Button>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  Pažymėkite nuotraukas AI fonui
+                </span>
+              </>
+            )}
+          </div>
         )}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {images.map((img, index) => {
           const isProcessing = processingIds.has(img.id);
+          const isSelected = selectedForAi.has(img.id);
+          const hasAiProcessed = originalUrls.has(img.id);
+          const canSelect = showAiBackground && carId && onReplaceUrl && !isProcessing && !hasAiProcessed;
           return (
             <div
               key={img.id}

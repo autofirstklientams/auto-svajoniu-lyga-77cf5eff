@@ -779,7 +779,7 @@ const CreateListing = ({
                   id="year"
                   type="number"
                   value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, year: e.target.value ? parseInt(e.target.value) : ("" as any) })}
                   required
                 />
               </div>

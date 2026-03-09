@@ -774,30 +774,23 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="year">Metai *</Label>
-                <Input
-                  id="year"
-                  type="number"
-                  value={formData.year}
-                  onChange={(e) => {
-                    const newYear = e.target.value ? parseInt(e.target.value) : ("" as any);
-                    setFormData({ ...formData, year: newYear });
-                  }}
-                  required
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="first_reg_date">Pirmosios reg. data</Label>
+                <Label htmlFor="first_reg_date">Pagaminimo metai / mėnuo *</Label>
                 <Input
                   id="first_reg_date"
                   type="month"
-                  value={formData.first_reg_date ? formData.first_reg_date.substring(0, 7) : ""}
+                  value={
+                    formData.first_reg_date 
+                      ? formData.first_reg_date.substring(0, 7) 
+                      : formData.year 
+                        ? `${formData.year}-01` 
+                        : ""
+                  }
                   onChange={(e) => {
-                    const newDate = e.target.value; // format: YYYY-MM
-                    const newYear = newDate ? parseInt(newDate.split('-')[0]) : formData.year;
+                    const newDate = e.target.value;
+                    const newYear = newDate ? parseInt(newDate.split('-')[0]) : ("" as any);
                     setFormData({ ...formData, first_reg_date: newDate, year: newYear });
                   }}
+                  required
                 />
               </div>
 

@@ -77,7 +77,7 @@ const CreateListing = ({
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
-    year: car?.year || new Date().getFullYear(),
+    year: car?.year || ("" as any),
     price: car?.price || 0,
     mileage: car?.mileage || 0,
     fuel_type: car?.fuel_type || "",

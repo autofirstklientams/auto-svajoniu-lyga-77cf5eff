@@ -162,14 +162,39 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     toast.success('Originalus fonas grąžintas!');
   }, [onReplaceUrl, originalUrls]);
 
+  const toggleSelectForAi = useCallback((id: string) => {
+    setSelectedForAi(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const selectAllForAi = useCallback(() => {
+    const unprocessedIds = images
+      .filter(img => !originalUrls.has(img.id) && !processingIds.has(img.id))
+      .map(img => img.id);
+    setSelectedForAi(new Set(unprocessedIds));
+  }, [images, originalUrls, processingIds]);
+
+  const clearSelectionForAi = useCallback(() => {
+    setSelectedForAi(new Set());
+  }, []);
+
   const handleBulkAiBackground = useCallback(async () => {
     if (!carId || !onReplaceUrl) return;
     
-    // Get images that haven't been AI processed yet
-    const imagesToProcess = images.filter(img => !originalUrls.has(img.id) && !processingIds.has(img.id));
+    // Get selected images that haven't been AI processed yet
+    const imagesToProcess = images.filter(img => 
+      selectedForAi.has(img.id) && !originalUrls.has(img.id) && !processingIds.has(img.id)
+    );
     
     if (imagesToProcess.length === 0) {
-      toast.info('Visos nuotraukos jau turi pakeistą foną arba yra apdorojamos.');
+      toast.info('Pasirinkite nuotraukas, kurioms norite keisti foną.');
       return;
     }
 
@@ -180,11 +205,11 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     let successCount = 0;
     let failCount = 0;
     
-    toast.info(`Pradedamas masinis fono keitimas (${imagesToProcess.length} nuotr.). Prašome palaukti...`);
+    toast.info(`Pradedamas fono keitimas (${imagesToProcess.length} nuotr.). Prašome palaukti...`);
 
-    for (let i = 0; i < images.length; i++) {
-      const img = images[i];
-      if (processingIds.has(img.id) || originalUrls.has(img.id)) continue;
+    for (let i = 0; i < imagesToProcess.length; i++) {
+      const img = imagesToProcess[i];
+      const imageIndex = images.findIndex(im => im.id === img.id);
       
       setProcessingIds(prev => new Set(prev).add(img.id));
       
@@ -199,7 +224,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
         let data: any = null;
         while (attempts < 3) {
           const result = await supabase.functions.invoke('replace-car-background', {
-            body: { imageUrl: img.url, carId, isMainPhoto: i === 0 },
+            body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
           });
 
           if (result.error) {
@@ -221,8 +246,14 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
 
         onReplaceUrl(img.id, data.url);
         successCount++;
+        // Remove from selection after success
+        setSelectedForAi(prev => {
+          const next = new Set(prev);
+          next.delete(img.id);
+          return next;
+        });
       } catch (err: any) {
-        console.error('Bulk AI error for image', i, err);
+        console.error('Bulk AI error for image', imageIndex, err);
         setOriginalUrls(prev => {
           const next = new Map(prev);
           next.delete(img.id);
@@ -238,7 +269,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
       }
       
       // Delay between images to respect rate limits
-      if (i < images.length - 1) {
+      if (i < imagesToProcess.length - 1) {
          await new Promise(r => setTimeout(r, 3000));
       }
     }
@@ -249,9 +280,11 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     if (failCount > 0) {
       toast.error(`Nepavyko pakeisti ${failCount} nuotraukų fono.`);
     }
-  }, [carId, images, onReplaceUrl, processingIds, originalUrls]);
+  }, [carId, images, onReplaceUrl, processingIds, originalUrls, selectedForAi]);
 
   if (images.length === 0) return null;
+
+  const unprocessedCount = images.filter(img => !originalUrls.has(img.id) && !processingIds.has(img.id)).length;
 
   return (
     <div>

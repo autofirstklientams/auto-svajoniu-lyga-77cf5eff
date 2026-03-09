@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
-import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, Undo2 } from "lucide-react";
+import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, Undo2, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -28,6 +29,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  const [selectedForAi, setSelectedForAi] = useState<Set<string>>(new Set());
   // Store original URLs before AI replacement for undo
   const [originalUrls, setOriginalUrls] = useState<Map<string, string>>(new Map());
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
@@ -160,14 +162,39 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     toast.success('Originalus fonas grąžintas!');
   }, [onReplaceUrl, originalUrls]);
 
+  const toggleSelectForAi = useCallback((id: string) => {
+    setSelectedForAi(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
+
+  const selectAllForAi = useCallback(() => {
+    const unprocessedIds = images
+      .filter(img => !originalUrls.has(img.id) && !processingIds.has(img.id))
+      .map(img => img.id);
+    setSelectedForAi(new Set(unprocessedIds));
+  }, [images, originalUrls, processingIds]);
+
+  const clearSelectionForAi = useCallback(() => {
+    setSelectedForAi(new Set());
+  }, []);
+
   const handleBulkAiBackground = useCallback(async () => {
     if (!carId || !onReplaceUrl) return;
     
-    // Get images that haven't been AI processed yet
-    const imagesToProcess = images.filter(img => !originalUrls.has(img.id) && !processingIds.has(img.id));
+    // Get selected images that haven't been AI processed yet
+    const imagesToProcess = images.filter(img => 
+      selectedForAi.has(img.id) && !originalUrls.has(img.id) && !processingIds.has(img.id)
+    );
     
     if (imagesToProcess.length === 0) {
-      toast.info('Visos nuotraukos jau turi pakeistą foną arba yra apdorojamos.');
+      toast.info('Pasirinkite nuotraukas, kurioms norite keisti foną.');
       return;
     }
 
@@ -178,11 +205,11 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     let successCount = 0;
     let failCount = 0;
     
-    toast.info(`Pradedamas masinis fono keitimas (${imagesToProcess.length} nuotr.). Prašome palaukti...`);
+    toast.info(`Pradedamas fono keitimas (${imagesToProcess.length} nuotr.). Prašome palaukti...`);
 
-    for (let i = 0; i < images.length; i++) {
-      const img = images[i];
-      if (processingIds.has(img.id) || originalUrls.has(img.id)) continue;
+    for (let i = 0; i < imagesToProcess.length; i++) {
+      const img = imagesToProcess[i];
+      const imageIndex = images.findIndex(im => im.id === img.id);
       
       setProcessingIds(prev => new Set(prev).add(img.id));
       
@@ -197,7 +224,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
         let data: any = null;
         while (attempts < 3) {
           const result = await supabase.functions.invoke('replace-car-background', {
-            body: { imageUrl: img.url, carId, isMainPhoto: i === 0 },
+            body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
           });
 
           if (result.error) {
@@ -219,8 +246,14 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
 
         onReplaceUrl(img.id, data.url);
         successCount++;
+        // Remove from selection after success
+        setSelectedForAi(prev => {
+          const next = new Set(prev);
+          next.delete(img.id);
+          return next;
+        });
       } catch (err: any) {
-        console.error('Bulk AI error for image', i, err);
+        console.error('Bulk AI error for image', imageIndex, err);
         setOriginalUrls(prev => {
           const next = new Map(prev);
           next.delete(img.id);
@@ -236,7 +269,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
       }
       
       // Delay between images to respect rate limits
-      if (i < images.length - 1) {
+      if (i < imagesToProcess.length - 1) {
          await new Promise(r => setTimeout(r, 3000));
       }
     }
@@ -247,9 +280,11 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     if (failCount > 0) {
       toast.error(`Nepavyko pakeisti ${failCount} nuotraukų fono.`);
     }
-  }, [carId, images, onReplaceUrl, processingIds, originalUrls]);
+  }, [carId, images, onReplaceUrl, processingIds, originalUrls, selectedForAi]);
 
   if (images.length === 0) return null;
+
+  const unprocessedCount = images.filter(img => !originalUrls.has(img.id) && !processingIds.has(img.id)).length;
 
   return (
     <div>
@@ -265,22 +300,57 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
         </p>
         
         {showAiBackground && carId && onReplaceUrl && images.length > 0 && (
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm" 
-            onClick={handleBulkAiBackground}
-            disabled={processingIds.size > 0}
-            className="h-8 text-xs bg-gradient-to-r from-violet-600/10 to-indigo-600/10 border-violet-200 hover:border-violet-300"
-          >
-            <Sparkles className="h-3.5 w-3.5 mr-1.5 text-violet-600" />
-            <span className="text-violet-700 dark:text-violet-300 font-medium">Masinis fono keitimas (AI)</span>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            {selectedForAi.size > 0 ? (
+              <>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={clearSelectionForAi}
+                  className="h-8 text-xs"
+                >
+                  Atšaukti ({selectedForAi.size})
+                </Button>
+                <Button 
+                  type="button" 
+                  size="sm" 
+                  onClick={handleBulkAiBackground}
+                  disabled={processingIds.size > 0}
+                  className="h-8 text-xs bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white"
+                >
+                  <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                  Keisti foną ({selectedForAi.size})
+                </Button>
+              </>
+            ) : (
+              <>
+                {unprocessedCount > 0 && (
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={selectAllForAi}
+                    className="h-8 text-xs"
+                  >
+                    <CheckSquare className="h-3.5 w-3.5 mr-1.5" />
+                    Pasirinkti visas ({unprocessedCount})
+                  </Button>
+                )}
+                <span className="text-xs text-muted-foreground">
+                  Pažymėkite nuotraukas AI fonui
+                </span>
+              </>
+            )}
+          </div>
         )}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {images.map((img, index) => {
           const isProcessing = processingIds.has(img.id);
+          const isSelected = selectedForAi.has(img.id);
+          const hasAiProcessed = originalUrls.has(img.id);
+          const canSelect = showAiBackground && carId && onReplaceUrl && !isProcessing && !hasAiProcessed;
           return (
             <div
               key={img.id}
@@ -311,6 +381,17 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                   <span className="text-white text-xs font-medium">AI fonas...</span>
                 </div>
               )}
+
+              {/* Selection Checkbox */}
+              {canSelect && (
+                <div className="absolute top-2 left-2 z-20" onClick={e => e.stopPropagation()}>
+                  <Checkbox 
+                    checked={isSelected}
+                    onCheckedChange={() => toggleSelectForAi(img.id)}
+                    className="h-5 w-5 bg-white/90 border-2 border-white data-[state=checked]:bg-violet-600 data-[state=checked]:border-violet-600 shadow-sm"
+                  />
+                </div>
+              )}
               
               {/* Order badge */}
               <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
@@ -318,7 +399,10 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
               </div>
               
               {/* Drag handle - desktop */}
-              <div className="absolute top-1 left-1 bg-black/50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block">
+              <div className={cn(
+                "absolute bg-black/50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block",
+                canSelect ? "top-1 left-9" : "top-1 left-1"
+              )}>
                 <GripVertical className="h-3 w-3" />
               </div>
 
@@ -326,7 +410,10 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setPreviewIndex(index); }}
-                className="absolute top-1 left-1 sm:left-8 bg-black/50 text-white p-1 rounded sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                className={cn(
+                  "absolute bg-black/50 text-white p-1 rounded sm:opacity-0 sm:group-hover:opacity-100 transition-opacity",
+                  canSelect ? "top-8 left-2 sm:left-9" : "top-1 left-1 sm:left-8"
+                )}
                 title="Padidinti"
               >
                 <ZoomIn className="h-3 w-3" />
@@ -334,31 +421,32 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
 
               {/* AI Background button */}
               {showAiBackground && carId && onReplaceUrl && !isProcessing && (
-                <div className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 flex gap-1 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                <div className="absolute top-8 right-1 flex flex-col gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20">
                   {originalUrls.has(img.id) && (
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handleUndoBackground(img); }}
-                      className="bg-muted text-foreground p-1 sm:p-1.5 rounded flex items-center gap-1 text-xs shadow-sm"
+                      className="bg-background text-foreground p-1.5 rounded flex items-center justify-center gap-1 text-xs shadow-sm"
                       title="Atsaukti AI foną"
                     >
-                      <Undo2 className="h-3 w-3" />
+                      <Undo2 className="h-4 w-4 sm:h-3 sm:w-3" />
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); handleAiBackground(img, index); }}
-                    className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1 sm:p-1.5 rounded flex items-center gap-1 text-xs"
-                    title="AI: pakeisti foną į saloną"
-                  >
-                    <Sparkles className="h-3 w-3" />
-                    <span className="hidden sm:inline">Salonas</span>
-                  </button>
+                  {!originalUrls.has(img.id) && (
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); handleAiBackground(img, index); }}
+                      className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1.5 rounded flex items-center justify-center gap-1 text-xs shadow-sm"
+                      title="AI: pakeisti foną į saloną"
+                    >
+                      <Sparkles className="h-4 w-4 sm:h-3 sm:w-3" />
+                    </button>
+                  )}
                 </div>
               )}
 
               {/* Mobile move buttons */}
-              <div className="flex sm:hidden absolute bottom-1 right-8 gap-0.5">
+              <div className="flex sm:hidden absolute bottom-1 right-1 gap-0.5 z-20">
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); moveImage(index, -1); }}
@@ -382,7 +470,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute top-1 right-1 h-6 w-6 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
+                className="absolute top-1 right-1 h-6 w-6 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemove(img.id);

@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react"
+import { useLocation } from "react-router-dom"
 
 type Theme = "dark" | "light" | "system"
 
@@ -30,10 +31,20 @@ export function ThemeProvider({
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
   )
 
+  const location = useLocation()
+
   useEffect(() => {
     const root = window.document.documentElement
+    
+    // Always force light mode on main site, allow theme changes on dashboard
+    const isDashboard = location.pathname.startsWith('/partner') || location.pathname.startsWith('/admin')
 
     root.classList.remove("light", "dark")
+
+    if (!isDashboard) {
+      root.classList.add("light")
+      return
+    }
 
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
@@ -46,7 +57,7 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme)
-  }, [theme])
+  }, [theme, location.pathname])
 
   const value = {
     theme,

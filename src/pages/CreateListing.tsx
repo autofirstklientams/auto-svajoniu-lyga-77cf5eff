@@ -788,7 +788,7 @@ const CreateListing = ({
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Metai" />
+                      <SelectValue placeholder="YYYY" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => new Date().getFullYear() - i).map(year => (
@@ -809,7 +809,7 @@ const CreateListing = ({
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Mėnuo" />
+                      <SelectValue placeholder="MM" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 12 }, (_, i) => {
@@ -1217,7 +1217,7 @@ const CreateListing = ({
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Metai" />
+                      <SelectValue placeholder="YYYY" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 15 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
@@ -1234,7 +1234,7 @@ const CreateListing = ({
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Mėnuo" />
+                      <SelectValue placeholder="MM" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 12 }, (_, i) => {

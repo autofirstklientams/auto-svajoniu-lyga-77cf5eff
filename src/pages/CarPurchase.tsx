@@ -5,50 +5,52 @@ import CarPurchaseForm from "@/components/CarPurchaseForm";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Car, Euro, Clock, Shield, CheckCircle, Phone } from "lucide-react";
-
-const features = [
-  {
-    icon: Euro,
-    title: "Geriausios kainos",
-    description: "Siūlome konkurencingas kainas už jūsų automobilį",
-  },
-  {
-    icon: Clock,
-    title: "Greitas procesas",
-    description: "Automobilio įvertinimas ir pirkimas per 24 valandas",
-  },
-  {
-    icon: Shield,
-    title: "Patikimas sandoris",
-    description: "Skaidrus ir saugus automobilio supirkimo procesas",
-  },
-  {
-    icon: CheckCircle,
-    title: "Bet kokia būklė",
-    description: "Perkame automobilius įvairių markių ir bet kokios būklės",
-  },
-];
-
-const steps = [
-  {
-    number: "1",
-    title: "Susisiekite",
-    description: "Paskambinkite mums arba užpildykite formą internete su automobilio duomenimis",
-  },
-  {
-    number: "2",
-    title: "Įvertinimas",
-    description: "Mūsų specialistas apžiūri automobilį ir pateikia kainą",
-  },
-  {
-    number: "3",
-    title: "Sandoris",
-    description: "Sutarę dėl kainos, atliekame visus formalumus ir atsiskaitome",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CarPurchase = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const { t, language } = useLanguage();
+
+  const features = [
+    {
+      icon: Euro,
+      title: t("carPurchase.bestPrices"),
+      description: t("carPurchase.bestPricesDesc"),
+    },
+    {
+      icon: Clock,
+      title: t("carPurchase.fastProcess"),
+      description: t("carPurchase.fastProcessDesc"),
+    },
+    {
+      icon: Shield,
+      title: t("carPurchase.reliableDeal"),
+      description: t("carPurchase.reliableDealDesc"),
+    },
+    {
+      icon: CheckCircle,
+      title: t("carPurchase.anyCondition"),
+      description: t("carPurchase.anyConditionDesc"),
+    },
+  ];
+
+  const steps = [
+    {
+      number: "1",
+      title: t("carPurchase.stepContact"),
+      description: t("carPurchase.stepContactDesc"),
+    },
+    {
+      number: "2",
+      title: t("carPurchase.stepEval"),
+      description: t("carPurchase.stepEvalDesc"),
+    },
+    {
+      number: "3",
+      title: t("carPurchase.stepDeal"),
+      description: t("carPurchase.stepDealDesc"),
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-background">
@@ -60,10 +62,10 @@ const CarPurchase = () => {
             <div className="max-w-3xl text-white">
               <div className="flex items-center gap-4 mb-4">
                 <Car className="h-12 w-12" />
-                <h1 className="text-5xl md:text-6xl font-bold">Auto supirkimas</h1>
+                <h1 className="text-5xl md:text-6xl font-bold">{t("carPurchase.title")}</h1>
               </div>
               <p className="text-xl md:text-2xl text-white/90">
-                Greitai ir sąžiningai superkame visų markių automobilius
+                {t("carPurchase.heroDesc")}
               </p>
             </div>
           </div>
@@ -72,9 +74,9 @@ const CarPurchase = () => {
         <section className="py-16 bg-background">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 text-foreground">Kodėl parduoti mums?</h2>
+              <h2 className="text-3xl font-bold mb-4 text-foreground">{t("carPurchase.whySell")}</h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                Superkame automobilius greitai, sąžiningai ir už geriausią kainą
+                {t("carPurchase.whySellDesc")}
               </p>
             </div>
 
@@ -95,9 +97,9 @@ const CarPurchase = () => {
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
-              <h2 className="text-3xl font-bold mb-4 text-foreground">Kaip tai veikia?</h2>
+              <h2 className="text-3xl font-bold mb-4 text-foreground">{t("carPurchase.howWorks")}</h2>
               <p className="text-xl text-muted-foreground">
-                Paprastas ir greitas procesas
+                {t("carPurchase.simpleProcess")}
               </p>
             </div>
 
@@ -121,25 +123,34 @@ const CarPurchase = () => {
               <Card className="shadow-xl">
                 <CardContent className="p-8">
                   <h2 className="text-3xl font-bold mb-6 text-center text-foreground">
-                    Norite parduoti automobilį?
+                    {t("carPurchase.wantToSell")}
                   </h2>
                   <p className="text-center text-muted-foreground text-lg mb-8">
-                    Susisiekite su mumis šiandien ir gaukite geriausią pasiūlymą!
+                    {t("carPurchase.wantToSellDesc")}
                   </p>
                   
                   <div className="grid md:grid-cols-2 gap-6 mb-8">
                     <div className="bg-muted/30 p-6 rounded-lg text-center">
                       <Phone className="h-8 w-8 mx-auto mb-3 text-primary" />
-                      <h3 className="font-bold mb-2 text-foreground">Paskambinkite</h3>
+                      <h3 className="font-bold mb-2 text-foreground">{t("carPurchase.call")}</h3>
                       <a href="tel:+37062851439" className="text-primary text-lg hover:underline">
                         +370 628 51439
                       </a>
                     </div>
                     <div className="bg-muted/30 p-6 rounded-lg text-center">
                       <CheckCircle className="h-8 w-8 mx-auto mb-3 text-primary" />
-                      <h3 className="font-bold mb-2 text-foreground">Darbo laikas</h3>
-                      <p className="text-muted-foreground">Pr-Pt: 9:00-18:00</p>
-                      <p className="text-muted-foreground">Št: 10:00-16:00</p>
+                      <h3 className="font-bold mb-2 text-foreground">{t("carPurchase.workingHours")}</h3>
+                      {language === "en" ? (
+                        <>
+                          <p className="text-muted-foreground">Mon-Fri: 9:00-18:00</p>
+                          <p className="text-muted-foreground">Sat: 10:00-16:00</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-muted-foreground">Pr-Pt: 9:00-18:00</p>
+                          <p className="text-muted-foreground">Št: 10:00-16:00</p>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -149,7 +160,7 @@ const CarPurchase = () => {
                       className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8"
                       onClick={() => setIsFormOpen(true)}
                     >
-                      Pateikti užklausą
+                      {t("carPurchase.submitRequest")}
                     </Button>
                   </div>
                 </CardContent>

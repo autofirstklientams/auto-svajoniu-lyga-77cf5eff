@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface Car {
   id: string;
+  slug: string | null;
   make: string;
   model: string;
   year: number;

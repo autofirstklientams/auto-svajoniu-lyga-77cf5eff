@@ -14,6 +14,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const lt: Record<string, string> = {
   // Navigation
   "nav.home": "Pagrindinis",
+  "home.banner": "📍 Persikėlėme! Naujas adresas — Palemono g. 173, Kaunas →",
   "nav.cars": "Automobiliai",
   "nav.leasing": "Lizingas",
   "nav.carPurchase": "Auto supirkimas",

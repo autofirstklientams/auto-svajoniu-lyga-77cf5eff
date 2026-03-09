@@ -75,10 +75,10 @@ const App = () => (
             </Routes>
           </Suspense>
           <CookieConsent />
+        </ThemeProvider>
         </BrowserRouter>
       </TooltipProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    </LanguageProvider>
   </QueryClientProvider>
 );
 

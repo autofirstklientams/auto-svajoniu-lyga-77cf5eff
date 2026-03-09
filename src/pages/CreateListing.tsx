@@ -791,10 +791,10 @@ const CreateListing = ({
                 <Label htmlFor="first_reg_date">Pirmosios reg. data</Label>
                 <Input
                   id="first_reg_date"
-                  type="date"
-                  value={formData.first_reg_date}
+                  type="month"
+                  value={formData.first_reg_date ? formData.first_reg_date.substring(0, 7) : ""}
                   onChange={(e) => {
-                    const newDate = e.target.value;
+                    const newDate = e.target.value; // format: YYYY-MM
                     const newYear = newDate ? parseInt(newDate.split('-')[0]) : formData.year;
                     setFormData({ ...formData, first_reg_date: newDate, year: newYear });
                   }}

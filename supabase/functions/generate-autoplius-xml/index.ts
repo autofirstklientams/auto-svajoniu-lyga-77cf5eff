@@ -372,13 +372,16 @@ const originCountryMapping: Record<string, string> = {
 
 // Feature name to Autoplius feature ID mapping (from datacollector)
 const featureIdMapping: Record<string, string> = {
+  // Salonas
   "Odinis salonas": "22", "Iš dalies odinis": "1029", "Alcantara": "1030",
   "Sportinės sėdynės": "31", "Tamsinti stiklai": "37", "Daugiafunkcinis vairas": "7",
   "Šildomos sėdynės": "36", "Stoglangis": "33", "Elektra valdomos sėdynės": "27",
   "Panoraminis stogas": "50", "Autonominis šildymas": "39", "Ventiliuojamos sėdynės": "52",
   "Elektra valdomos sėdynės su atmintimi": "56", "Bagažinės uždangalas": "60",
   "Šildomas vairas": "77", "Masažuojančios sėdynės": "1032", "Dvi bagažinės": "1037",
-  "Dvigubi stiklai": "1047",
+  "Dvigubi stiklai": "1047", "Atlenkiamos sėdynės": "87", "Stiklo paketai": "89",
+  "Personalinė ventiliacija": "93", "Personalinis apšvietimas": "94",
+  // Elektronika
   "El. reguliuojami veidrodėliai": "9", "Elektra valdomas bagažinės dangtis": "66",
   "Automatiškai įsijungiantys žibintai": "76", "Elektra reguliuojama vairo padėtis": "8",
   "Kritulių jutiklis": "18", "Šildomi veidrodėliai": "35", "Pritemstantis veidrodėlis": "1020",
@@ -389,23 +392,29 @@ const featureIdMapping: Record<string, string> = {
   "Skaitmeninis prietaisų skydelis": "1018", "Bevielis telefono krovimas": "1019",
   "Liečiamas ekranas": "1033", "Nuotolinis programinės įrangos atnaujinimas": "1045",
   "Virtualūs veidrodėliai": "1036",
+  // Apsauga
   "Imobilaizeris": "68", "Signalizacija": "29", "Palydovinė sekimo sistema": "1000",
   "Šarvuotas (apsaugos)": "47",
+  // Audio/Video
   "CD grotuvas": "5", "MP3 grotuvas": "72", "Papildoma audio įranga": "20",
   "CD keitiklis": "6", "AUX jungtis": "61", "Žemų dažnių garsiakalbis": "43",
   "HiFi audio sistema": "1015", "DVD grotuvas": "40", "USB jungtis": "65",
   "USB-C jungtis": "1035", "Laisvų rankų įranga": "45", "Apple CarPlay / Android Auto": "1001",
+  // Eksterjeras
   "Lengvojo lydinio ratlankiai": "19", "LED dienos žibintai": "34", "LED žibintai": "1002",
   "Žibintai Xenon": "46", "Rūko žibintai": "42", "Kablys": "17",
   "Priekinių žibintų plovimo įtaisas": "25", "Stogo bagažinės laikikliai": "75",
   "Automatiškai užsilenkiantys veidrodėliai": "1005", "Žieminių padangų komplektas": "44",
   "Durelių pritraukimas": "1016", "Matriciniai žibintai": "1021",
+  "Dvigubi ratai": "86", "Dvejos slankiojančios durys": "90",
+  // Kiti ypatumai
   "Neeksploatuota Lietuvoje": "32", "Automobilis iš Amerikos": "28", "Domina keitimas": "11",
   "Parduodama lizingu": "12", "Serviso knygelė": "26", "Katalizatorius": "80",
   "Keli raktų komplektai": "1013", "Pritaikytas neįgaliesiems": "1014",
   "Padidinta variklio galia": "73", "Paruoštas autosportui": "58",
   "Pneumatinė pakaba": "1031", "Atsarginis ratas": "1034",
   "Nuotolinis užvedimas": "1038", "Nuotolinė klimato kontrolė": "1039",
+  // Saugumas
   "Traukos kontrolės sistema": "55", "ESP": "59", "Įkalnės stabdys": "49",
   "Automatinio parkavimo sistema": "82", "Atstumo palaikymo sistema": "83",
   "Aklosios zonos stebėjimo sistema": "84", "Juostos palaikymo sistema": "85",
@@ -413,9 +422,13 @@ const featureIdMapping: Record<string, string> = {
   "ISOFIX tvirtinimo taškai": "1009", "Susidūrimo prevencijos sistema": "1010",
   "Tolimųjų šviesų asistentas": "1011", "Dinaminis posūkių apšvietimas": "1012",
   "Galinio vaizdo kamera": "67", "Priekinio vaizdo kamera": "81", "360° vaizdo kamera": "48",
+  // Elektromobilių ypatumai
   "Greitasis krovimas": "1041", "Trifazis krovimas": "1042",
   "Dvipusis energijos perdavimas": "1044", "Šilumos siurblys": "1046",
   "Baterijos garantija": "1040", "APVA kompensacija nepanaudota": "1043",
+  // Komercinių automobilių ypatumai
+  "Pritaikytas prekybai": "1026", "Su tentu": "1025", "Bortinis": "1024",
+  "Dviguba kabina": "1023", "Šaldymo įranga": "1027", "Liftas": "1028",
 };
 
 const handler = async (req: Request): Promise<Response> => {

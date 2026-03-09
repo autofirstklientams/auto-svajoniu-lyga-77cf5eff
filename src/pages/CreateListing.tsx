@@ -774,24 +774,51 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="first_reg_date">Pagaminimo metai / mėnuo *</Label>
-                <Input
-                  id="first_reg_date"
-                  type="month"
-                  value={
-                    formData.first_reg_date 
-                      ? formData.first_reg_date.substring(0, 7) 
-                      : formData.year 
-                        ? `${formData.year}-01` 
-                        : ""
-                  }
-                  onChange={(e) => {
-                    const newDate = e.target.value;
-                    const newYear = newDate ? parseInt(newDate.split('-')[0]) : ("" as any);
-                    setFormData({ ...formData, first_reg_date: newDate, year: newYear });
-                  }}
-                  required
-                />
+                <Label>Pagaminimo data *</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Select
+                    value={formData.first_reg_date ? formData.first_reg_date.substring(0, 4) : formData.year ? String(formData.year) : ""}
+                    onValueChange={(year) => {
+                      const currentMonth = formData.first_reg_date ? formData.first_reg_date.substring(5, 7) : "01";
+                      setFormData({ 
+                        ...formData, 
+                        year: parseInt(year),
+                        first_reg_date: `${year}-${currentMonth}` 
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Metai" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => new Date().getFullYear() - i).map(year => (
+                        <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={formData.first_reg_date ? formData.first_reg_date.substring(5, 7) : ""}
+                    onValueChange={(month) => {
+                      const currentYear = formData.first_reg_date ? formData.first_reg_date.substring(0, 4) : formData.year ? String(formData.year) : String(new Date().getFullYear());
+                      setFormData({ 
+                        ...formData, 
+                        year: parseInt(currentYear),
+                        first_reg_date: `${currentYear}-${month}` 
+                      });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Mėnuo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const monthNum = String(i + 1).padStart(2, '0');
+                        return <SelectItem key={monthNum} value={monthNum}>{monthNum}</SelectItem>;
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="space-y-2">

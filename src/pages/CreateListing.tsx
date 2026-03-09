@@ -1234,7 +1234,7 @@ const CreateListing = ({
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Mėnuo" />
+                      <SelectValue placeholder="MM" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 12 }, (_, i) => {

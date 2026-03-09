@@ -115,17 +115,25 @@ const CarDetail = () => {
     setIsLoading(false);
   }, [identifier]);
 
-  const fetchImages = useCallback(async () => {
+  const fetchImagesById = useCallback(async (carId: string) => {
     const { data, error } = await supabase
       .from("car_images")
       .select("id, image_url, display_order")
-      .eq("car_id", id)
+      .eq("car_id", carId)
       .order("display_order", { ascending: true });
 
     if (!error && data) {
       setImages(data);
     }
-  }, [id]);
+  }, []);
+
+  const fetchImages = useCallback(async () => {
+    // Only used as fallback when we have a UUID id
+    const isUuid = identifier && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+    if (isUuid && identifier) {
+      fetchImagesById(identifier);
+    }
+  }, [identifier, fetchImagesById]);
 
   const allImages = useMemo(() => {
     return images.length > 0 

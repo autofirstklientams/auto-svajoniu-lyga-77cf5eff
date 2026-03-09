@@ -203,19 +203,36 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
               <h3 className="font-semibold text-foreground text-lg">
                 {car.make} {car.model}
               </h3>
-              <p className="text-muted-foreground text-sm">{car.year} m.</p>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <span>
+                  {car.first_reg_date 
+                    ? car.first_reg_date.substring(0, 7)
+                    : car.year}
+                </span>
+                {car.body_type && (
+                  <>
+                    <span className="text-border">|</span>
+                    <span>{car.body_type}</span>
+                  </>
+                )}
+              </div>
             </div>
             <p className="text-xl font-bold text-primary">
               {car.price.toLocaleString()} €
             </p>
           </div>
           
-          <div className="flex gap-4 text-sm text-muted-foreground">
-            {car.mileage && (
-              <span>{car.mileage.toLocaleString()} km</span>
-            )}
-            {car.fuel_type && (
-              <span>{car.fuel_type}</span>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+            {car.fuel_type && <span>{car.fuel_type}</span>}
+            {car.fuel_type && car.transmission && <span className="text-border">|</span>}
+            {car.transmission && <span>{car.transmission}</span>}
+            {(car.fuel_type || car.transmission) && car.mileage && <span className="text-border">|</span>}
+            {car.mileage && <span>{car.mileage.toLocaleString()} km</span>}
+            {car.mot_date && (
+              <>
+                <span className="text-border">|</span>
+                <span>TA iki {car.mot_date.substring(0, 7)}</span>
+              </>
             )}
           </div>
         </CardContent>

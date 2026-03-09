@@ -734,18 +734,20 @@ const CreateListing = ({
 
   return (
     <Card className="mb-6">
-      <CardHeader>
-        <CardTitle>{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
+      <CardHeader className="pb-4">
+        <CardTitle className="text-xl">{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
       </CardHeader>
       <CardContent>
-        {/* Autoplius import removed */}
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Basic Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Pagrindinė informacija</h3>
-            <div className="grid md:grid-cols-3 gap-4">
-              <div className="space-y-2">
+        <form onSubmit={handleSubmit} className="space-y-8">
+          
+          {/* ═══════════════ 1. PAGRINDINĖ INFORMACIJA ═══════════════ */}
+          <section>
+            <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
+              Pagrindinė informacija
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="space-y-2 col-span-2 md:col-span-1">
                 <Label>Markė *</Label>
                 <SearchableCombobox
                   options={autopliusMakes.map((m) => ({ value: m.name, label: m.name }))}
@@ -759,7 +761,7 @@ const CreateListing = ({
                 />
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2 col-span-2 md:col-span-1">
                 <Label>Modelis *</Label>
                 <SearchableCombobox
                   options={modelOptions.map((m) => ({ value: m.name, label: m.name }))}
@@ -774,43 +776,30 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label>Pirmos registracijos data *</Label>
+                <Label>Pirma registracija *</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <Select
                     value={formData.first_reg_date ? formData.first_reg_date.substring(0, 4) : formData.year ? String(formData.year) : ""}
                     onValueChange={(year) => {
                       const currentMonth = formData.first_reg_date ? formData.first_reg_date.substring(5, 7) : "01";
-                      setFormData({ 
-                        ...formData, 
-                        year: parseInt(year),
-                        first_reg_date: `${year}-${currentMonth}` 
-                      });
+                      setFormData({ ...formData, year: parseInt(year), first_reg_date: `${year}-${currentMonth}` });
                     }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="YYYY" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Metai" /></SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => new Date().getFullYear() - i).map(year => (
                         <SelectItem key={year} value={String(year)}>{year}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-
                   <Select
                     value={formData.first_reg_date ? formData.first_reg_date.substring(5, 7) : ""}
                     onValueChange={(month) => {
                       const currentYear = formData.first_reg_date ? formData.first_reg_date.substring(0, 4) : formData.year ? String(formData.year) : String(new Date().getFullYear());
-                      setFormData({ 
-                        ...formData, 
-                        year: parseInt(currentYear),
-                        first_reg_date: `${currentYear}-${month}` 
-                      });
+                      setFormData({ ...formData, year: parseInt(currentYear), first_reg_date: `${currentYear}-${month}` });
                     }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="MM" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Mėn." /></SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 12 }, (_, i) => {
                         const monthNum = String(i + 1).padStart(2, '0');
@@ -823,35 +812,23 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label htmlFor="price">Kaina (€) *</Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="1"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
-                  required
-                />
+                <Input id="price" type="number" step="1" value={formData.price} onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })} required />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="mileage">Rida (km)</Label>
+                <Input id="mileage" type="number" value={formData.mileage || ""} onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) || 0 })} placeholder="Pvz.: 150000" />
               </div>
 
               <div className="space-y-2">
                 <Label htmlFor="vin">VIN kodas</Label>
-                <Input
-                  id="vin"
-                  value={formData.vin}
-                  onChange={(e) => setFormData({ ...formData, vin: e.target.value })}
-                  placeholder="Pvz.: WVWZZZ3CZWE123456"
-                />
+                <Input id="vin" value={formData.vin} onChange={(e) => setFormData({ ...formData, vin: e.target.value })} placeholder="WVWZZZ3CZWE123456" />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="condition">Būklė</Label>
-                <Select
-                  value={formData.condition}
-                  onValueChange={(value) => setFormData({ ...formData, condition: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label>Būklė</Label>
+                <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Naujas">Naujas</SelectItem>
                     <SelectItem value="Naudotas">Naudotas</SelectItem>
@@ -859,22 +836,25 @@ const CreateListing = ({
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-          </div>
 
-          {/* Technical Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Techniniai duomenys</h3>
-            <div className="grid md:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="body_type">Kėbulo tipas</Label>
-                <Select
-                  value={formData.body_type}
-                  onValueChange={(value) => setFormData({ ...formData, body_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label htmlFor="sdk_code">SDK kodas</Label>
+                <Input id="sdk_code" value={formData.sdk_code} onChange={(e) => setFormData({ ...formData, sdk_code: e.target.value })} placeholder="ABC123" maxLength={10} />
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════════════ 2. TECHNINIAI DUOMENYS ═══════════════ */}
+          <section>
+            <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
+              Techniniai duomenys
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Kėbulo tipas</Label>
+                <Select value={formData.body_type} onValueChange={(value) => setFormData({ ...formData, body_type: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Sedanas">Sedanas</SelectItem>
                     <SelectItem value="Hečbekas">Hečbekas</SelectItem>
@@ -885,19 +865,17 @@ const CreateListing = ({
                     <SelectItem value="Vienatūris">Vienatūris</SelectItem>
                     <SelectItem value="Pikapas">Pikapas</SelectItem>
                     <SelectItem value="Komercinis">Komercinis</SelectItem>
+                    <SelectItem value="Limuzinas">Limuzinas</SelectItem>
+                    <SelectItem value="Keleivinis mikroautobusas">Keleivinis mikroautobusas</SelectItem>
+                    <SelectItem value="Krovininis mikroautobusas">Krovininis mikroautobusas</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="fuel_type">Kuro tipas</Label>
-                <Select
-                  value={formData.fuel_type}
-                  onValueChange={(value) => setFormData({ ...formData, fuel_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label>Kuro tipas</Label>
+                <Select value={formData.fuel_type} onValueChange={(value) => setFormData({ ...formData, fuel_type: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Benzinas">Benzinas</SelectItem>
                     <SelectItem value="Dyzelinas">Dyzelinas</SelectItem>
@@ -905,22 +883,16 @@ const CreateListing = ({
                     <SelectItem value="Benzinas/Elektra">Benzinas/Elektra</SelectItem>
                     <SelectItem value="Dyzelinas/Elektra">Dyzelinas/Elektra</SelectItem>
                     <SelectItem value="Benzinas/Dujos">Benzinas/Dujos</SelectItem>
-                    <SelectItem value="Dujos">Dujos</SelectItem>
-                    <SelectItem value="Bioetanolis (E85)">Bioetanolis (E85)</SelectItem>
                     <SelectItem value="Vandenilis">Vandenilis</SelectItem>
+                    <SelectItem value="Bioetanolis (E85)">Bioetanolis (E85)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="transmission">Pavarų dėžė</Label>
-                <Select
-                  value={formData.transmission}
-                  onValueChange={(value) => setFormData({ ...formData, transmission: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label>Pavarų dėžė</Label>
+                <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Mechaninė">Mechaninė</SelectItem>
                     <SelectItem value="Automatinė">Automatinė</SelectItem>
@@ -929,14 +901,31 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="steering_wheel">Vairas</Label>
-                <Select
-                  value={formData.steering_wheel}
-                  onValueChange={(value) => setFormData({ ...formData, steering_wheel: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label>Variklio tūris (cm³)</Label>
+                <Input type="number" value={formData.engine_capacity || ""} onChange={(e) => setFormData({ ...formData, engine_capacity: parseInt(e.target.value) || 0 })} placeholder="2000" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Galia (kW)</Label>
+                <Input type="number" value={formData.power_kw || ""} onChange={(e) => setFormData({ ...formData, power_kw: parseInt(e.target.value) || 0 })} placeholder="150" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Varantieji ratai</Label>
+                <Select value={formData.wheel_drive} onValueChange={(value) => setFormData({ ...formData, wheel_drive: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Priekiniai">Priekiniai</SelectItem>
+                    <SelectItem value="Galiniai">Galiniai</SelectItem>
+                    <SelectItem value="Visi">Visi (4x4)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Vairas</Label>
+                <Select value={formData.steering_wheel} onValueChange={(value) => setFormData({ ...formData, steering_wheel: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Kairė">Kairė</SelectItem>
                     <SelectItem value="Dešinė">Dešinė</SelectItem>
@@ -945,47 +934,9 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="engine_capacity">Variklio tūris (cm³)</Label>
-                <Input
-                  id="engine_capacity"
-                  type="number"
-                  value={formData.engine_capacity || ""}
-                  onChange={(e) => setFormData({ ...formData, engine_capacity: parseInt(e.target.value) || 0 })}
-                  placeholder="Pvz.: 2000"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="power_kw">Galia (kW)</Label>
-                <Input
-                  id="power_kw"
-                  type="number"
-                  value={formData.power_kw || ""}
-                  onChange={(e) => setFormData({ ...formData, power_kw: parseInt(e.target.value) || 0 })}
-                  placeholder="Pvz.: 150"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="mileage">Rida (km)</Label>
-                <Input
-                  id="mileage"
-                  type="number"
-                  value={formData.mileage || ""}
-                  onChange={(e) => setFormData({ ...formData, mileage: parseInt(e.target.value) || 0 })}
-                  placeholder="Pvz.: 150000"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="color">Spalva</Label>
-                <Select
-                  value={formData.color}
-                  onValueChange={(value) => setFormData({ ...formData, color: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label>Spalva</Label>
+                <Select value={formData.color} onValueChange={(value) => setFormData({ ...formData, color: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Balta">Balta</SelectItem>
                     <SelectItem value="Juoda">Juoda</SelectItem>
@@ -1003,57 +954,84 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="doors">Durų skaičius</Label>
-                <Select
-                  value={formData.doors?.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, doors: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label>Durų skaičius</Label>
+                <Select value={formData.doors?.toString()} onValueChange={(value) => setFormData({ ...formData, doors: parseInt(value) })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2/3</SelectItem>
+                    <SelectItem value="4">4/5</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Vietų skaičius</Label>
+                <Select value={formData.seats?.toString()} onValueChange={(value) => setFormData({ ...formData, seats: parseInt(value) })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="2">2</SelectItem>
                     <SelectItem value="3">3</SelectItem>
                     <SelectItem value="4">4</SelectItem>
                     <SelectItem value="5">5</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="seats">Vietų skaičius</Label>
-                <Select
-                  value={formData.seats?.toString()}
-                  onValueChange={(value) => setFormData({ ...formData, seats: parseInt(value) })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="2">2</SelectItem>
-                    <SelectItem value="4">4</SelectItem>
-                    <SelectItem value="5">5</SelectItem>
+                    <SelectItem value="6">6</SelectItem>
                     <SelectItem value="7">7</SelectItem>
+                    <SelectItem value="8">8</SelectItem>
                     <SelectItem value="9">9</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-          </div>
 
-          {/* Autoplius Extra Fields */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Papildomi duomenys (Autoplius)</h3>
-            <div className="grid md:grid-cols-4 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="city">Miestas</Label>
-                <Select
-                  value={formData.city}
-                  onValueChange={(value) => setFormData({ ...formData, city: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label>Euro standartas</Label>
+                <Select value={formData.euro_standard} onValueChange={(value) => setFormData({ ...formData, euro_standard: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Euro 1">Euro 1</SelectItem>
+                    <SelectItem value="Euro 2">Euro 2</SelectItem>
+                    <SelectItem value="Euro 3">Euro 3</SelectItem>
+                    <SelectItem value="Euro 4">Euro 4</SelectItem>
+                    <SelectItem value="Euro 5">Euro 5</SelectItem>
+                    <SelectItem value="Euro 6">Euro 6</SelectItem>
+                    <SelectItem value="Euro 6d">Euro 6d</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Ratų dydis</Label>
+                <Select value={formData.wheel_size} onValueChange={(value) => setFormData({ ...formData, wheel_size: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="R12">R12</SelectItem>
+                    <SelectItem value="R13">R13</SelectItem>
+                    <SelectItem value="R14">R14</SelectItem>
+                    <SelectItem value="R15">R15</SelectItem>
+                    <SelectItem value="R16">R16</SelectItem>
+                    <SelectItem value="R17">R17</SelectItem>
+                    <SelectItem value="R18">R18</SelectItem>
+                    <SelectItem value="R19">R19</SelectItem>
+                    <SelectItem value="R20">R20</SelectItem>
+                    <SelectItem value="R21">R21</SelectItem>
+                    <SelectItem value="R22">R22</SelectItem>
+                    <SelectItem value="R23">R23</SelectItem>
+                    <SelectItem value="R24">R24</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </section>
+
+          {/* ═══════════════ 3. PAPILDOMI DUOMENYS ═══════════════ */}
+          <section>
+            <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
+              Papildomi duomenys
+            </h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label>Miestas</Label>
+                <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Kaunas">Kaunas</SelectItem>
                     <SelectItem value="Vilnius">Vilnius</SelectItem>
@@ -1068,63 +1046,9 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="sdk_code">SDK kodas</Label>
-                <Input
-                  id="sdk_code"
-                  value={formData.sdk_code}
-                  onChange={(e) => setFormData({ ...formData, sdk_code: e.target.value })}
-                  placeholder="Pvz.: ABC123"
-                  maxLength={10}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="euro_standard">Euro standartas</Label>
-                <Select
-                  value={formData.euro_standard}
-                  onValueChange={(value) => setFormData({ ...formData, euro_standard: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Euro 1">Euro 1</SelectItem>
-                    <SelectItem value="Euro 2">Euro 2</SelectItem>
-                    <SelectItem value="Euro 3">Euro 3</SelectItem>
-                    <SelectItem value="Euro 4">Euro 4</SelectItem>
-                    <SelectItem value="Euro 5">Euro 5</SelectItem>
-                    <SelectItem value="Euro 6">Euro 6</SelectItem>
-                    <SelectItem value="Euro 6d">Euro 6d</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="wheel_drive">Varantieji ratai</Label>
-                <Select
-                  value={formData.wheel_drive}
-                  onValueChange={(value) => setFormData({ ...formData, wheel_drive: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Priekiniai">Priekiniai</SelectItem>
-                    <SelectItem value="Galiniai">Galiniai</SelectItem>
-                    <SelectItem value="Visi">Visi (4x4)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="origin_country">Kilmės šalis</Label>
-                <Select
-                  value={formData.origin_country}
-                  onValueChange={(value) => setFormData({ ...formData, origin_country: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
+                <Label>Kilmės šalis</Label>
+                <Select value={formData.origin_country} onValueChange={(value) => setFormData({ ...formData, origin_country: value })}>
+                  <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Lietuva">Lietuva</SelectItem>
                     <SelectItem value="Vokietija">Vokietija</SelectItem>
@@ -1159,52 +1083,9 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="co2_emission">CO₂ emisija (g/km)</Label>
-                <Input
-                  id="co2_emission"
-                  type="number"
-                  value={formData.co2_emission || ""}
-                  onChange={(e) => setFormData({ ...formData, co2_emission: parseInt(e.target.value) || 0 })}
-                  placeholder="Pvz.: 120"
-                />
+                <Label>CO₂ emisija (g/km)</Label>
+                <Input type="number" value={formData.co2_emission || ""} onChange={(e) => setFormData({ ...formData, co2_emission: parseInt(e.target.value) || 0 })} placeholder="120" />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="fuel_cons_urban">Kuro sąnaudos mieste (l/100km)</Label>
-                <Input
-                  id="fuel_cons_urban"
-                  type="number"
-                  step="0.1"
-                  value={formData.fuel_cons_urban || ""}
-                  onChange={(e) => setFormData({ ...formData, fuel_cons_urban: parseFloat(e.target.value) || 0 })}
-                  placeholder="Pvz.: 8.5"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="fuel_cons_highway">Kuro sąnaudos užmiestyje (l/100km)</Label>
-                <Input
-                  id="fuel_cons_highway"
-                  type="number"
-                  step="0.1"
-                  value={formData.fuel_cons_highway || ""}
-                  onChange={(e) => setFormData({ ...formData, fuel_cons_highway: parseFloat(e.target.value) || 0 })}
-                  placeholder="Pvz.: 5.5"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="fuel_cons_combined">Kuro sąnaudos vidutinės (l/100km)</Label>
-                <Input
-                  id="fuel_cons_combined"
-                  type="number"
-                  step="0.1"
-                  value={formData.fuel_cons_combined || ""}
-                  onChange={(e) => setFormData({ ...formData, fuel_cons_combined: parseFloat(e.target.value) || 0 })}
-                  placeholder="Pvz.: 6.5"
-                />
-              </div>
-
 
               <div className="space-y-2">
                 <Label>TA galiojimas iki</Label>
@@ -1216,16 +1097,13 @@ const CreateListing = ({
                       setFormData({ ...formData, mot_date: `${year}-${currentMonth}` });
                     }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="YYYY" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Metai" /></SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 15 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
                         <SelectItem key={year} value={String(year)}>{year}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-
                   <Select
                     value={formData.mot_date && formData.mot_date.length >= 7 ? formData.mot_date.substring(5, 7) : ""}
                     onValueChange={(month) => {
@@ -1233,9 +1111,7 @@ const CreateListing = ({
                       setFormData({ ...formData, mot_date: `${currentYear}-${month}` });
                     }}
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="MM" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Mėn." /></SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: 12 }, (_, i) => {
                         const monthNum = String(i + 1).padStart(2, '0');
@@ -1247,37 +1123,32 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="wheel_size">Ratų dydis</Label>
-                <Select
-                  value={formData.wheel_size}
-                  onValueChange={(value) => setFormData({ ...formData, wheel_size: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pasirinkite" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="R14">R14</SelectItem>
-                    <SelectItem value="R15">R15</SelectItem>
-                    <SelectItem value="R16">R16</SelectItem>
-                    <SelectItem value="R17">R17</SelectItem>
-                    <SelectItem value="R18">R18</SelectItem>
-                    <SelectItem value="R19">R19</SelectItem>
-                    <SelectItem value="R20">R20</SelectItem>
-                    <SelectItem value="R21">R21</SelectItem>
-                    <SelectItem value="R22">R22</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label>Kuro sąnaudos mieste (l/100km)</Label>
+                <Input type="number" step="0.1" value={formData.fuel_cons_urban || ""} onChange={(e) => setFormData({ ...formData, fuel_cons_urban: parseFloat(e.target.value) || 0 })} placeholder="8.5" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Kuro sąnaudos užmiestyje (l/100km)</Label>
+                <Input type="number" step="0.1" value={formData.fuel_cons_highway || ""} onChange={(e) => setFormData({ ...formData, fuel_cons_highway: parseFloat(e.target.value) || 0 })} placeholder="5.5" />
+              </div>
+
+              <div className="space-y-2">
+                <Label>Kuro sąnaudos vidutinės (l/100km)</Label>
+                <Input type="number" step="0.1" value={formData.fuel_cons_combined || ""} onChange={(e) => setFormData({ ...formData, fuel_cons_combined: parseFloat(e.target.value) || 0 })} placeholder="6.5" />
               </div>
             </div>
-          </div>
+          </section>
 
-          {/* Images */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Nuotraukos</h3>
+          {/* ═══════════════ 4. NUOTRAUKOS ═══════════════ */}
+          <section>
+            <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">4</span>
+              Nuotraukos
+            </h3>
             <div className="space-y-4">
               <label 
                 htmlFor="image" 
-                className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
+                className={`flex flex-col items-center justify-center w-full h-28 border-2 border-dashed rounded-lg cursor-pointer transition-all ${
                   isDragging 
                     ? 'border-primary bg-primary/10 scale-[1.02]' 
                     : 'border-border hover:bg-accent/50'
@@ -1286,27 +1157,16 @@ const CreateListing = ({
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-                <Upload className={`h-8 w-8 mb-2 transition-colors ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
+                <Upload className={`h-6 w-6 mb-1 transition-colors ${isDragging ? 'text-primary' : 'text-muted-foreground'}`} />
                 <span className={`text-sm transition-colors ${isDragging ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
                   {isDragging ? 'Paleiskite nuotraukas čia' : 'Įkelkite arba užvilkite nuotraukas'}
                 </span>
-                <span className="text-xs text-muted-foreground mt-1">Max 20MB kiekviena (automatiškai sumažinama)</span>
+                <span className="text-xs text-muted-foreground mt-0.5">Max 20MB (automatiškai sumažinama)</span>
               </label>
-              <Input
-                id="image"
-                type="file"
-                accept="image/*"
-                multiple
-                className="hidden"
-                onChange={handleImageChange}
-              />
+              <Input id="image" type="file" accept="image/*" multiple className="hidden" onChange={handleImageChange} />
 
-              {/* Existing images with drag-and-drop */}
               <DraggableImageGrid
-                images={existingImages.map(img => ({
-                  id: img.id,
-                  url: img.url,
-                }))}
+                images={existingImages.map(img => ({ id: img.id, url: img.url }))}
                 onReorder={handleReorderExistingImages}
                 onRemove={handleRemoveExistingImage}
                 onReplaceUrl={handleReplaceExistingImageUrl}
@@ -1315,87 +1175,67 @@ const CreateListing = ({
                 showAiBackground={isSuperAdmin && !!car?.id}
               />
 
-              {/* New images with drag-and-drop */}
               <DraggableImageGrid
-                images={imagePreviews.map((preview, index) => ({
-                  id: `new-${index}`,
-                  url: preview,
-                  isNew: true,
-                }))}
+                images={imagePreviews.map((preview, index) => ({ id: `new-${index}`, url: preview, isNew: true }))}
                 onReorder={handleReorderNewImages}
                 onRemove={handleRemoveNewImage}
                 title="Naujos nuotraukos:"
               />
 
-              {/* Imported images with drag-and-drop */}
               <DraggableImageGrid
-                images={importedImageUrls.map((url, index) => ({
-                  id: `imported-${index}`,
-                  url: url,
-                }))}
+                images={importedImageUrls.map((url, index) => ({ id: `imported-${index}`, url }))}
                 onReorder={handleReorderImportedImages}
                 onRemove={handleRemoveImportedImage}
                 title={`Importuotos nuotraukos (${importedImageUrls.length}):`}
               />
             </div>
-          </div>
+          </section>
 
-          {/* Description & Defects */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="description">Aprašymas</Label>
-              <Textarea
-                id="description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                rows={4}
-                placeholder="Automobilio aprašymas..."
-              />
+          {/* ═══════════════ 5. APRAŠYMAS ═══════════════ */}
+          <section>
+            <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">5</span>
+              Aprašymas
+            </h3>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="description">Aprašymas</Label>
+                <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} placeholder="Automobilio aprašymas..." />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="defects">Defektai / Trūkumai</Label>
+                <Textarea id="defects" value={formData.defects} onChange={(e) => setFormData({ ...formData, defects: e.target.value })} rows={4} placeholder="Jei yra defektų, nurodykite čia..." />
+              </div>
             </div>
+          </section>
 
-            <div className="space-y-2">
-              <Label htmlFor="defects">Defektai / Trūkumai</Label>
-              <Textarea
-                id="defects"
-                value={formData.defects}
-                onChange={(e) => setFormData({ ...formData, defects: e.target.value })}
-                rows={4}
-                placeholder="Jei yra defektų, nurodykite čia..."
-              />
-            </div>
-          </div>
+          {/* ═══════════════ 6. YPATYBĖS ═══════════════ */}
+          <section>
+            <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">6</span>
+              Įranga ir ypatybės
+            </h3>
+            <CarFeaturesSelector selectedFeatures={selectedFeatures} onChange={setSelectedFeatures} />
+          </section>
 
-          {/* Car Features */}
-          <CarFeaturesSelector
-            selectedFeatures={selectedFeatures}
-            onChange={setSelectedFeatures}
-          />
-
-          {/* Visibility Options */}
-          <div className="border rounded-lg p-4 bg-muted/30">
-            <h3 className="text-lg font-semibold mb-4 text-foreground">Publikavimo nustatymai</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Pasirinkite kur norite publikuoti skelbimą
-            </p>
+          {/* ═══════════════ 7. PUBLIKAVIMAS ═══════════════ */}
+          <section className="border rounded-lg p-4 bg-muted/30">
+            <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">7</span>
+              Publikavimo nustatymai
+            </h3>
             <div className="flex flex-wrap gap-6">
               <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox
-                  checked={visibleWeb}
-                  onCheckedChange={(checked) => setVisibleWeb(checked === true)}
-                />
+                <Checkbox checked={visibleWeb} onCheckedChange={(checked) => setVisibleWeb(checked === true)} />
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-primary" />
                   <span className="font-medium">AutoKOPERS svetainė</span>
                 </div>
               </label>
               
-              {/* Autoplius for admins and partners */}
               {canExportAutoplius && (
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={visibleAutoplius}
-                    onCheckedChange={(checked) => setVisibleAutoplius(checked === true)}
-                  />
+                  <Checkbox checked={visibleAutoplius} onCheckedChange={(checked) => setVisibleAutoplius(checked === true)} />
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autoplius.lt</span>
@@ -1403,13 +1243,9 @@ const CreateListing = ({
                 </label>
               )}
 
-              {/* Autolizingas for admins and partners */}
               {canExportAutoplius && (
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={visibleAutolizingas}
-                    onCheckedChange={(checked) => setVisibleAutolizingas(checked === true)}
-                  />
+                  <Checkbox checked={visibleAutolizingas} onCheckedChange={(checked) => setVisibleAutolizingas(checked === true)} />
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autolizingas.lt</span>
@@ -1418,16 +1254,11 @@ const CreateListing = ({
               )}
             </div>
             
-            {/* Admin-only options */}
             {isAdmin && (
               <>
-                {/* Company car option */}
                 <div className="mt-4 pt-4 border-t">
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox
-                      checked={isCompanyCar}
-                      onCheckedChange={(checked) => setIsCompanyCar(checked === true)}
-                    />
+                    <Checkbox checked={isCompanyCar} onCheckedChange={(checked) => setIsCompanyCar(checked === true)} />
                     <div>
                       <span className="font-medium">AutoKOPERS įmonės automobilis</span>
                       <p className="text-sm text-muted-foreground">Pažymėkite, jei šis automobilis priklauso AutoKOPERS įmonei</p>
@@ -1435,25 +1266,18 @@ const CreateListing = ({
                   </label>
                 </div>
 
-                {/* Featured and Recommended options */}
                 <div className="mt-4 pt-4 border-t">
                   <h4 className="font-medium mb-3">Išskirtiniai nustatymai</h4>
                   <div className="space-y-3">
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <Checkbox
-                        checked={isFeatured}
-                        onCheckedChange={(checked) => setIsFeatured(checked === true)}
-                      />
+                      <Checkbox checked={isFeatured} onCheckedChange={(checked) => setIsFeatured(checked === true)} />
                       <div>
                         <span className="font-medium">Rodyti pagrindiniame puslapyje</span>
                         <p className="text-sm text-muted-foreground">Automobilis bus matomas pagrindiniame puslapyje</p>
                       </div>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <Checkbox
-                        checked={isRecommended}
-                        onCheckedChange={(checked) => setIsRecommended(checked === true)}
-                      />
+                      <Checkbox checked={isRecommended} onCheckedChange={(checked) => setIsRecommended(checked === true)} />
                       <div>
                         <span className="font-medium text-primary">✓ AUTOKOPERS rekomenduoja</span>
                         <p className="text-sm text-muted-foreground">Ant nuotraukos bus rodomas "AUTOKOPERS rekomenduoja" ženkliukas</p>
@@ -1463,11 +1287,11 @@ const CreateListing = ({
                 </div>
               </>
             )}
-          </div>
+          </section>
 
-          <div className="flex gap-2">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saugoma..." : car ? "Atnaujinti" : "Sukurti"}
+          <div className="flex gap-2 sticky bottom-4 bg-background/95 backdrop-blur-sm py-3 px-1 -mx-1 rounded-lg border shadow-sm">
+            <Button type="submit" disabled={isLoading} className="flex-1 sm:flex-none">
+              {isLoading ? "Saugoma..." : car ? "Atnaujinti" : "Sukurti skelbimą"}
             </Button>
             <Button type="button" variant="outline" onClick={onClose}>
               Atšaukti

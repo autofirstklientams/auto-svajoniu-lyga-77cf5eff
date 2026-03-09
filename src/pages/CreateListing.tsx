@@ -77,7 +77,7 @@ const CreateListing = ({
   const [formData, setFormData] = useState({
     make: car?.make || "",
     model: car?.model || "",
-    year: car?.year || new Date().getFullYear(),
+    year: car?.year || ("" as any),
     price: car?.price || 0,
     mileage: car?.mileage || 0,
     fuel_type: car?.fuel_type || "",
@@ -260,7 +260,7 @@ const CreateListing = ({
     setFormData({
       make: source?.make || "",
       model: source?.model || "",
-      year: source?.year || new Date().getFullYear(),
+      year: source?.year || ("" as any),
       price: source?.price || 0,
       mileage: source?.mileage || 0,
       fuel_type: source?.fuel_type || "",
@@ -307,7 +307,7 @@ const CreateListing = ({
       setFormData({
         make: "",
         model: "",
-        year: new Date().getFullYear(),
+        year: "" as any,
         price: 0,
         mileage: 0,
         fuel_type: "",
@@ -779,7 +779,7 @@ const CreateListing = ({
                   id="year"
                   type="number"
                   value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, year: e.target.value ? parseInt(e.target.value) : ("" as any) })}
                   required
                 />
               </div>

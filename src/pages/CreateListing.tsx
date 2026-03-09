@@ -779,8 +779,25 @@ const CreateListing = ({
                   id="year"
                   type="number"
                   value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: e.target.value ? parseInt(e.target.value) : ("" as any) })}
+                  onChange={(e) => {
+                    const newYear = e.target.value ? parseInt(e.target.value) : ("" as any);
+                    setFormData({ ...formData, year: newYear });
+                  }}
                   required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="first_reg_date">Pirmosios reg. data</Label>
+                <Input
+                  id="first_reg_date"
+                  type="date"
+                  value={formData.first_reg_date}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    const newYear = newDate ? parseInt(newDate.split('-')[0]) : formData.year;
+                    setFormData({ ...formData, first_reg_date: newDate, year: newYear });
+                  }}
                 />
               </div>
 

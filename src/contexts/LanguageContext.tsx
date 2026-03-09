@@ -824,6 +824,23 @@ const en: Record<string, string> = {
   "carPurchase.workingHours": "Working hours",
   "carPurchase.submitRequest": "Submit request",
 
+  // Car purchase form
+  "carPurchaseForm.title": "Car Sell Request",
+  "carPurchaseForm.name": "Full Name *",
+  "carPurchaseForm.email": "Email *",
+  "carPurchaseForm.phone": "Phone *",
+  "carPurchaseForm.make": "Make *",
+  "carPurchaseForm.model": "Model *",
+  "carPurchaseForm.year": "Year *",
+  "carPurchaseForm.mileage": "Mileage (km) *",
+  "carPurchaseForm.additionalInfo": "Additional Information",
+  "carPurchaseForm.additionalInfoPlaceholder": "Condition, defects, additional equipment...",
+  "carPurchaseForm.submit": "Submit request",
+  "carPurchaseForm.submitting": "Submitting...",
+  "carPurchaseForm.success": "Request submitted!",
+  "carPurchaseForm.successDesc": "We will contact you shortly regarding the car evaluation.",
+  "carPurchaseForm.error": "Error submitting request. Please try again.",
+
   // Sell your car page
   "sellCar.heroTitle": "We'll sell your car",
   "sellCar.heroDesc": "Leave your car for sale with us and get maximum results without hassle. We'll take care of everything: from professional photos and listings to negotiations with buyers and paperwork.",

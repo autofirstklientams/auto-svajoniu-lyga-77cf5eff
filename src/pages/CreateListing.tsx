@@ -1185,15 +1185,6 @@ const CreateListing = ({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="first_reg_date">Pirmoji registracija</Label>
-                <Input
-                  id="first_reg_date"
-                  type="date"
-                  value={formData.first_reg_date}
-                  onChange={(e) => setFormData({ ...formData, first_reg_date: e.target.value })}
-                />
-              </div>
 
               <div className="space-y-2">
                 <Label htmlFor="mot_date">TA galiojimas iki</Label>

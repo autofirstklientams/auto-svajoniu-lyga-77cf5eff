@@ -5,6 +5,7 @@ import CarPurchaseForm from "@/components/CarPurchaseForm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import hero from "@/assets/hero-car.jpg";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const setMeta = (name: string, content: string) => {
   let tag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
@@ -28,15 +29,16 @@ const ensureCanonical = (href: string) => {
 
 export default function SellYourCar() {
   const [open, setOpen] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
-    document.title = "Parduosime tavo automobilį | AutoKopers";
+    document.title = t("nav.carPurchase") + " | AutoKopers";
     setMeta(
       "description",
-      "Palik automobilį parduoti AutoKopers – pasirūpinsime skelbimais, pirkėjais ir dokumentais. Greita, saugu, patogu."
+      t("sellCar.heroDesc")
     );
     ensureCanonical(window.location.origin + "/sell-your-car");
-  }, []);
+  }, [t]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -52,11 +54,10 @@ export default function SellYourCar() {
           <div className="container mx-auto px-4 relative z-10 py-16">
             <div className="max-w-3xl text-white">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Parduosime tavo automobilį
+                {t("sellCar.heroTitle")}
               </h1>
               <p className="text-lg md:text-xl text-white/90 mb-8">
-                Palik savo automobilį parduoti pas mus ir gauk maksimalų rezultatą be vargo.
-                Mes pasirūpinsime viskuo: nuo profesionalių nuotraukų ir skelbimų iki derybų su pirkėjais ir dokumentų sutvarkymo.
+                {t("sellCar.heroDesc")}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Button 
@@ -64,7 +65,7 @@ export default function SellYourCar() {
                   size="lg" 
                   className="bg-white text-primary hover:bg-white/90 font-semibold"
                 >
-                  Pateikti užklausą
+                  {t("sellCar.submitRequest")}
                 </Button>
                 <Button 
                   asChild
@@ -86,36 +87,36 @@ export default function SellYourCar() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
-                Kaip tai veikia?
+                {t("sellCar.howWorks")}
               </h2>
               <div className="grid md:grid-cols-4 gap-6">
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
                     1
                   </div>
-                  <h3 className="font-semibold mb-2">Užklausa</h3>
-                  <p className="text-sm text-muted-foreground">Užpildyk formą su automobilio informacija</p>
+                  <h3 className="font-semibold mb-2">{t("sellCar.step1")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("sellCar.step1Desc")}</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
                     2
                   </div>
-                  <h3 className="font-semibold mb-2">Įvertinimas</h3>
-                  <p className="text-sm text-muted-foreground">Susisiekiame ir įvertiname automobilį</p>
+                  <h3 className="font-semibold mb-2">{t("sellCar.step2")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("sellCar.step2Desc")}</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
                     3
                   </div>
-                  <h3 className="font-semibold mb-2">Pardavimas</h3>
-                  <p className="text-sm text-muted-foreground">Skelbiame, rodome ir deramės su pirkėjais</p>
+                  <h3 className="font-semibold mb-2">{t("sellCar.step3")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("sellCar.step3Desc")}</p>
                 </div>
                 <div className="text-center">
                   <div className="w-12 h-12 rounded-full bg-primary text-white flex items-center justify-center text-xl font-bold mx-auto mb-4">
                     4
                   </div>
-                  <h3 className="font-semibold mb-2">Išmokėjimas</h3>
-                  <p className="text-sm text-muted-foreground">Sutvarkome dokumentus ir išmokame pinigus</p>
+                  <h3 className="font-semibold mb-2">{t("sellCar.step4")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("sellCar.step4Desc")}</p>
                 </div>
               </div>
             </div>
@@ -126,35 +127,31 @@ export default function SellYourCar() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <h2 className="text-3xl font-bold text-center mb-12 text-foreground">
-                Kodėl pasirinkti mus?
+                {t("sellCar.whyChoose")}
               </h2>
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="p-6 rounded-lg border bg-card">
-                  <h3 className="text-xl font-semibold mb-3 text-foreground">📸 Profesionalios paslaugos</h3>
+                  <h3 className="text-xl font-semibold mb-3 text-foreground">📸 {t("sellCar.professional")}</h3>
                   <p className="text-muted-foreground">
-                    Profesionalios nuotraukos, detalūs skelbimai ir aktyvus rinkodaros darbas užtikrina, 
-                    kad tavo automobilis pasiektų kuo platesnę auditoriją.
+                    {t("sellCar.professionalDesc")}
                   </p>
                 </div>
                 <div className="p-6 rounded-lg border bg-card">
-                  <h3 className="text-xl font-semibold mb-3 text-foreground">⏱️ Sutaupytas laikas</h3>
+                  <h3 className="text-xl font-semibold mb-3 text-foreground">⏱️ {t("sellCar.timeSaved")}</h3>
                   <p className="text-muted-foreground">
-                    Nereikia pačiam rašyti skelbimų, atsakinėti į žinutes, rodyti automobilio 
-                    ar derėtis su pirkėjais – visa tai darome mes.
+                    {t("sellCar.timeSavedDesc")}
                   </p>
                 </div>
                 <div className="p-6 rounded-lg border bg-card">
-                  <h3 className="text-xl font-semibold mb-3 text-foreground">🛡️ Saugumas</h3>
+                  <h3 className="text-xl font-semibold mb-3 text-foreground">🛡️ {t("sellCar.safety")}</h3>
                   <p className="text-muted-foreground">
-                    Patikrinami pirkėjai, saugus pinigų perdavimas ir pilnas dokumentų sutvarkymas. 
-                    Tau nereikia jaudintis dėl sukčiavimo ar biurokratijos.
+                    {t("sellCar.safetyDesc")}
                   </p>
                 </div>
                 <div className="p-6 rounded-lg border bg-card">
-                  <h3 className="text-xl font-semibold mb-3 text-foreground">💰 Geriausia kaina</h3>
+                  <h3 className="text-xl font-semibold mb-3 text-foreground">💰 {t("sellCar.bestPrice")}</h3>
                   <p className="text-muted-foreground">
-                    Padedame nustatyti optimalią kainą, kuri užtikrina greitą pardavimą 
-                    ir maksimalią naudą tau. 10+ metų patirtis automobilių rinkoje.
+                    {t("sellCar.bestPriceDesc")}
                   </p>
                 </div>
               </div>
@@ -166,11 +163,10 @@ export default function SellYourCar() {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h2 className="text-3xl font-bold mb-6 text-foreground">
-                Pasiruošęs parduoti?
+                {t("sellCar.readyToSell")}
               </h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Komisinis mokestis suderinamas individualiai, priklausomai nuo automobilio 
-                ir paslaugų apimties. Susisiek ir sužinok daugiau!
+                {t("sellCar.readyToSellDesc")}
               </p>
               <div className="flex flex-wrap gap-3 justify-center">
                 <Button 
@@ -178,7 +174,7 @@ export default function SellYourCar() {
                   size="lg"
                   className="font-semibold"
                 >
-                  Pateikti užklausą
+                  {t("sellCar.submitRequest")}
                 </Button>
                 <Button 
                   asChild

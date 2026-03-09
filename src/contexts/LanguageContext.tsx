@@ -434,6 +434,7 @@ const lt: Record<string, string> = {
 const en: Record<string, string> = {
   // Navigation
   "nav.home": "Home",
+  "home.banner": "📍 We have moved! New address — Palemono st. 173, Kaunas →",
   "nav.cars": "Cars",
   "nav.leasing": "Leasing",
   "nav.carPurchase": "Car Purchase",

@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Calculator, FileText } from "lucide-react";
 import LoanApplicationForm from "@/components/LoanApplicationForm";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface LoanCalculatorProps {
   carPrice: number;
@@ -15,14 +16,6 @@ interface LoanCalculatorProps {
 }
 
 const INTEREST_RATE = 0.089; // 8.9% annual interest rate
-
-const DOWN_PAYMENT_OPTIONS = [
-  { value: 0, label: "Be pradinio įnašo" },
-  { value: 0.10, label: "10%" },
-  { value: 0.15, label: "15%" },
-  { value: 0.20, label: "20%" },
-  { value: 0.30, label: "30%" },
-];
 
 export const calculateMonthlyPayment = (
   price: number,
@@ -44,11 +37,20 @@ export const calculateMonthlyPayment = (
 };
 
 const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorProps) => {
+  const { t } = useLanguage();
   const [months, setMonths] = useState(144);
   const [downPaymentPercent, setDownPaymentPercent] = useState(0);
   const [customDownPayment, setCustomDownPayment] = useState<string>("");
   const [useCustomDownPayment, setUseCustomDownPayment] = useState(false);
   const [showApplicationForm, setShowApplicationForm] = useState(false);
+
+  const DOWN_PAYMENT_OPTIONS = useMemo(() => [
+    { value: 0, label: t("loanCalc.noDownPayment") },
+    { value: 0.10, label: "10%" },
+    { value: 0.15, label: "15%" },
+    { value: 0.20, label: "20%" },
+    { value: 0.30, label: "30%" },
+  ], [t]);
 
   const downPayment = useMemo(() => {
     if (useCustomDownPayment && customDownPayment) {
@@ -92,7 +94,7 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
     return (
       <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
         <Calculator className="h-3.5 w-3.5" />
-        <span>nuo <span className="font-semibold text-primary">{formatPrice(monthlyPayment)}</span>/mėn.</span>
+        <span>{t("loanCalc.from")} <span className="font-semibold text-primary">{formatPrice(monthlyPayment)}</span>{t("loanCalc.perMonth")}</span>
       </div>
     );
   }
@@ -102,19 +104,19 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
       <CardHeader className="pb-4">
         <CardTitle className="flex items-center gap-2">
           <Calculator className="h-5 w-5 text-primary" />
-          Lizingo skaičiuoklė
+          {t("loanCalc.title")}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         {/* Car price display */}
         <div className="p-4 bg-muted/50 rounded-lg">
-          <p className="text-sm text-muted-foreground mb-1">Automobilio kaina</p>
+          <p className="text-sm text-muted-foreground mb-1">{t("loanCalc.carPrice")}</p>
           <p className="text-2xl font-bold text-foreground">{formatPrice(carPrice)}</p>
         </div>
 
         {/* Down payment options */}
         <div className="space-y-3">
-          <span className="text-sm text-muted-foreground">Pradinis įnašas</span>
+          <span className="text-sm text-muted-foreground">{t("loanCalc.downPayment")}</span>
           <RadioGroup
             value={useCustomDownPayment ? "custom" : downPaymentPercent.toString()}
             onValueChange={(v) => {
@@ -152,7 +154,7 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
                 htmlFor="down-custom"
                 className="cursor-pointer rounded-lg border-2 border-muted bg-popover px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary peer-data-[state=checked]:bg-primary/10 peer-data-[state=checked]:text-primary transition-colors"
               >
-                Kita suma
+                {t("loanCalc.customAmount")}
               </Label>
             </div>
           </RadioGroup>
@@ -161,7 +163,7 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
             <div className="flex items-center gap-2">
               <Input
                 type="number"
-                placeholder="Įveskite sumą"
+                placeholder={t("loanCalc.enterAmount")}
                 value={customDownPayment}
                 onChange={(e) => setCustomDownPayment(e.target.value)}
                 min={0}
@@ -176,8 +178,8 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
         {/* Loan period slider */}
         <div className="space-y-4">
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Laikotarpis</span>
-            <span className="font-semibold text-foreground">{months} mėn.</span>
+            <span className="text-sm text-muted-foreground">{t("loanCalc.period")}</span>
+            <span className="font-semibold text-foreground">{months} {t("loanCalc.months")}</span>
           </div>
           <Slider
             value={[months]}
@@ -188,8 +190,8 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
             className="w-full"
           />
           <div className="flex justify-between text-xs text-muted-foreground">
-            <span>12 mėn.</span>
-            <span>144 mėn.</span>
+            <span>12 {t("loanCalc.months")}</span>
+            <span>144 {t("loanCalc.months")}</span>
           </div>
         </div>
 
@@ -197,16 +199,16 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
         <div className="space-y-3 pt-4 border-t">
           {downPaymentPercent > 0 && (
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Pradinis įnašas ({(downPaymentPercent * 100).toFixed(0)}%)</span>
+              <span className="text-sm text-muted-foreground">{t("loanCalc.downPayment")} ({(downPaymentPercent * 100).toFixed(0)}%)</span>
               <span className="font-medium text-foreground">{formatPrice(downPayment)}</span>
             </div>
           )}
           <div className="flex justify-between items-center">
-            <span className="text-sm text-muted-foreground">Bendra suma</span>
+            <span className="text-sm text-muted-foreground">{t("loanCalc.totalAmount")}</span>
             <span className="font-medium text-foreground">{formatPrice(totalAmount)}</span>
           </div>
           <div className="flex justify-between items-center p-3 bg-primary/10 rounded-lg">
-            <span className="font-medium text-foreground">Mėnesinė įmoka</span>
+            <span className="font-medium text-foreground">{t("loanCalc.monthlyPayment")}</span>
             <span className="text-2xl font-bold text-primary">{formatPrice(monthlyPayment)}</span>
           </div>
         </div>
@@ -214,7 +216,7 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
         {/* Leasing application button */}
         <Button className="w-full" size="lg" onClick={() => setShowApplicationForm(true)}>
           <FileText className="mr-2 h-4 w-4" />
-          Pateikti lizingo paraišką
+          {t("loanCalc.submitApplication")}
         </Button>
 
         <LoanApplicationForm
@@ -227,8 +229,7 @@ const LoanCalculator = ({ carPrice, carInfo, compact = false }: LoanCalculatorPr
         />
 
         <p className="text-xs text-muted-foreground">
-          * Skaičiavimas orientacinis. Tikslias sąlygas sužinosite pateikę lizingo paraišką. 
-          Metinė palūkanų norma: {(INTEREST_RATE * 100).toFixed(1)}%.
+          {t("loanCalc.disclaimer")} {(INTEREST_RATE * 100).toFixed(1)}%.
         </p>
       </CardContent>
     </Card>

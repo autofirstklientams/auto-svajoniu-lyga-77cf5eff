@@ -29,6 +29,7 @@ interface CarListing {
   image_url: string | null;
   partner_id: string;
   created_at: string;
+  slug?: string;
   profiles?: {
     full_name: string;
     email: string;

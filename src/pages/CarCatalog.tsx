@@ -338,6 +338,7 @@ const CarCatalog = () => {
                     >
                       <CarCard
                         id={car.id}
+                        slug={car.slug || undefined}
                         title={`${car.make} ${car.model}`}
                         year={car.year}
                         price={`${car.price.toLocaleString()} €`}

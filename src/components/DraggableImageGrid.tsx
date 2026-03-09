@@ -29,6 +29,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
+  const [selectedForAi, setSelectedForAi] = useState<Set<string>>(new Set());
   // Store original URLs before AI replacement for undo
   const [originalUrls, setOriginalUrls] = useState<Map<string, string>>(new Map());
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);

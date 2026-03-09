@@ -788,7 +788,7 @@ const CreateListing = ({
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Metai" />
+                      <SelectValue placeholder="YYYY" />
                     </SelectTrigger>
                     <SelectContent>
                       {Array.from({ length: new Date().getFullYear() - 1899 }, (_, i) => new Date().getFullYear() - i).map(year => (

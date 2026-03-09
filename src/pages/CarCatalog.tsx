@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 
 interface Car {
   id: string;
+  slug: string | null;
   make: string;
   model: string;
   year: number;

@@ -40,6 +40,7 @@ interface Car {
   is_reserved?: boolean;
   sdk_code?: string;
   wheel_size?: string;
+  features?: Record<string, string[]> | null;
 }
 
 interface CarImage {

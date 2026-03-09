@@ -826,6 +826,30 @@ const handler = async (req: Request): Promise<Response> => {
         
         xml += '</photos>\n';
       }
+
+      // Features / Equipment
+      if (car.features && typeof car.features === 'object') {
+        const featureIds: string[] = [];
+        for (const categoryFeatures of Object.values(car.features as Record<string, string[]>)) {
+          if (Array.isArray(categoryFeatures)) {
+            for (const featureName of categoryFeatures) {
+              const fId = featureIdMapping[featureName];
+              if (fId) {
+                featureIds.push(fId);
+              } else {
+                console.warn(`Unknown feature for Autoplius: ${featureName}`);
+              }
+            }
+          }
+        }
+        if (featureIds.length > 0) {
+          xml += '<features>\n';
+          for (const fId of featureIds) {
+            xml += `<feature>${fId}</feature>\n`;
+          }
+          xml += '</features>\n';
+        }
+      }
       
       xml += '</cars>\n';
     }

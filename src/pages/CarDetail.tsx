@@ -63,7 +63,8 @@ interface Car {
 }
 
 const CarDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, slug } = useParams<{ id?: string; slug?: string }>();
+  const identifier = slug || id;
   const [car, setCar] = useState<Car | null>(null);
   const [images, setImages] = useState<CarImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);

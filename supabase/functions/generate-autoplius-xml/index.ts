@@ -40,6 +40,7 @@ interface Car {
   is_reserved?: boolean;
   sdk_code?: string;
   wheel_size?: string;
+  features?: Record<string, string[]> | null;
 }
 
 interface CarImage {
@@ -367,6 +368,54 @@ const originCountryMapping: Record<string, string> = {
   "Kinija": "33",  // fallback
   "Islandija": "35",
   "Slovėnija": "36",
+};
+
+// Feature name to Autoplius feature ID mapping (from datacollector)
+const featureIdMapping: Record<string, string> = {
+  "Odinis salonas": "22", "Iš dalies odinis": "1029", "Alcantara": "1030",
+  "Sportinės sėdynės": "31", "Tamsinti stiklai": "37", "Daugiafunkcinis vairas": "7",
+  "Šildomos sėdynės": "36", "Stoglangis": "33", "Elektra valdomos sėdynės": "27",
+  "Panoraminis stogas": "50", "Autonominis šildymas": "39", "Ventiliuojamos sėdynės": "52",
+  "Elektra valdomos sėdynės su atmintimi": "56", "Bagažinės uždangalas": "60",
+  "Šildomas vairas": "77", "Masažuojančios sėdynės": "1032", "Dvi bagažinės": "1037",
+  "Dvigubi stiklai": "1047",
+  "El. reguliuojami veidrodėliai": "9", "Elektra valdomas bagažinės dangtis": "66",
+  "Automatiškai įsijungiantys žibintai": "76", "Elektra reguliuojama vairo padėtis": "8",
+  "Kritulių jutiklis": "18", "Šildomi veidrodėliai": "35", "Pritemstantis veidrodėlis": "1020",
+  "Atstumo jutiklių sistema": "3", "Beraktė sistema": "78", "Autopilotas": "1",
+  "Elektra šildomas priekinis stiklas": "79", "Start-Stop funkcija": "1003",
+  "Valdymas balsu": "1004", "Pavarų perjungimas prie vairo": "1006", "LCD ekranas": "63",
+  "Navigacija/GPS": "21", "Projekcinis ekranas ant stiklo (HUD)": "1017",
+  "Skaitmeninis prietaisų skydelis": "1018", "Bevielis telefono krovimas": "1019",
+  "Liečiamas ekranas": "1033", "Nuotolinis programinės įrangos atnaujinimas": "1045",
+  "Virtualūs veidrodėliai": "1036",
+  "Imobilaizeris": "68", "Signalizacija": "29", "Palydovinė sekimo sistema": "1000",
+  "Šarvuotas (apsaugos)": "47",
+  "CD grotuvas": "5", "MP3 grotuvas": "72", "Papildoma audio įranga": "20",
+  "CD keitiklis": "6", "AUX jungtis": "61", "Žemų dažnių garsiakalbis": "43",
+  "HiFi audio sistema": "1015", "DVD grotuvas": "40", "USB jungtis": "65",
+  "USB-C jungtis": "1035", "Laisvų rankų įranga": "45", "Apple CarPlay / Android Auto": "1001",
+  "Lengvojo lydinio ratlankiai": "19", "LED dienos žibintai": "34", "LED žibintai": "1002",
+  "Žibintai Xenon": "46", "Rūko žibintai": "42", "Kablys": "17",
+  "Priekinių žibintų plovimo įtaisas": "25", "Stogo bagažinės laikikliai": "75",
+  "Automatiškai užsilenkiantys veidrodėliai": "1005", "Žieminių padangų komplektas": "44",
+  "Durelių pritraukimas": "1016", "Matriciniai žibintai": "1021",
+  "Neeksploatuota Lietuvoje": "32", "Automobilis iš Amerikos": "28", "Domina keitimas": "11",
+  "Parduodama lizingu": "12", "Serviso knygelė": "26", "Katalizatorius": "80",
+  "Keli raktų komplektai": "1013", "Pritaikytas neįgaliesiems": "1014",
+  "Padidinta variklio galia": "73", "Paruoštas autosportui": "58",
+  "Pneumatinė pakaba": "1031", "Atsarginis ratas": "1034",
+  "Nuotolinis užvedimas": "1038", "Nuotolinė klimato kontrolė": "1039",
+  "Traukos kontrolės sistema": "55", "ESP": "59", "Įkalnės stabdys": "49",
+  "Automatinio parkavimo sistema": "82", "Atstumo palaikymo sistema": "83",
+  "Aklosios zonos stebėjimo sistema": "84", "Juostos palaikymo sistema": "85",
+  "Naktinio matymo asistentas": "1007", "Kelio ženklų atpažinimo sistema": "1008",
+  "ISOFIX tvirtinimo taškai": "1009", "Susidūrimo prevencijos sistema": "1010",
+  "Tolimųjų šviesų asistentas": "1011", "Dinaminis posūkių apšvietimas": "1012",
+  "Galinio vaizdo kamera": "67", "Priekinio vaizdo kamera": "81", "360° vaizdo kamera": "48",
+  "Greitasis krovimas": "1041", "Trifazis krovimas": "1042",
+  "Dvipusis energijos perdavimas": "1044", "Šilumos siurblys": "1046",
+  "Baterijos garantija": "1040", "APVA kompensacija nepanaudota": "1043",
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -776,6 +825,30 @@ const handler = async (req: Request): Promise<Response> => {
         }
         
         xml += '</photos>\n';
+      }
+
+      // Features / Equipment
+      if (car.features && typeof car.features === 'object') {
+        const featureIds: string[] = [];
+        for (const categoryFeatures of Object.values(car.features as Record<string, string[]>)) {
+          if (Array.isArray(categoryFeatures)) {
+            for (const featureName of categoryFeatures) {
+              const fId = featureIdMapping[featureName];
+              if (fId) {
+                featureIds.push(fId);
+              } else {
+                console.warn(`Unknown feature for Autoplius: ${featureName}`);
+              }
+            }
+          }
+        }
+        if (featureIds.length > 0) {
+          xml += '<features>\n';
+          for (const fId of featureIds) {
+            xml += `<feature>${fId}</feature>\n`;
+          }
+          xml += '</features>\n';
+        }
       }
       
       xml += '</cars>\n';

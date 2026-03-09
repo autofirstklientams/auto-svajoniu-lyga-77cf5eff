@@ -5,13 +5,9 @@ import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useDragAndDrop, useAiBackground } from "./draggable-image-grid/hooks";
 import { ImageGridItem } from "./draggable-image-grid/ImageGridItem";
+import { DraggableImage } from "./draggable-image-grid/types";
 
-export interface DraggableImage {
-  id: string;
-  url: string;
-  isNew?: boolean;
-  file?: File;
-}
+export type { DraggableImage };
 
 interface DraggableImageGridProps {
   images: DraggableImage[];

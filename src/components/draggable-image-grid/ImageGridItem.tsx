@@ -2,7 +2,7 @@ import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, 
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { DraggableImage } from "../DraggableImageGrid";
+import { DraggableImage } from "./types";
 
 interface ImageGridItemProps {
   img: DraggableImage;

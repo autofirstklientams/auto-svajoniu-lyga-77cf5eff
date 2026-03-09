@@ -1207,13 +1207,43 @@ const CreateListing = ({
 
 
               <div className="space-y-2">
-                <Label htmlFor="mot_date">TA galiojimas iki</Label>
-                <Input
-                  id="mot_date"
-                  type="month"
-                  value={formData.mot_date ? formData.mot_date.substring(0, 7) : ""}
-                  onChange={(e) => setFormData({ ...formData, mot_date: e.target.value })}
-                />
+                <Label>TA galiojimas iki</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Select
+                    value={formData.mot_date ? formData.mot_date.substring(0, 4) : ""}
+                    onValueChange={(year) => {
+                      const currentMonth = formData.mot_date && formData.mot_date.length >= 7 ? formData.mot_date.substring(5, 7) : "01";
+                      setFormData({ ...formData, mot_date: `${year}-${currentMonth}` });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Metai" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 15 }, (_, i) => new Date().getFullYear() - 5 + i).map(year => (
+                        <SelectItem key={year} value={String(year)}>{year}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={formData.mot_date && formData.mot_date.length >= 7 ? formData.mot_date.substring(5, 7) : ""}
+                    onValueChange={(month) => {
+                      const currentYear = formData.mot_date && formData.mot_date.length >= 4 ? formData.mot_date.substring(0, 4) : String(new Date().getFullYear());
+                      setFormData({ ...formData, mot_date: `${currentYear}-${month}` });
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Mėnuo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 12 }, (_, i) => {
+                        const monthNum = String(i + 1).padStart(2, '0');
+                        return <SelectItem key={monthNum} value={monthNum}>{monthNum}</SelectItem>;
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               <div className="space-y-2">

@@ -1190,8 +1190,8 @@ const CreateListing = ({
                 <Label htmlFor="mot_date">TA galiojimas iki</Label>
                 <Input
                   id="mot_date"
-                  type="date"
-                  value={formData.mot_date}
+                  type="month"
+                  value={formData.mot_date ? formData.mot_date.substring(0, 7) : ""}
                   onChange={(e) => setFormData({ ...formData, mot_date: e.target.value })}
                 />
               </div>

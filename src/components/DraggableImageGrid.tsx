@@ -160,19 +160,124 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     toast.success('Originalus fonas grąžintas!');
   }, [onReplaceUrl, originalUrls]);
 
+  const handleBulkAiBackground = useCallback(async () => {
+    if (!carId || !onReplaceUrl) return;
+    
+    // Get images that haven't been AI processed yet
+    const imagesToProcess = images.filter(img => !originalUrls.has(img.id) && !processingIds.has(img.id));
+    
+    if (imagesToProcess.length === 0) {
+      toast.info('Visos nuotraukos jau turi pakeistą foną arba yra apdorojamos.');
+      return;
+    }
+
+    if (!window.confirm(`Ar tikrai norite pakeisti ${imagesToProcess.length} nuotraukų fonus? Tai gali užtrukti (po ~10s kiekvienai).`)) {
+      return;
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+    
+    toast.info(`Pradedamas masinis fono keitimas (${imagesToProcess.length} nuotr.). Prašome palaukti...`);
+
+    for (let i = 0; i < images.length; i++) {
+      const img = images[i];
+      if (processingIds.has(img.id) || originalUrls.has(img.id)) continue;
+      
+      setProcessingIds(prev => new Set(prev).add(img.id));
+      
+      try {
+        setOriginalUrls(prev => {
+          const next = new Map(prev);
+          if (!next.has(img.id)) next.set(img.id, img.url);
+          return next;
+        });
+
+        let attempts = 0;
+        let data: any = null;
+        while (attempts < 3) {
+          const result = await supabase.functions.invoke('replace-car-background', {
+            body: { imageUrl: img.url, carId, isMainPhoto: i === 0 },
+          });
+
+          if (result.error) {
+            const errorBody = result.data;
+            if (errorBody?.error?.includes('Per daug') || result.error.message?.includes('non-2xx')) {
+              attempts++;
+              if (attempts < 3) {
+                await new Promise(r => setTimeout(r, 4000 * attempts)); // wait 4s, 8s
+                continue;
+              }
+            }
+            throw new Error(errorBody?.error || result.error.message || 'Nepavyko pakeisti fono');
+          }
+          data = result.data;
+          break;
+        }
+
+        if (!data?.success) throw new Error(data?.error || 'Nepavyko pakeisti fono');
+
+        onReplaceUrl(img.id, data.url);
+        successCount++;
+      } catch (err: any) {
+        console.error('Bulk AI error for image', i, err);
+        setOriginalUrls(prev => {
+          const next = new Map(prev);
+          next.delete(img.id);
+          return next;
+        });
+        failCount++;
+      } finally {
+        setProcessingIds(prev => {
+          const next = new Set(prev);
+          next.delete(img.id);
+          return next;
+        });
+      }
+      
+      // Delay between images to respect rate limits
+      if (i < images.length - 1) {
+         await new Promise(r => setTimeout(r, 3000));
+      }
+    }
+    
+    if (successCount > 0) {
+      toast.success(`Sėkmingai pakeistas ${successCount} nuotraukų fonas!`);
+    }
+    if (failCount > 0) {
+      toast.error(`Nepavyko pakeisti ${failCount} nuotraukų fono.`);
+    }
+  }, [carId, images, onReplaceUrl, processingIds, originalUrls]);
+
   if (images.length === 0) return null;
 
   return (
     <div>
-      <p className="text-sm font-medium mb-2 flex items-center gap-2">
-        {title}
-        <span className="text-xs text-muted-foreground font-normal hidden sm:inline">
-          (vilkite, kad pakeistumėte tvarką)
-        </span>
-        <span className="text-xs text-muted-foreground font-normal sm:hidden">
-          (naudokite rodykles tvarkai keisti)
-        </span>
-      </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+        <p className="text-sm font-medium flex items-center gap-2">
+          {title}
+          <span className="text-xs text-muted-foreground font-normal hidden sm:inline">
+            (vilkite, kad pakeistumėte tvarką)
+          </span>
+          <span className="text-xs text-muted-foreground font-normal sm:hidden">
+            (naudokite rodykles tvarkai keisti)
+          </span>
+        </p>
+        
+        {showAiBackground && carId && onReplaceUrl && images.length > 0 && (
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            onClick={handleBulkAiBackground}
+            disabled={processingIds.size > 0}
+            className="h-8 text-xs bg-gradient-to-r from-violet-600/10 to-indigo-600/10 border-violet-200 hover:border-violet-300"
+          >
+            <Sparkles className="h-3.5 w-3.5 mr-1.5 text-violet-600" />
+            <span className="text-violet-700 dark:text-violet-300 font-medium">Masinis fono keitimas (AI)</span>
+          </Button>
+        )}
+      </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
         {images.map((img, index) => {
           const isProcessing = processingIds.has(img.id);

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const formSchema = z.object({
   name: z.string().trim().min(1, "Vardas privalomas").max(100, "Per ilgas vardas"),
@@ -25,6 +26,7 @@ interface CarPurchaseFormProps {
 }
 
 const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -57,8 +59,8 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
 
       if (error) throw error;
 
-      toast.success("Užklausa pateikta!", {
-        description: "Netrukus susisieksime su jumis dėl automobilio įvertinimo."
+      toast.success(t("carPurchaseForm.success"), {
+        description: t("carPurchaseForm.successDesc")
       });
       
       setFormData({
@@ -74,7 +76,7 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
       onOpenChange(false);
     } catch (error) {
       console.error("Error submitting car purchase request:", error);
-      toast.error("Klaida pateikiant užklausą. Bandykite dar kartą.");
+      toast.error(t("carPurchaseForm.error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -85,12 +87,12 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
       <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-foreground">
-            Automobilio pardavimo užklausa
+            {t("carPurchaseForm.title")}
           </DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           <div className="space-y-2">
-            <Label htmlFor="name">Vardas, Pavardė *</Label>
+            <Label htmlFor="name">{t("carPurchaseForm.name")}</Label>
             <Input
               id="name"
               value={formData.name}
@@ -101,7 +103,7 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="email">El. paštas *</Label>
+            <Label htmlFor="email">{t("carPurchaseForm.email")}</Label>
             <Input
               id="email"
               type="email"
@@ -113,7 +115,7 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="phone">Telefonas *</Label>
+            <Label htmlFor="phone">{t("carPurchaseForm.phone")}</Label>
             <Input
               id="phone"
               type="tel"
@@ -126,7 +128,7 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="carMake">Markė *</Label>
+              <Label htmlFor="carMake">{t("carPurchaseForm.make")}</Label>
               <Input
                 id="carMake"
                 value={formData.carMake}
@@ -137,7 +139,7 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="carModel">Modelis *</Label>
+              <Label htmlFor="carModel">{t("carPurchaseForm.model")}</Label>
               <Input
                 id="carModel"
                 value={formData.carModel}
@@ -150,7 +152,7 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="carYear">Metai *</Label>
+              <Label htmlFor="carYear">{t("carPurchaseForm.year")}</Label>
               <Input
                 id="carYear"
                 value={formData.carYear}
@@ -161,7 +163,7 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="mileage">Rida (km) *</Label>
+              <Label htmlFor="mileage">{t("carPurchaseForm.mileage")}</Label>
               <Input
                 id="mileage"
                 value={formData.mileage}
@@ -173,12 +175,12 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="additionalInfo">Papildoma informacija</Label>
+            <Label htmlFor="additionalInfo">{t("carPurchaseForm.additionalInfo")}</Label>
             <Textarea
               id="additionalInfo"
               value={formData.additionalInfo}
               onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
-              placeholder="Būklė, defektai, papildoma įranga..."
+              placeholder={t("carPurchaseForm.additionalInfoPlaceholder")}
               rows={3}
             />
           </div>
@@ -188,7 +190,7 @@ const CarPurchaseForm = ({ open, onOpenChange }: CarPurchaseFormProps) => {
             className="w-full bg-accent hover:bg-accent/90 text-accent-foreground"
             disabled={isSubmitting}
           >
-            {isSubmitting ? "Siunčiama..." : "Pateikti užklausą"}
+            {isSubmitting ? t("carPurchaseForm.submitting") : t("carPurchaseForm.submit")}
           </Button>
         </form>
       </DialogContent>

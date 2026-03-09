@@ -14,6 +14,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 const lt: Record<string, string> = {
   // Navigation
   "nav.home": "Pagrindinis",
+  "home.banner": "📍 Persikėlėme! Naujas adresas — Palemono g. 173, Kaunas →",
   "nav.cars": "Automobiliai",
   "nav.leasing": "Lizingas",
   "nav.carPurchase": "Auto supirkimas",
@@ -386,6 +387,23 @@ const lt: Record<string, string> = {
   "carPurchase.workingHours": "Darbo laikas",
   "carPurchase.submitRequest": "Pateikti užklausą",
 
+  // Car purchase form
+  "carPurchaseForm.title": "Automobilio pardavimo užklausa",
+  "carPurchaseForm.name": "Vardas, Pavardė *",
+  "carPurchaseForm.email": "El. paštas *",
+  "carPurchaseForm.phone": "Telefonas *",
+  "carPurchaseForm.make": "Markė *",
+  "carPurchaseForm.model": "Modelis *",
+  "carPurchaseForm.year": "Metai *",
+  "carPurchaseForm.mileage": "Rida (km) *",
+  "carPurchaseForm.additionalInfo": "Papildoma informacija",
+  "carPurchaseForm.additionalInfoPlaceholder": "Būklė, defektai, papildoma įranga...",
+  "carPurchaseForm.submit": "Pateikti užklausą",
+  "carPurchaseForm.submitting": "Siunčiama...",
+  "carPurchaseForm.success": "Užklausa pateikta!",
+  "carPurchaseForm.successDesc": "Netrukus susisieksime su jumis dėl automobilio įvertinimo.",
+  "carPurchaseForm.error": "Klaida pateikiant užklausą. Bandykite dar kartą.",
+
   // Sell your car page
   "sellCar.heroTitle": "Parduosime tavo automobilį",
   "sellCar.heroDesc": "Palik savo automobilį parduoti pas mus ir gauk maksimalų rezultatą be vargo. Mes pasirūpinsime viskuo: nuo profesionalių nuotraukų ir skelbimų iki derybų su pirkėjais ir dokumentų sutvarkymo.",
@@ -433,6 +451,7 @@ const lt: Record<string, string> = {
 const en: Record<string, string> = {
   // Navigation
   "nav.home": "Home",
+  "home.banner": "📍 We have moved! New address — Palemono st. 173, Kaunas →",
   "nav.cars": "Cars",
   "nav.leasing": "Leasing",
   "nav.carPurchase": "Car Purchase",
@@ -804,6 +823,23 @@ const en: Record<string, string> = {
   "carPurchase.call": "Call us",
   "carPurchase.workingHours": "Working hours",
   "carPurchase.submitRequest": "Submit request",
+
+  // Car purchase form
+  "carPurchaseForm.title": "Car Sell Request",
+  "carPurchaseForm.name": "Full Name *",
+  "carPurchaseForm.email": "Email *",
+  "carPurchaseForm.phone": "Phone *",
+  "carPurchaseForm.make": "Make *",
+  "carPurchaseForm.model": "Model *",
+  "carPurchaseForm.year": "Year *",
+  "carPurchaseForm.mileage": "Mileage (km) *",
+  "carPurchaseForm.additionalInfo": "Additional Information",
+  "carPurchaseForm.additionalInfoPlaceholder": "Condition, defects, additional equipment...",
+  "carPurchaseForm.submit": "Submit request",
+  "carPurchaseForm.submitting": "Submitting...",
+  "carPurchaseForm.success": "Request submitted!",
+  "carPurchaseForm.successDesc": "We will contact you shortly regarding the car evaluation.",
+  "carPurchaseForm.error": "Error submitting request. Please try again.",
 
   // Sell your car page
   "sellCar.heroTitle": "We'll sell your car",

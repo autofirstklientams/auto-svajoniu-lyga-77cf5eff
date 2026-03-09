@@ -6,6 +6,7 @@ import { Calculator, ChevronRight, Info, Clock, FileCheck, CreditCard, CheckCirc
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import LoanApplicationForm from "@/components/LoanApplicationForm";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Tooltip,
   TooltipContent,
@@ -47,6 +48,7 @@ const AnimatedNumber = ({ value, suffix = "" }: { value: number; suffix?: string
 };
 
 const Leasing = () => {
+  const { t } = useLanguage();
   const [loanAmount, setLoanAmount] = useState(10000);
   const [loanTerm, setLoanTerm] = useState(60);
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -64,32 +66,32 @@ const Leasing = () => {
   const totalPayment = monthlyPayment * loanTerm + contractFee;
 
   const steps = [
-    { icon: FileCheck, title: "Užpildykite paraišką", desc: "Nurodykite paskolos sumą ir terminą" },
-    { icon: Clock, title: "Gaukite pasiūlymą", desc: "Atsakymas per 24 val." },
-    { icon: CreditCard, title: "Pasirašykite sutartį", desc: "Patogiai internetu" },
-    { icon: CheckCircle2, title: "Gaukite pinigus", desc: "Tiesiogiai į sąskaitą" },
+    { icon: FileCheck, title: t("leasing.step1"), desc: t("leasing.step1Desc") },
+    { icon: Clock, title: t("leasing.step2"), desc: t("leasing.step2Desc") },
+    { icon: CreditCard, title: t("leasing.step3"), desc: t("leasing.step3Desc") },
+    { icon: CheckCircle2, title: t("leasing.step4"), desc: t("leasing.step4Desc") },
   ];
 
   const benefits = [
     {
       icon: Scale,
-      title: "Palyginame sąlygas",
-      description: "Surandame geriausią pasiūlymą iš kelių finansų partnerių"
+      title: t("leasing.benefit1"),
+      description: t("leasing.benefit1Desc")
     },
     {
       icon: TrendingDown,
-      title: "Žemos palūkanos",
-      description: "Konkurencingos palūkanų normos nuo 6.9% metinių"
+      title: t("leasing.benefit2"),
+      description: t("leasing.benefit2Desc")
     },
     {
       icon: Clock,
-      title: "Greitas sprendimas",
-      description: "Atsakymas per 24 valandas, pinigai - per 1-2 dienas"
+      title: t("leasing.benefit3"),
+      description: t("leasing.benefit3Desc")
     },
     {
       icon: Users,
-      title: "Individuali konsultacija",
-      description: "Padėsime pasirinkti tinkamiausią finansavimo variantą"
+      title: t("leasing.benefit4"),
+      description: t("leasing.benefit4Desc")
     }
   ];
 
@@ -102,10 +104,10 @@ const Leasing = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl md:text-5xl font-bold mb-6">
-                Finansavimas
+                {t("leasing.heroTitle")}
               </h1>
               <p className="text-xl text-white/90 mb-8">
-                Greitas ir paprastas procesas – gaukite finansavimą per 24 valandas su žemiausiomis palūkanomis rinkoje
+                {t("leasing.heroDesc")}
               </p>
             </div>
           </div>
@@ -114,9 +116,9 @@ const Leasing = () => {
         {/* Calculator Section */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-4 animate-fade-in">Paskaičiuokite mėnesinę įmoką</h2>
+            <h2 className="text-3xl font-bold text-center mb-4 animate-fade-in">{t("leasing.calcTitle")}</h2>
             <p className="text-muted-foreground text-center mb-12 max-w-2xl mx-auto animate-fade-in" style={{ animationDelay: '0.1s' }}>
-              Naudokite skaičiuoklę ir sužinokite preliminarią mėnesinę įmoką
+              {t("leasing.calcDesc")}
             </p>
             
             <Card className="shadow-xl border-0 max-w-4xl mx-auto overflow-hidden animate-fade-in" style={{ animationDelay: '0.2s' }}>
@@ -128,13 +130,13 @@ const Leasing = () => {
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                         <Calculator className="h-5 w-5 text-primary" />
                       </div>
-                      <h3 className="text-xl font-bold text-foreground">Paskolos skaičiuoklė</h3>
+                      <h3 className="text-xl font-bold text-foreground">{t("leasing.loanCalculator")}</h3>
                     </div>
 
                     <div className="space-y-6">
                       <div>
                         <div className="flex justify-between items-center mb-3">
-                          <label className="text-sm font-medium text-foreground">Paskolos suma</label>
+                          <label className="text-sm font-medium text-foreground">{t("leasing.loanAmount")}</label>
                           <span className="text-lg font-bold text-primary tabular-nums">
                             <AnimatedNumber value={loanAmount} suffix=" €" />
                           </span>
@@ -155,9 +157,9 @@ const Leasing = () => {
 
                       <div>
                         <div className="flex justify-between items-center mb-3">
-                          <label className="text-sm font-medium text-foreground">Terminas</label>
+                          <label className="text-sm font-medium text-foreground">{t("leasing.term")}</label>
                           <span className="text-lg font-bold text-primary tabular-nums">
-                            <AnimatedNumber value={loanTerm} suffix=" mėn." />
+                            <AnimatedNumber value={loanTerm} suffix={` ${t("loanCalc.months")}`} />
                           </span>
                         </div>
                         <Slider
@@ -169,30 +171,30 @@ const Leasing = () => {
                           className="transition-all"
                         />
                         <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                          <span>6 mėn.</span>
-                          <span>144 mėn.</span>
+                          <span>6 {t("loanCalc.months")}</span>
+                          <span>144 {t("loanCalc.months")}</span>
                         </div>
                       </div>
 
                       <div className="bg-primary/5 rounded-xl p-4 transition-all duration-300">
                         <div className="flex items-center gap-1 mb-1">
-                          <span className="text-sm text-muted-foreground">Mėnesio įmoka nuo</span>
+                          <span className="text-sm text-muted-foreground">{t("leasing.monthlyFrom")}</span>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger>
                                 <Info className="h-3.5 w-3.5 text-muted-foreground" />
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs">
-                                <p>Skaičiuojama su 6.9% metinėmis palūkanomis + 9.50 € mėn. mokestis.</p>
+                                <p>{t("leasing.calculatorTooltip")}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
                         </div>
                         <div className="text-4xl font-bold text-primary tabular-nums">
-                          <AnimatedNumber value={Math.round(monthlyPayment)} /> <span className="text-xl">€/mėn.</span>
+                          <AnimatedNumber value={Math.round(monthlyPayment)} /> <span className="text-xl">€{t("loanCalc.perMonth")}</span>
                         </div>
                         <div className="text-xs text-muted-foreground mt-2 tabular-nums">
-                          Bendra grąžintina suma: <AnimatedNumber value={Math.round(totalPayment)} suffix=" €" />
+                          {t("leasing.totalReturn")} <AnimatedNumber value={Math.round(totalPayment)} suffix=" €" />
                         </div>
                       </div>
                     </div>
@@ -200,39 +202,39 @@ const Leasing = () => {
 
                   {/* Conditions side */}
                   <div className="bg-muted/40 p-6 lg:p-8 flex flex-col">
-                    <h4 className="font-semibold text-foreground mb-4">Kredito sąlygos</h4>
+                    <h4 className="font-semibold text-foreground mb-4">{t("leasing.conditions")}</h4>
                     
                     <div className="space-y-3 flex-1">
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Metinė palūkanų norma</span>
+                        <span className="text-muted-foreground">{t("leasing.annualRate")}</span>
                         <span className="font-semibold text-foreground">6.9%</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Paskolos suma</span>
+                        <span className="text-muted-foreground">{t("leasing.loanSum")}</span>
                         <span className="font-semibold text-foreground">1 000 € – 30 000 €</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Terminas</span>
-                        <span className="font-semibold text-foreground">6 – 144 mėn.</span>
+                        <span className="text-muted-foreground">{t("leasing.termRange")}</span>
+                        <span className="font-semibold text-foreground">6 – 144 {t("loanCalc.months")}</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Mėn. administravimo mokestis</span>
+                        <span className="text-muted-foreground">{t("leasing.adminFee")}</span>
                         <span className="font-semibold text-foreground">9.50 €</span>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Sutarties mokestis</span>
+                        <span className="text-muted-foreground">{t("leasing.contractFee")}</span>
                         <span className="font-semibold text-foreground">50 €</span>
                       </div>
                       <div className="flex justify-between text-sm pt-2 border-t border-border">
                         <div className="flex items-center gap-1">
-                          <span className="font-medium text-foreground">BVKMNN nuo</span>
+                          <span className="font-medium text-foreground">{t("leasing.bvkmn")}</span>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger>
                                 <Info className="h-3.5 w-3.5 text-muted-foreground" />
                               </TooltipTrigger>
                               <TooltipContent className="max-w-xs">
-                                <p>Bendrosios vidutinės kredito kainos metinė norma.</p>
+                                <p>{t("leasing.bvkmnTooltip")}</p>
                               </TooltipContent>
                             </Tooltip>
                           </TooltipProvider>
@@ -246,7 +248,7 @@ const Leasing = () => {
                       className="w-full mt-6 bg-accent hover:bg-accent/90 text-accent-foreground font-semibold"
                       size="lg"
                     >
-                      Pateikti paraišką
+                      {t("leasing.submitApplication")}
                       <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                   </div>
@@ -259,7 +261,7 @@ const Leasing = () => {
         {/* Steps Section */}
         <section className="py-16">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Kaip veikia finansavimas?</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">{t("leasing.howItWorks")}</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-4xl mx-auto">
               {steps.map((step, index) => (
                 <div 
@@ -273,7 +275,7 @@ const Leasing = () => {
                   }`}>
                     <step.icon className="h-6 w-6" />
                   </div>
-                  <div className="text-xs text-muted-foreground mb-2">Žingsnis {index + 1}</div>
+                  <div className="text-xs text-muted-foreground mb-2">{t("leasing.step")} {index + 1}</div>
                   <h3 className="font-semibold text-sm mb-1 text-foreground">{step.title}</h3>
                   <p className="text-xs text-muted-foreground">{step.desc}</p>
                 </div>
@@ -285,7 +287,7 @@ const Leasing = () => {
         {/* Benefits Section */}
         <section className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Kodėl rinktis mus?</h2>
+            <h2 className="text-3xl font-bold text-center mb-12">{t("leasing.whyChoose")}</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto">
               {benefits.map((benefit, index) => (
                 <Card key={index} className="border-0 shadow-md hover:shadow-lg transition-shadow">
@@ -305,16 +307,16 @@ const Leasing = () => {
         {/* CTA Section */}
         <section className="py-16 bg-primary text-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-4">Pasiruošę pradėti?</h2>
+            <h2 className="text-3xl font-bold mb-4">{t("leasing.readyToStart")}</h2>
             <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-              Užpildykite paraišką dabar ir gaukite pasiūlymą per 24 valandas
+              {t("leasing.readyToStartDesc")}
             </p>
             <Button 
               onClick={() => setIsFormOpen(true)}
               size="lg"
               className="bg-accent hover:bg-accent/90 text-accent-foreground font-semibold text-lg px-8"
             >
-              Gauti pasiūlymą
+              {t("leasing.getOffer")}
               <ChevronRight className="ml-2 h-5 w-5" />
             </Button>
           </div>

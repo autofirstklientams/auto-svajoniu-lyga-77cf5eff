@@ -31,7 +31,7 @@ const Index = () => {
           rel="noopener noreferrer"
           className="block bg-primary text-primary-foreground text-center py-2 px-4 text-sm font-medium hover:bg-primary/90 transition-colors"
         >
-          📍 Persikėlėme! Naujas adresas — Palemono g. 173, Kaunas →
+          {t("home.banner")}
         </a>
       )}
       <Header />

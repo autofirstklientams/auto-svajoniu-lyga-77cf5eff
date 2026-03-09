@@ -86,6 +86,14 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     onReorder(newImages);
   }, [images, onReorder]);
 
+  const makeMainPhoto = useCallback((index: number) => {
+    if (index === 0) return;
+    const newImages = [...images];
+    const [image] = newImages.splice(index, 1);
+    newImages.unshift(image);
+    onReorder(newImages);
+  }, [images, onReorder]);
+
   const handleAiBackground = useCallback(async (img: DraggableImage, imageIndex: number) => {
     if (!carId || !onReplaceUrl) return;
     
@@ -394,7 +402,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
               )}
               
               {/* Order badge */}
-              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-1.5 py-0.5 rounded">
+              <div className="absolute bottom-1 left-1 bg-black/70 text-white text-xs px-2 py-1 rounded font-medium z-10 pointer-events-none">
                 {index + 1}
               </div>
               
@@ -403,7 +411,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                 "absolute bg-black/50 text-white p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block",
                 canSelect ? "top-1 left-9" : "top-1 left-1"
               )}>
-                <GripVertical className="h-3 w-3" />
+                <GripVertical className="h-4 w-4" />
               </div>
 
               {/* Zoom button */}
@@ -411,23 +419,23 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                 type="button"
                 onClick={(e) => { e.stopPropagation(); setPreviewIndex(index); }}
                 className={cn(
-                  "absolute bg-black/50 text-white p-1 rounded sm:opacity-0 sm:group-hover:opacity-100 transition-opacity",
-                  canSelect ? "top-8 left-2 sm:left-9" : "top-1 left-1 sm:left-8"
+                  "absolute bg-black/50 text-white p-2 sm:p-1 rounded opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20 shadow-sm",
+                  canSelect ? "top-10 left-2 sm:top-8 sm:left-2" : "top-1 left-1 sm:top-1 sm:left-8"
                 )}
                 title="Padidinti"
               >
-                <ZoomIn className="h-3 w-3" />
+                <ZoomIn className="h-4 w-4 sm:h-3 sm:w-3" />
               </button>
 
               {/* AI Background button */}
               {showAiBackground && carId && onReplaceUrl && !isProcessing && (
-                <div className="absolute top-8 right-1 flex flex-col gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20">
+                <div className="absolute top-2 right-10 sm:top-8 sm:right-1 flex flex-col gap-2 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20">
                   {originalUrls.has(img.id) && (
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handleUndoBackground(img); }}
-                      className="bg-background text-foreground p-1.5 rounded flex items-center justify-center gap-1 text-xs shadow-sm"
-                      title="Atsaukti AI foną"
+                      className="bg-background text-foreground p-2 sm:p-1.5 rounded flex items-center justify-center shadow-md border border-border"
+                      title="Atšaukti AI foną"
                     >
                       <Undo2 className="h-4 w-4 sm:h-3 sm:w-3" />
                     </button>
@@ -436,7 +444,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handleAiBackground(img, index); }}
-                      className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-1.5 rounded flex items-center justify-center gap-1 text-xs shadow-sm"
+                      className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-2 sm:p-1.5 rounded flex items-center justify-center shadow-md"
                       title="AI: pakeisti foną į saloną"
                     >
                       <Sparkles className="h-4 w-4 sm:h-3 sm:w-3" />
@@ -445,23 +453,32 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                 </div>
               )}
 
-              {/* Mobile move buttons */}
-              <div className="flex sm:hidden absolute bottom-1 right-1 gap-0.5 z-20">
+              {/* Mobile controls */}
+              <div className="flex sm:hidden absolute bottom-1 right-1 gap-1 z-20">
+                {index > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); makeMainPhoto(index); }}
+                    className="bg-primary/90 text-primary-foreground px-2 py-1.5 rounded text-[10px] font-bold shadow-md active:bg-primary"
+                  >
+                    PIRMA
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); moveImage(index, -1); }}
                   disabled={index === 0}
-                  className="bg-black/60 text-white p-1 rounded disabled:opacity-30 active:bg-black/80"
+                  className="bg-black/60 text-white p-1.5 rounded disabled:opacity-30 active:bg-black/80 shadow-md"
                 >
-                  <ChevronLeft className="h-3.5 w-3.5" />
+                  <ChevronLeft className="h-4 w-4" />
                 </button>
                 <button
                   type="button"
                   onClick={(e) => { e.stopPropagation(); moveImage(index, 1); }}
                   disabled={index === images.length - 1}
-                  className="bg-black/60 text-white p-1 rounded disabled:opacity-30 active:bg-black/80"
+                  className="bg-black/60 text-white p-1.5 rounded disabled:opacity-30 active:bg-black/80 shadow-md"
                 >
-                  <ChevronRight className="h-3.5 w-3.5" />
+                  <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
               
@@ -470,13 +487,13 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
                 type="button"
                 variant="destructive"
                 size="icon"
-                className="absolute top-1 right-1 h-6 w-6 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20"
+                className="absolute top-2 right-2 sm:top-1 sm:right-1 h-8 w-8 sm:h-6 sm:w-6 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20 shadow-md"
                 onClick={(e) => {
                   e.stopPropagation();
                   onRemove(img.id);
                 }}
               >
-                <X className="h-3 w-3" />
+                <X className="h-4 w-4 sm:h-3 sm:w-3" />
               </Button>
             </div>
           );

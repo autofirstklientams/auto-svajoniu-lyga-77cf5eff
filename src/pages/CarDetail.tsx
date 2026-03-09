@@ -38,6 +38,7 @@ interface CarImage {
 
 interface Car {
   id: string;
+  slug?: string;
   make: string;
   model: string;
   year: number;

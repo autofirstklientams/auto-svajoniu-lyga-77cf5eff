@@ -15,7 +15,8 @@ export const CAR_FEATURES = {
       "Odinis salonas", "Iš dalies odinis", "Alcantara", "Sportinės sėdynės", "Tamsinti stiklai",
       "Daugiafunkcinis vairas", "Šildomos sėdynės", "Stoglangis", "Elektra valdomos sėdynės",
       "Panoraminis stogas", "Autonominis šildymas", "Ventiliuojamos sėdynės", "Elektra valdomos sėdynės su atmintimi",
-      "Bagažinės uždangalas", "Šildomas vairas", "Masažuojančios sėdynės", "Dvi bagažinės", "Dvigubi stiklai"
+      "Bagažinės uždangalas", "Šildomas vairas", "Masažuojančios sėdynės", "Dvi bagažinės", "Dvigubi stiklai",
+      "Atlenkiamos sėdynės", "Stiklo paketai", "Personalinė ventiliacija", "Personalinis apšvietimas"
     ]
   },
   elektronika: {
@@ -52,7 +53,8 @@ export const CAR_FEATURES = {
     options: [
       "Lengvojo lydinio ratlankiai", "LED dienos žibintai", "LED žibintai", "Žibintai Xenon",
       "Rūko žibintai", "Kablys", "Priekinių žibintų plovimo įtaisas", "Stogo bagažinės laikikliai",
-      "Automatiškai užsilenkiantys veidrodėliai", "Žieminių padangų komplektas", "Durelių pritraukimas", "Matriciniai žibintai"
+      "Automatiškai užsilenkiantys veidrodėliai", "Žieminių padangų komplektas", "Durelių pritraukimas",
+      "Matriciniai žibintai", "Dvigubi ratai", "Dvejos slankiojančios durys"
     ]
   },
   kitiYpatumai: {
@@ -82,6 +84,13 @@ export const CAR_FEATURES = {
     options: [
       "Greitasis krovimas", "Trifazis krovimas", "Dvipusis energijos perdavimas", "Šilumos siurblys",
       "Baterijos garantija", "APVA kompensacija nepanaudota"
+    ]
+  },
+  komerciniaiYpatumai: {
+    title: "Komercinių automobilių ypatumai",
+    description: "Papildomos ypatybės komerciniams automobiliams",
+    options: [
+      "Pritaikytas prekybai", "Su tentu", "Bortinis", "Dviguba kabina", "Šaldymo įranga", "Liftas"
     ]
   }
 };

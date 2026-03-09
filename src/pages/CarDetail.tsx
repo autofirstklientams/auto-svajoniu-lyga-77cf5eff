@@ -79,11 +79,11 @@ const CarDetail = () => {
   });
 
   useEffect(() => {
-    if (id) {
+    if (identifier) {
       fetchCar();
       fetchImages();
     }
-  }, [id]);
+  }, [identifier]);
 
   const fetchCar = useCallback(async () => {
     const { data, error } = await supabase

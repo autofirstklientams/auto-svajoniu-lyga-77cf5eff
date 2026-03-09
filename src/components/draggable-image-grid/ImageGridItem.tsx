@@ -77,6 +77,7 @@ export function ImageGridItem({
         alt={`Image ${index + 1}`}
         className={cn("w-full h-full object-cover pointer-events-none", isProcessing && "opacity-50")}
         draggable={false}
+        loading="lazy"
       />
 
       {isProcessing && (

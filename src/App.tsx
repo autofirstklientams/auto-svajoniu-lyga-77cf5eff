@@ -46,12 +46,12 @@ const PageLoader = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-      <LanguageProvider>
-        <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+    <LanguageProvider>
+      <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
           <ScrollToTop />
           <Suspense fallback={<PageLoader />}>
             <Routes>

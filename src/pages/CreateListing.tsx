@@ -826,9 +826,9 @@ const CreateListing = ({
                 <Input
                   id="price"
                   type="number"
-                  step="0.01"
+                  step="1"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: parseFloat(e.target.value) })}
+                  onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })}
                   required
                 />
               </div>

@@ -429,28 +429,31 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
 
               {/* AI Background button */}
               {showAiBackground && carId && onReplaceUrl && !isProcessing && (
-                <div className="absolute top-2 right-10 sm:top-8 sm:right-1 flex flex-col gap-2 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20">
+                <>
                   {originalUrls.has(img.id) && (
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); handleUndoBackground(img); }}
-                      className="bg-background text-foreground p-2 sm:p-1.5 rounded flex items-center justify-center shadow-md border border-border"
+                      className="absolute bottom-1 right-1 sm:bottom-auto sm:top-8 sm:right-1 bg-amber-500 text-white p-2 sm:p-1.5 rounded flex items-center gap-1 justify-center shadow-lg z-30 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                       title="Atšaukti AI foną"
                     >
                       <Undo2 className="h-4 w-4 sm:h-3 sm:w-3" />
+                      <span className="text-[10px] font-bold sm:hidden">UNDO</span>
                     </button>
                   )}
                   {!originalUrls.has(img.id) && (
-                    <button
-                      type="button"
-                      onClick={(e) => { e.stopPropagation(); handleAiBackground(img, index); }}
-                      className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-2 sm:p-1.5 rounded flex items-center justify-center shadow-md"
-                      title="AI: pakeisti foną į saloną"
-                    >
-                      <Sparkles className="h-4 w-4 sm:h-3 sm:w-3" />
-                    </button>
+                    <div className="absolute top-2 right-10 sm:top-8 sm:right-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20">
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleAiBackground(img, index); }}
+                        className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white p-2 sm:p-1.5 rounded flex items-center justify-center shadow-md"
+                        title="AI: pakeisti foną į saloną"
+                      >
+                        <Sparkles className="h-4 w-4 sm:h-3 sm:w-3" />
+                      </button>
+                    </div>
                   )}
-                </div>
+                </>
               )}
 
               {/* Mobile controls */}

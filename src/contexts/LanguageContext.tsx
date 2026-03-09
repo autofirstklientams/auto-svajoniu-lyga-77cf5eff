@@ -387,6 +387,23 @@ const lt: Record<string, string> = {
   "carPurchase.workingHours": "Darbo laikas",
   "carPurchase.submitRequest": "Pateikti užklausą",
 
+  // Car purchase form
+  "carPurchaseForm.title": "Automobilio pardavimo užklausa",
+  "carPurchaseForm.name": "Vardas, Pavardė *",
+  "carPurchaseForm.email": "El. paštas *",
+  "carPurchaseForm.phone": "Telefonas *",
+  "carPurchaseForm.make": "Markė *",
+  "carPurchaseForm.model": "Modelis *",
+  "carPurchaseForm.year": "Metai *",
+  "carPurchaseForm.mileage": "Rida (km) *",
+  "carPurchaseForm.additionalInfo": "Papildoma informacija",
+  "carPurchaseForm.additionalInfoPlaceholder": "Būklė, defektai, papildoma įranga...",
+  "carPurchaseForm.submit": "Pateikti užklausą",
+  "carPurchaseForm.submitting": "Siunčiama...",
+  "carPurchaseForm.success": "Užklausa pateikta!",
+  "carPurchaseForm.successDesc": "Netrukus susisieksime su jumis dėl automobilio įvertinimo.",
+  "carPurchaseForm.error": "Klaida pateikiant užklausą. Bandykite dar kartą.",
+
   // Sell your car page
   "sellCar.heroTitle": "Parduosime tavo automobilį",
   "sellCar.heroDesc": "Palik savo automobilį parduoti pas mus ir gauk maksimalų rezultatą be vargo. Mes pasirūpinsime viskuo: nuo profesionalių nuotraukų ir skelbimų iki derybų su pirkėjais ir dokumentų sutvarkymo.",

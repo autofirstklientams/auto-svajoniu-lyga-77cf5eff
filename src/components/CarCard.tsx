@@ -119,7 +119,7 @@ function CarCardComponent({ id, slug, image, title, price, numericPrice, year, m
   );
 
   if (id) {
-    return <Link to={`/car/${id}`}>{content}</Link>;
+    return <Link to={`/automobiliai/${slug || id}`}>{content}</Link>;
   }
 
   return content;

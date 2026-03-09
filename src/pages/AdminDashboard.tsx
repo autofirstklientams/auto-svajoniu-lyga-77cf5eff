@@ -516,7 +516,7 @@ const AdminDashboard = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.open(`/car/${car.id}`, '_blank')}
+                              onClick={() => window.open(`/automobiliai/${car.slug || car.id}`, '_blank')}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>

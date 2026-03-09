@@ -260,7 +260,7 @@ const CreateListing = ({
     setFormData({
       make: source?.make || "",
       model: source?.model || "",
-      year: source?.year || new Date().getFullYear(),
+      year: source?.year || ("" as any),
       price: source?.price || 0,
       mileage: source?.mileage || 0,
       fuel_type: source?.fuel_type || "",

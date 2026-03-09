@@ -774,7 +774,7 @@ const CreateListing = ({
               </div>
 
               <div className="space-y-2">
-                <Label>Pagaminimo data *</Label>
+                <Label>Pirmos registracijos data *</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <Select
                     value={formData.first_reg_date ? formData.first_reg_date.substring(0, 4) : formData.year ? String(formData.year) : ""}

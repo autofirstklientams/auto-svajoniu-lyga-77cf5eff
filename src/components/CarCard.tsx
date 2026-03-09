@@ -26,7 +26,7 @@ interface CarCardProps {
   priority?: boolean;
 }
 
-function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, isReserved, isSold, priority = false }: CarCardProps) {
+function CarCardComponent({ id, slug, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, isReserved, isSold, priority = false }: CarCardProps) {
   const { t } = useLanguage();
   const monthlyPayment = numericPrice ? calculateMonthlyPayment(numericPrice) : null;
   

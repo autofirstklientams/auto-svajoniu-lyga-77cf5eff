@@ -11,6 +11,7 @@ import { getThumbnailUrl, getOptimizedImageUrl } from "@/utils/imageUtils";
 
 interface CarCardProps {
   id?: string;
+  slug?: string;
   image: string;
   title: string;
   price: string;

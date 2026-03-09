@@ -121,7 +121,7 @@ export function ImageGridItem({
       </button>
 
       {showAiBackground && carId && onReplaceUrl && !isProcessing && (
-        <div className="absolute top-2 right-10 sm:top-8 sm:right-1 flex flex-col gap-2 sm:gap-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-30">
+        <div className="absolute top-2 right-10 sm:top-8 sm:right-1 flex flex-col gap-2 sm:gap-1 opacity-100 z-30">
           {hasAiProcessed ? (
             <button
               type="button"

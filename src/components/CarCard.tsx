@@ -11,6 +11,7 @@ import { getThumbnailUrl, getOptimizedImageUrl } from "@/utils/imageUtils";
 
 interface CarCardProps {
   id?: string;
+  slug?: string;
   image: string;
   title: string;
   price: string;
@@ -25,7 +26,7 @@ interface CarCardProps {
   priority?: boolean;
 }
 
-function CarCardComponent({ id, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, isReserved, isSold, priority = false }: CarCardProps) {
+function CarCardComponent({ id, slug, image, title, price, numericPrice, year, mileage, fuel, featured, isRecommended, isReserved, isSold, priority = false }: CarCardProps) {
   const { t } = useLanguage();
   const monthlyPayment = numericPrice ? calculateMonthlyPayment(numericPrice) : null;
   
@@ -118,7 +119,7 @@ function CarCardComponent({ id, image, title, price, numericPrice, year, mileage
   );
 
   if (id) {
-    return <Link to={`/car/${id}`}>{content}</Link>;
+    return <Link to={`/automobiliai/${slug || id}`}>{content}</Link>;
   }
 
   return content;

@@ -147,6 +147,7 @@ export type Database = {
           price: number
           sdk_code: string | null
           seats: number | null
+          slug: string | null
           steering_wheel: string | null
           transmission: string | null
           updated_at: string | null
@@ -194,6 +195,7 @@ export type Database = {
           price: number
           sdk_code?: string | null
           seats?: number | null
+          slug?: string | null
           steering_wheel?: string | null
           transmission?: string | null
           updated_at?: string | null
@@ -241,6 +243,7 @@ export type Database = {
           price?: number
           sdk_code?: string | null
           seats?: number | null
+          slug?: string | null
           steering_wheel?: string | null
           transmission?: string | null
           updated_at?: string | null

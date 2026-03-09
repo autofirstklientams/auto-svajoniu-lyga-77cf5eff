@@ -29,6 +29,7 @@ interface CarListing {
   image_url: string | null;
   partner_id: string;
   created_at: string;
+  slug?: string;
   profiles?: {
     full_name: string;
     email: string;
@@ -516,7 +517,7 @@ const AdminDashboard = () => {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => window.open(`/car/${car.id}`, '_blank')}
+                              onClick={() => window.open(`/automobiliai/${car.slug || car.id}`, '_blank')}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>

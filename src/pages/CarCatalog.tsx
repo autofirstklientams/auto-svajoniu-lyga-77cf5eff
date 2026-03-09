@@ -16,6 +16,7 @@ import { useQuery } from "@tanstack/react-query";
 
 interface Car {
   id: string;
+  slug: string | null;
   make: string;
   model: string;
   year: number;
@@ -51,7 +52,7 @@ const sortOptions: { value: SortOption; label: string }[] = [
 const fetchAllCars = async (): Promise<Car[]> => {
   const { data, error } = await supabase
     .from("cars")
-    .select("id, make, model, year, price, mileage, image_url, fuel_type, transmission, body_type, is_recommended, is_reserved, is_sold")
+    .select("id, slug, make, model, year, price, mileage, image_url, fuel_type, transmission, body_type, is_recommended, is_reserved, is_sold")
     .eq("visible_web", true);
 
   if (error) throw error;
@@ -337,6 +338,7 @@ const CarCatalog = () => {
                     >
                       <CarCard
                         id={car.id}
+                        slug={car.slug || undefined}
                         title={`${car.make} ${car.model}`}
                         year={car.year}
                         price={`${car.price.toLocaleString()} €`}

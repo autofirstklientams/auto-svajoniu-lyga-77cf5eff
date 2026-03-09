@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 interface Car {
   id: string;
+  slug: string | null;
   make: string;
   model: string;
   year: number;
@@ -25,7 +26,7 @@ interface Car {
 const fetchFeaturedCars = async (): Promise<Car[]> => {
   const { data, error } = await supabase
     .from("cars")
-    .select("id, make, model, year, price, mileage, image_url, fuel_type, is_recommended, is_reserved, is_sold")
+    .select("id, slug, make, model, year, price, mileage, image_url, fuel_type, is_recommended, is_reserved, is_sold")
     .eq("visible_web", true)
     .eq("is_featured", true)
     .order("is_recommended", { ascending: false })
@@ -104,6 +105,7 @@ const FeaturedCars = () => {
             >
               <CarCard
                 id={car.id}
+                slug={car.slug || undefined}
                 title={`${car.make} ${car.model}`}
                 year={car.year}
                 price={`${car.price.toLocaleString()} €`}

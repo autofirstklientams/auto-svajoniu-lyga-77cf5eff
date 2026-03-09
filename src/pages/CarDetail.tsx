@@ -38,6 +38,7 @@ interface CarImage {
 
 interface Car {
   id: string;
+  slug?: string;
   make: string;
   model: string;
   year: number;
@@ -63,7 +64,8 @@ interface Car {
 }
 
 const CarDetail = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, slug } = useParams<{ id?: string; slug?: string }>();
+  const identifier = slug || id;
   const [car, setCar] = useState<Car | null>(null);
   const [images, setImages] = useState<CarImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -78,40 +80,61 @@ const CarDetail = () => {
   });
 
   useEffect(() => {
-    if (id) {
+    if (identifier) {
       fetchCar();
       fetchImages();
     }
-  }, [id]);
+  }, [identifier]);
 
   const fetchCar = useCallback(async () => {
-    const { data, error } = await supabase
+    // Try slug first, then fall back to id (UUID)
+    const isUuid = identifier && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+    
+    let query = supabase
       .from("cars")
-      .select("id, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features, is_reserved, is_sold")
-      .eq("id", id)
-      .eq("visible_web", true)
-      .single();
+      .select("id, slug, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features, is_reserved, is_sold")
+      .eq("visible_web", true);
+
+    if (isUuid) {
+      query = query.eq("id", identifier);
+    } else {
+      query = query.eq("slug", identifier);
+    }
+
+    const { data, error } = await query.single();
 
     if (error) {
       console.error("Error fetching car:", error);
       setCar(null);
     } else {
       setCar(data as Car);
+      // Fetch images using the car's actual ID
+      if (data?.id) {
+        fetchImagesById(data.id);
+      }
     }
     setIsLoading(false);
-  }, [id]);
+  }, [identifier]);
 
-  const fetchImages = useCallback(async () => {
+  const fetchImagesById = useCallback(async (carId: string) => {
     const { data, error } = await supabase
       .from("car_images")
       .select("id, image_url, display_order")
-      .eq("car_id", id)
+      .eq("car_id", carId)
       .order("display_order", { ascending: true });
 
     if (!error && data) {
       setImages(data);
     }
-  }, [id]);
+  }, []);
+
+  const fetchImages = useCallback(async () => {
+    // Only used as fallback when we have a UUID id
+    const isUuid = identifier && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);
+    if (isUuid && identifier) {
+      fetchImagesById(identifier);
+    }
+  }, [identifier, fetchImagesById]);
 
   const allImages = useMemo(() => {
     return images.length > 0 

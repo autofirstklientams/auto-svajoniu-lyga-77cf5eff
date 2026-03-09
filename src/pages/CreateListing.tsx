@@ -307,7 +307,7 @@ const CreateListing = ({
       setFormData({
         make: "",
         model: "",
-        year: new Date().getFullYear(),
+        year: "" as any,
         price: 0,
         mileage: 0,
         fuel_type: "",

@@ -20,7 +20,7 @@ interface DraggableImageGridProps {
   showAiBackground?: boolean;
 }
 
-export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, title, carId, showAiBackground = false }: DraggableImageGridProps) {
+export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, onRotateImage, title, carId, showAiBackground = false }: DraggableImageGridProps) {
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const {

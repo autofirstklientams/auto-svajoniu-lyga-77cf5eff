@@ -1,8 +1,9 @@
-import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, Undo2 } from "lucide-react";
+import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, Undo2, RotateCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { DraggableImage } from "./types";
+import { useState } from "react";
 
 interface ImageGridItemProps {
   img: DraggableImage;
@@ -29,6 +30,36 @@ interface ImageGridItemProps {
   onUndoBackground: (img: DraggableImage) => void;
   onMakeMain: (index: number) => void;
   onMoveImage: (index: number, direction: -1 | 1) => void;
+  onRotateImage?: (img: DraggableImage) => void;
+}
+
+function rotateImage(imageUrl: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      // Swap width/height for 90° rotation
+      canvas.width = img.height;
+      canvas.height = img.width;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("No canvas context")); return; }
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate(Math.PI / 2);
+      ctx.drawImage(img, -img.width / 2, -img.height / 2);
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) { reject(new Error("Failed to create blob")); return; }
+          const newUrl = URL.createObjectURL(blob);
+          resolve(newUrl);
+        },
+        "image/jpeg",
+        0.92
+      );
+    };
+    img.onerror = () => reject(new Error("Failed to load image for rotation"));
+    img.src = imageUrl;
+  });
 }
 
 export function ImageGridItem({
@@ -55,8 +86,36 @@ export function ImageGridItem({
   onAiBackground,
   onUndoBackground,
   onMakeMain,
-  onMoveImage
+  onMoveImage,
+  onRotateImage
 }: ImageGridItemProps) {
+  const [isRotating, setIsRotating] = useState(false);
+
+  const handleRotate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (isRotating || isProcessing) return;
+    setIsRotating(true);
+    try {
+      const rotatedUrl = await rotateImage(img.url);
+      // If the image has a file (new upload), create a new File from the rotated blob
+      if (img.file) {
+        const response = await fetch(rotatedUrl);
+        const blob = await response.blob();
+        const rotatedFile = new File([blob], img.file.name, { type: "image/jpeg", lastModified: Date.now() });
+        // Use onRotateImage callback if available
+        if (onRotateImage) {
+          onRotateImage({ ...img, url: rotatedUrl, file: rotatedFile });
+        }
+      } else if (onRotateImage) {
+        onRotateImage({ ...img, url: rotatedUrl });
+      }
+    } catch (err) {
+      console.error("Rotation failed:", err);
+    } finally {
+      setIsRotating(false);
+    }
+  };
+
   return (
     <div
       draggable={!isProcessing}
@@ -80,10 +139,10 @@ export function ImageGridItem({
         loading="lazy"
       />
 
-      {isProcessing && (
+      {(isProcessing || isRotating) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 z-10">
           <Loader2 className="h-6 w-6 text-white animate-spin mb-1" />
-          <span className="text-white text-xs font-medium">AI fonas...</span>
+          <span className="text-white text-xs font-medium">{isRotating ? "Sukama..." : "AI fonas..."}</span>
         </div>
       )}
 
@@ -108,6 +167,7 @@ export function ImageGridItem({
         <GripVertical className="h-4 w-4" />
       </div>
 
+      {/* Zoom button */}
       <button
         type="button"
         onClick={(e) => { e.stopPropagation(); onPreview(index); }}
@@ -119,6 +179,21 @@ export function ImageGridItem({
       >
         <ZoomIn className="h-4 w-4 sm:h-3 sm:w-3" />
       </button>
+
+      {/* Rotate button */}
+      {onRotateImage && !isProcessing && !isRotating && (
+        <button
+          type="button"
+          onClick={handleRotate}
+          className={cn(
+            "absolute bg-black/50 hover:bg-black/70 text-white p-2 sm:p-1 rounded opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20 shadow-sm",
+            canSelect ? "top-[4.5rem] left-2 sm:top-[3.5rem] sm:left-2" : "top-10 left-1 sm:top-8 sm:left-8"
+          )}
+          title="Pasukti 90°"
+        >
+          <RotateCw className="h-4 w-4 sm:h-3 sm:w-3" />
+        </button>
+      )}
 
       {showAiBackground && carId && onReplaceUrl && !isProcessing && (
         <div className="absolute top-2 right-10 sm:top-8 sm:right-1 flex flex-col gap-2 sm:gap-1 opacity-100 z-30">

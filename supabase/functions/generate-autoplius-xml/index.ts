@@ -376,7 +376,7 @@ const featureIdMapping: Record<string, string> = {
   "Odinis salonas": "22", "Iš dalies odinis": "1029", "Alcantara": "1030",
   "Sportinės sėdynės": "31", "Tamsinti stiklai": "37", "Daugiafunkcinis vairas": "7",
   "Šildomos sėdynės": "36", "Stoglangis": "33", "Elektra valdomos sėdynės": "27",
-  "Panoraminis stogas": "50", "Autonominis šildymas": "39", "Ventiliuojamos sėdynės": "52",
+  "Panoraminis stoglangis": "50", "Panoraminis stogas": "50", "Autonominis šildymas": "39", "Ventiliuojamos sėdynės": "52",
   "Elektra valdomos sėdynės su atmintimi": "56", "Bagažinės uždangalas": "60",
   "Šildomas vairas": "77", "Masažuojančios sėdynės": "1032", "Dvi bagažinės": "1037",
   "Dvigubi stiklai": "1047", "Atlenkiamos sėdynės": "87", "Stiklo paketai": "89",

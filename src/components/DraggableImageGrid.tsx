@@ -151,7 +151,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
 
       <Dialog open={previewIndex !== null} onOpenChange={(open) => { if (!open) setPreviewIndex(null); }}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-2 sm:p-4 flex flex-col items-center justify-center bg-black/95 border-none" aria-describedby={undefined}>
-          <VisuallyHidden><DialogTitle>Nuotraukos peržiūra</DialogTitle></VisuallyHidden>
+          <DialogTitle className="sr-only">Nuotraukos peržiūra</DialogTitle>
           {previewIndex !== null && images[previewIndex] && (
             <>
               <img

@@ -144,6 +144,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
               onUndoBackground={handleUndoBackground}
               onMakeMain={makeMainPhoto}
               onMoveImage={moveImage}
+              onRotateImage={onRotateImage}
             />
           );
         })}

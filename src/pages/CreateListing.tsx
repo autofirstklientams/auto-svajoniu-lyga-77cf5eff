@@ -661,15 +661,13 @@ const CreateListing = ({
           .eq("id", car.id);
         if (error) throw error;
         
-        // Update existing images order if changed
+        // Always update all existing images order
         for (let i = 0; i < existingImages.length; i++) {
           const img = existingImages[i];
-          if (img.order !== i) {
-            await supabase
-              .from("car_images")
-              .update({ display_order: i })
-              .eq("id", img.id);
-          }
+          await supabase
+            .from("car_images")
+            .update({ display_order: i })
+            .eq("id", img.id);
         }
       } else {
         const { data: newCar, error } = await supabase

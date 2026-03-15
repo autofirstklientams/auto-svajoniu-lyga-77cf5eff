@@ -120,34 +120,43 @@ const CarCatalog = () => {
       filtered = filtered.filter((car) => selectedMakes.includes(car.make));
     }
 
+    // Always push sold cars to the end, then apply chosen sort
+    const soldSort = (a: any, b: any) => {
+      if (a.is_sold && !b.is_sold) return 1;
+      if (!a.is_sold && b.is_sold) return -1;
+      return 0;
+    };
+
     switch (sortBy) {
       case "recommended":
         filtered.sort((a, b) => {
+          const s = soldSort(a, b);
+          if (s !== 0) return s;
           if (a.is_recommended && !b.is_recommended) return -1;
           if (!a.is_recommended && b.is_recommended) return 1;
           return 0;
         });
         break;
       case "newest":
-        filtered.sort((a, b) => new Date(b.id).getTime() - new Date(a.id).getTime());
+        filtered.sort((a, b) => soldSort(a, b) || new Date(b.id).getTime() - new Date(a.id).getTime());
         break;
       case "price_asc":
-        filtered.sort((a, b) => a.price - b.price);
+        filtered.sort((a, b) => soldSort(a, b) || a.price - b.price);
         break;
       case "price_desc":
-        filtered.sort((a, b) => b.price - a.price);
+        filtered.sort((a, b) => soldSort(a, b) || b.price - a.price);
         break;
       case "year_desc":
-        filtered.sort((a, b) => b.year - a.year);
+        filtered.sort((a, b) => soldSort(a, b) || b.year - a.year);
         break;
       case "year_asc":
-        filtered.sort((a, b) => a.year - b.year);
+        filtered.sort((a, b) => soldSort(a, b) || a.year - b.year);
         break;
       case "mileage_asc":
-        filtered.sort((a, b) => (a.mileage || 0) - (b.mileage || 0));
+        filtered.sort((a, b) => soldSort(a, b) || (a.mileage || 0) - (b.mileage || 0));
         break;
       case "mileage_desc":
-        filtered.sort((a, b) => (b.mileage || 0) - (a.mileage || 0));
+        filtered.sort((a, b) => soldSort(a, b) || (b.mileage || 0) - (a.mileage || 0));
         break;
     }
 

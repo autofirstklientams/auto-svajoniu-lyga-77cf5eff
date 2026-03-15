@@ -603,8 +603,10 @@ const handler = async (req: Request): Promise<Response> => {
     for (const car of carsToExport) {
       xml += '<cars>\n';
       
-      // external_id (required)
-      xml += `<external_id>${escapeXml(car.id)}</external_id>\n`;
+      // external_id (required) - must be int(10) per Autoplius docs
+      const numericExternalId = uuidToNumericId(car.id);
+      xml += `<external_id>${numericExternalId}</external_id>\n`;
+      console.log(`Car ${car.make} ${car.model} (${car.year}) -> external_id: ${numericExternalId}`);
       
       // sell_price (required)
       xml += `<sell_price>${car.price}</sell_price>\n`;
@@ -1092,6 +1094,20 @@ function escapeXml(str: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&apos;');
+}
+
+// Convert UUID to a stable numeric ID (max 10 digits) for Autoplius external_id
+function uuidToNumericId(uuid: string): string {
+  // Remove hyphens and take first 15 hex chars, convert to number, then mod to fit 10 digits
+  const hex = uuid.replace(/-/g, '').substring(0, 15);
+  // Parse as base-16 integer, then take modulo to ensure max 10 digits
+  let num = 0n;
+  for (const char of hex) {
+    num = num * 16n + BigInt(parseInt(char, 16));
+  }
+  // Ensure it fits in 10 digits (max 2147483647 for safety, or 9999999999)
+  const result = Number(num % 9999999999n) + 1; // +1 to avoid 0
+  return result.toString();
 }
 
 serve(handler);

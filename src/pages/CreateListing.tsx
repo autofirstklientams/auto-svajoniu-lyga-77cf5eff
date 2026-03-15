@@ -1214,6 +1214,7 @@ const CreateListing = ({
                 onReorder={handleReorderExistingImages}
                 onRemove={handleRemoveExistingImage}
                 onReplaceUrl={handleReplaceExistingImageUrl}
+                onRotateImage={handleRotateExistingImage}
                 title="Esamos nuotraukos:"
                 carId={car?.id}
                 showAiBackground={isSuperAdmin && !!car?.id}
@@ -1223,6 +1224,7 @@ const CreateListing = ({
                 images={imagePreviews.map((preview, index) => ({ id: `new-${index}`, url: preview, isNew: true }))}
                 onReorder={handleReorderNewImages}
                 onRemove={handleRemoveNewImage}
+                onRotateImage={handleRotateNewImage}
                 title="Naujos nuotraukos:"
               />
 
@@ -1230,6 +1232,7 @@ const CreateListing = ({
                 images={importedImageUrls.map((url, index) => ({ id: `imported-${index}`, url }))}
                 onReorder={handleReorderImportedImages}
                 onRemove={handleRemoveImportedImage}
+                onRotateImage={handleRotateImportedImage}
                 title={`Importuotos nuotraukos (${importedImageUrls.length}):`}
               />
             </div>

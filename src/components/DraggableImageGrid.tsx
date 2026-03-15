@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useDragAndDrop, useAiBackground } from "./draggable-image-grid/hooks";
 import { ImageGridItem } from "./draggable-image-grid/ImageGridItem";
 import { DraggableImage } from "./draggable-image-grid/types";

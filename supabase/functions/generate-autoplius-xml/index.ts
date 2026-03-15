@@ -875,6 +875,121 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("XML generated successfully");
 
+    // ==================== DIAGNOSE MODE ====================
+    if (action === "diagnose") {
+      const diagnostics = [];
+      for (const car of carsToExport) {
+        const issues: string[] = [];
+        const warnings: string[] = [];
+        const carImages = imagesByCarId[car.id] || [];
+        
+        // Required field checks
+        const makeId = makeIdMapping[car.make] || makeIdMapping[car.make?.trim()];
+        if (!makeId) issues.push(`make "${car.make}" nerastas Autoplius mapping'e`);
+        
+        // Model ID check
+        let resolvedModelId = "";
+        if (makeId && modelIdCache[makeId]) {
+          const modelLower = car.model?.trim().toLowerCase() || "";
+          resolvedModelId = modelIdCache[makeId][modelLower] || "";
+          if (!resolvedModelId) {
+            for (const [name, id] of Object.entries(modelIdCache[makeId])) {
+              if (name === modelLower || modelLower.startsWith(name) || name.startsWith(modelLower)) {
+                resolvedModelId = id;
+                break;
+              }
+            }
+          }
+          if (!resolvedModelId && modelLower.includes(' ')) {
+            const firstWord = modelLower.split(' ')[0];
+            resolvedModelId = modelIdCache[makeId][firstWord] || "";
+          }
+        }
+        if (!resolvedModelId) {
+          const kitaId = (makeId && modelIdCache[makeId]) ? (modelIdCache[makeId]["-kita-"] || "") : "";
+          if (kitaId) {
+            warnings.push(`model "${car.model}" nerastas – naudojamas "-kita-" (${kitaId})`);
+            resolvedModelId = kitaId;
+          } else {
+            issues.push(`model "${car.model}" nerastas ir nėra "-kita-" fallback`);
+          }
+        }
+        
+        if (!car.vin) warnings.push("Nėra VIN numerio");
+        if (!car.body_type) warnings.push(`Nėra kėbulo tipo – naudojamas default "Sedanas"`);
+        if (!car.first_reg_date) warnings.push(`Nėra pirmosios registracijos datos – naudojama ${car.year}-01`);
+        if (!car.fuel_type) warnings.push("Nėra kuro tipo – naudojamas default Benzinas");
+        if (!car.euro_standard) warnings.push("Nėra Euro standarto");
+        if (!car.mot_date) warnings.push("Nėra TA datos");
+        if (!car.origin_country) warnings.push("Nėra kilmės šalies");
+        if (!car.mileage) warnings.push("Nėra ridai");
+        if (!car.engine_capacity) warnings.push("Nėra variklio tūrio");
+        if (!car.power_kw) warnings.push("Nėra galios (kW)");
+        if (!car.color) warnings.push("Nėra spalvos");
+        if (car.color && !colorMapping[car.color]) issues.push(`Spalva "${car.color}" neturi Autoplius mapping'o`);
+        if (car.body_type && !bodyTypeMapping[car.body_type]) issues.push(`Kėbulo tipas "${car.body_type}" neturi Autoplius mapping'o`);
+        if (car.fuel_type && !fuelTypeMapping[car.fuel_type]) issues.push(`Kuro tipas "${car.fuel_type}" neturi Autoplius mapping'o`);
+        if (car.transmission && !transmissionMapping[car.transmission]) issues.push(`Pavarų dėžė "${car.transmission}" neturi mapping'o`);
+        
+        // Photo checks
+        if (carImages.length === 0 && !car.image_url) {
+          issues.push("Nėra nuotraukų!");
+        } else {
+          const totalPhotos = carImages.length + (car.image_url && !carImages.some(img => img.image_url === car.image_url) ? 1 : 0);
+          if (totalPhotos > 30) warnings.push(`Daug nuotraukų (${totalPhotos}) – Autoplius gali turėti limitą`);
+        }
+        
+        // Check a sample photo URL accessibility
+        const samplePhotoUrl = carImages[0]?.image_url || car.image_url;
+        let photoAccessible = "nepatikrindta";
+        if (samplePhotoUrl) {
+          try {
+            const photoResp = await fetch(samplePhotoUrl, { method: "HEAD" });
+            photoAccessible = photoResp.ok ? "✓ pasiekiama" : `✗ klaida ${photoResp.status}`;
+          } catch (e) {
+            photoAccessible = `✗ fetch klaida: ${e}`;
+          }
+        }
+        
+        // Description length
+        const descLength = car.description?.length || 0;
+        if (descLength > 10000) warnings.push(`Aprašymas labai ilgas (${descLength} simbolių)`);
+        if (descLength === 0) warnings.push("Nėra aprašymo");
+        
+        diagnostics.push({
+          car: `${car.make} ${car.model} (${car.year})`,
+          external_id: uuidToNumericId(car.id),
+          uuid: car.id,
+          make_id: makeId || "NERASTAS",
+          model_id: resolvedModelId || "NERASTAS",
+          sdk_code: car.sdk_code || null,
+          vin: car.vin || null,
+          body_type: car.body_type || "NULL → default Sedanas",
+          fuel_type: car.fuel_type || "NULL → default Benzinas",
+          first_reg_date: car.first_reg_date || `NULL → ${car.year}-01`,
+          photos_count: carImages.length,
+          sample_photo: photoAccessible,
+          description_length: descLength,
+          issues: issues.length > 0 ? issues : ["Jokių kritinių problemų"],
+          warnings: warnings.length > 0 ? warnings : ["Jokių įspėjimų"],
+          status: issues.length > 0 ? "❌ KLAIDA" : warnings.length > 0 ? "⚠️ ĮSPĖJIMAI" : "✅ OK",
+        });
+      }
+      
+      return new Response(
+        JSON.stringify({ 
+          total_cars: carsToExport.length,
+          diagnostics,
+          xml_size_bytes: new TextEncoder().encode(xml).length,
+          feed_url: `${supabaseUrl}/functions/v1/generate-autoplius-xml`,
+        }, null, 2),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json; charset=utf-8", ...corsHeaders },
+        }
+      );
+    }
+
     if (action === "push") {
       const pushResult = await pushXmlToAutoplius(xml);
 

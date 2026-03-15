@@ -14,7 +14,7 @@ export const CAR_FEATURES = {
     options: [
       "Odinis salonas", "Iš dalies odinis", "Alcantara", "Sportinės sėdynės", "Tamsinti stiklai",
       "Daugiafunkcinis vairas", "Šildomos sėdynės", "Stoglangis", "Elektra valdomos sėdynės",
-      "Panoraminis stogas", "Autonominis šildymas", "Ventiliuojamos sėdynės", "Elektra valdomos sėdynės su atmintimi",
+      "Panoraminis stoglangis", "Autonominis šildymas", "Ventiliuojamos sėdynės", "Elektra valdomos sėdynės su atmintimi",
       "Bagažinės uždangalas", "Šildomas vairas", "Masažuojančios sėdynės", "Dvi bagažinės", "Dvigubi stiklai",
       "Atlenkiamos sėdynės", "Stiklo paketai", "Personalinė ventiliacija", "Personalinis apšvietimas"
     ]

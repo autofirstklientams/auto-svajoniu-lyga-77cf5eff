@@ -553,6 +553,50 @@ const CreateListing = ({
     setExistingImages(prev => prev.map(img => img.id === id ? { ...img, url: newUrl } : img));
   }, []);
 
+  const handleRotateExistingImage = useCallback(async (updatedImg: DraggableImage) => {
+    // For existing images, upload the rotated version and update DB
+    if (!car?.id) return;
+    try {
+      const response = await fetch(updatedImg.url);
+      const blob = await response.blob();
+      const fileName = `${car.id}/${Date.now()}-rotated.jpg`;
+      const { error: uploadError } = await supabase.storage.from("car-images").upload(fileName, blob, { contentType: "image/jpeg", upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from("car-images").getPublicUrl(fileName);
+      await supabase.from("car_images").update({ image_url: publicUrl }).eq("id", updatedImg.id);
+      setExistingImages(prev => prev.map(img => img.id === updatedImg.id ? { ...img, url: publicUrl } : img));
+      toast.success("Nuotrauka pasukta!");
+    } catch (err) {
+      console.error("Rotate existing image error:", err);
+      toast.error("Nepavyko pasukti nuotraukos");
+    }
+  }, [car?.id]);
+
+  const handleRotateNewImage = useCallback((updatedImg: DraggableImage) => {
+    const index = parseInt(updatedImg.id.replace('new-', ''));
+    setImagePreviews(prev => {
+      const next = [...prev];
+      next[index] = updatedImg.url;
+      return next;
+    });
+    if (updatedImg.file) {
+      setImageFiles(prev => {
+        const next = [...prev];
+        next[index] = updatedImg.file!;
+        return next;
+      });
+    }
+  }, []);
+
+  const handleRotateImportedImage = useCallback((updatedImg: DraggableImage) => {
+    const index = parseInt(updatedImg.id.replace('imported-', ''));
+    setImportedImageUrls(prev => {
+      const next = [...prev];
+      next[index] = updatedImg.url;
+      return next;
+    });
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -1170,6 +1214,7 @@ const CreateListing = ({
                 onReorder={handleReorderExistingImages}
                 onRemove={handleRemoveExistingImage}
                 onReplaceUrl={handleReplaceExistingImageUrl}
+                onRotateImage={handleRotateExistingImage}
                 title="Esamos nuotraukos:"
                 carId={car?.id}
                 showAiBackground={isSuperAdmin && !!car?.id}
@@ -1179,6 +1224,7 @@ const CreateListing = ({
                 images={imagePreviews.map((preview, index) => ({ id: `new-${index}`, url: preview, isNew: true }))}
                 onReorder={handleReorderNewImages}
                 onRemove={handleRemoveNewImage}
+                onRotateImage={handleRotateNewImage}
                 title="Naujos nuotraukos:"
               />
 
@@ -1186,6 +1232,7 @@ const CreateListing = ({
                 images={importedImageUrls.map((url, index) => ({ id: `imported-${index}`, url }))}
                 onReorder={handleReorderImportedImages}
                 onRemove={handleRemoveImportedImage}
+                onRotateImage={handleRotateImportedImage}
                 title={`Importuotos nuotraukos (${importedImageUrls.length}):`}
               />
             </div>

@@ -14,12 +14,13 @@ interface DraggableImageGridProps {
   onReorder: (images: DraggableImage[]) => void;
   onRemove: (id: string) => void;
   onReplaceUrl?: (id: string, newUrl: string) => void;
+  onRotateImage?: (updatedImg: DraggableImage) => void;
   title: string;
   carId?: string;
   showAiBackground?: boolean;
 }
 
-export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, title, carId, showAiBackground = false }: DraggableImageGridProps) {
+export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, onRotateImage, title, carId, showAiBackground = false }: DraggableImageGridProps) {
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const {
@@ -143,6 +144,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
               onUndoBackground={handleUndoBackground}
               onMakeMain={makeMainPhoto}
               onMoveImage={moveImage}
+              onRotateImage={onRotateImage}
             />
           );
         })}

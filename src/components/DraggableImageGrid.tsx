@@ -14,6 +14,7 @@ interface DraggableImageGridProps {
   onReorder: (images: DraggableImage[]) => void;
   onRemove: (id: string) => void;
   onReplaceUrl?: (id: string, newUrl: string) => void;
+  onRotateImage?: (updatedImg: DraggableImage) => void;
   title: string;
   carId?: string;
   showAiBackground?: boolean;

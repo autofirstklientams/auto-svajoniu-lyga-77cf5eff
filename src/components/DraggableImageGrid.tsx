@@ -2,7 +2,6 @@ import { useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { useDragAndDrop, useAiBackground } from "./draggable-image-grid/hooks";
 import { ImageGridItem } from "./draggable-image-grid/ImageGridItem";
 import { DraggableImage } from "./draggable-image-grid/types";
@@ -152,7 +151,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
 
       <Dialog open={previewIndex !== null} onOpenChange={(open) => { if (!open) setPreviewIndex(null); }}>
         <DialogContent className="max-w-[95vw] max-h-[95vh] p-2 sm:p-4 flex flex-col items-center justify-center bg-black/95 border-none" aria-describedby={undefined}>
-          <VisuallyHidden><DialogTitle>Nuotraukos peržiūra</DialogTitle></VisuallyHidden>
+          <DialogTitle className="sr-only">Nuotraukos peržiūra</DialogTitle>
           {previewIndex !== null && images[previewIndex] && (
             <>
               <img

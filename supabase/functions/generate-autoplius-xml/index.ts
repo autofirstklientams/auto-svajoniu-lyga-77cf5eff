@@ -438,7 +438,8 @@ const handler = async (req: Request): Promise<Response> => {
 
   try {
     const payload = await getRequestPayload(req);
-    const action = payload.action === "push" ? "push" : "download";
+    const urlAction = new URL(req.url).searchParams.get("action");
+    const action = urlAction || payload.action || "download";
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;

@@ -197,7 +197,13 @@ const PartnerDashboard = () => {
 
       const { data, error } = await query;
       if (error) throw error;
-      setCars(data || []);
+      // Sort: sold cars go to the end, rest keep created_at desc order
+      const sorted = (data || []).sort((a: any, b: any) => {
+        if (a.is_sold && !b.is_sold) return 1;
+        if (!a.is_sold && b.is_sold) return -1;
+        return 0; // preserve existing created_at desc order
+      });
+      setCars(sorted);
     } catch (error: any) {
       const now = Date.now();
       if (now - (lastCarsErrorAtRef.current || 0) > 4000) {

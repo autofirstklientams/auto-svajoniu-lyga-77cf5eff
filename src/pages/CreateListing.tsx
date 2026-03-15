@@ -557,9 +557,11 @@ const CreateListing = ({
     // For existing images, upload the rotated version and update DB
     if (!car?.id) return;
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Neprisijungęs");
       const response = await fetch(updatedImg.url);
       const blob = await response.blob();
-      const fileName = `${car.id}/${Date.now()}-rotated.jpg`;
+      const fileName = `${user.id}/${Date.now()}-rotated.jpg`;
       const { error: uploadError } = await supabase.storage.from("car-images").upload(fileName, blob, { contentType: "image/jpeg", upsert: true });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from("car-images").getPublicUrl(fileName);

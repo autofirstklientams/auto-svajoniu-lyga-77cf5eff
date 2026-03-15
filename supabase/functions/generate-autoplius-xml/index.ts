@@ -603,8 +603,10 @@ const handler = async (req: Request): Promise<Response> => {
     for (const car of carsToExport) {
       xml += '<cars>\n';
       
-      // external_id (required)
-      xml += `<external_id>${escapeXml(car.id)}</external_id>\n`;
+      // external_id (required) - must be int(10) per Autoplius docs
+      const numericExternalId = uuidToNumericId(car.id);
+      xml += `<external_id>${numericExternalId}</external_id>\n`;
+      console.log(`Car ${car.make} ${car.model} (${car.year}) -> external_id: ${numericExternalId}`);
       
       // sell_price (required)
       xml += `<sell_price>${car.price}</sell_price>\n`;

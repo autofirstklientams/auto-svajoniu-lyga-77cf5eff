@@ -1,4 +1,4 @@
-import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, Undo2, RotateCw } from "lucide-react";
+import { X, GripVertical, ChevronLeft, ChevronRight, Sparkles, Loader2, ZoomIn, Undo2, RotateCw, Crop } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,7 @@ interface ImageGridItemProps {
   onMakeMain: (index: number) => void;
   onMoveImage: (index: number, direction: -1 | 1) => void;
   onRotateImage?: (img: DraggableImage) => void;
+  onCropImage?: (img: DraggableImage) => void;
 }
 
 function rotateImage(imageUrl: string): Promise<string> {
@@ -87,7 +88,8 @@ export function ImageGridItem({
   onUndoBackground,
   onMakeMain,
   onMoveImage,
-  onRotateImage
+  onRotateImage,
+  onCropImage
 }: ImageGridItemProps) {
   const [isRotating, setIsRotating] = useState(false);
 
@@ -192,6 +194,21 @@ export function ImageGridItem({
           title="Pasukti 90°"
         >
           <RotateCw className="h-4 w-4 sm:h-3 sm:w-3" />
+        </button>
+      )}
+
+      {/* Crop button */}
+      {onCropImage && !isProcessing && !isRotating && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onCropImage(img); }}
+          className={cn(
+            "absolute bg-black/50 hover:bg-black/70 text-white p-2 sm:p-1 rounded opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20 shadow-sm",
+            canSelect ? "top-[7rem] left-2 sm:top-[5rem] sm:left-2" : "top-[4.5rem] left-1 sm:top-[3.5rem] sm:left-8"
+          )}
+          title="Apkarpyti"
+        >
+          <Crop className="h-4 w-4 sm:h-3 sm:w-3" />
         </button>
       )}
 

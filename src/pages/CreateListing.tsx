@@ -1261,6 +1261,7 @@ const CreateListing = ({
                 onRemove={handleRemoveExistingImage}
                 onReplaceUrl={handleReplaceExistingImageUrl}
                 onRotateImage={handleRotateExistingImage}
+                onCropImage={handleCropExistingImage}
                 title="Esamos nuotraukos:"
                 carId={car?.id}
                 showAiBackground={isSuperAdmin && !!car?.id}

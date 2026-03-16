@@ -31,6 +31,7 @@ interface ImageGridItemProps {
   onMakeMain: (index: number) => void;
   onMoveImage: (index: number, direction: -1 | 1) => void;
   onRotateImage?: (img: DraggableImage) => void;
+  onCropImage?: (img: DraggableImage) => void;
 }
 
 function rotateImage(imageUrl: string): Promise<string> {

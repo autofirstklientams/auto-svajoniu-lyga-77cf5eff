@@ -197,6 +197,21 @@ export function ImageGridItem({
         </button>
       )}
 
+      {/* Crop button */}
+      {onCropImage && !isProcessing && !isRotating && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onCropImage(img); }}
+          className={cn(
+            "absolute bg-black/50 hover:bg-black/70 text-white p-2 sm:p-1 rounded opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity z-20 shadow-sm",
+            canSelect ? "top-[7rem] left-2 sm:top-[5rem] sm:left-2" : "top-[4.5rem] left-1 sm:top-[3.5rem] sm:left-8"
+          )}
+          title="Apkarpyti"
+        >
+          <Crop className="h-4 w-4 sm:h-3 sm:w-3" />
+        </button>
+      )}
+
       {showAiBackground && carId && onReplaceUrl && !isProcessing && (
         <div className="absolute top-2 right-10 sm:top-8 sm:right-1 flex flex-col gap-2 sm:gap-1 opacity-100 z-30">
           {hasAiProcessed ? (

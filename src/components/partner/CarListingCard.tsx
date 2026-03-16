@@ -234,6 +234,12 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
                 <span>TA iki {car.mot_date.substring(0, 7)}</span>
               </>
             )}
+            {car.sdk_code && (
+              <>
+                <span className="text-border">|</span>
+                <span className="font-medium text-foreground/70">SDK: {car.sdk_code}</span>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

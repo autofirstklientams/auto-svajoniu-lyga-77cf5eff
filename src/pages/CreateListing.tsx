@@ -599,6 +599,52 @@ const CreateListing = ({
     });
   }, []);
 
+  // Crop handlers — same logic as rotate, just replaces the image with the cropped version
+  const handleCropExistingImage = useCallback(async (updatedImg: DraggableImage) => {
+    if (!car?.id) return;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("Neprisijungęs");
+      const response = await fetch(updatedImg.url);
+      const blob = await response.blob();
+      const fileName = `${user.id}/${Date.now()}-cropped.jpg`;
+      const { error: uploadError } = await supabase.storage.from("car-images").upload(fileName, blob, { contentType: "image/jpeg", upsert: true });
+      if (uploadError) throw uploadError;
+      const { data: { publicUrl } } = supabase.storage.from("car-images").getPublicUrl(fileName);
+      await supabase.from("car_images").update({ image_url: publicUrl }).eq("id", updatedImg.id);
+      setExistingImages(prev => prev.map(img => img.id === updatedImg.id ? { ...img, url: publicUrl } : img));
+      toast.success("Nuotrauka apkarpyta!");
+    } catch (err) {
+      console.error("Crop existing image error:", err);
+      toast.error("Nepavyko apkarpyti nuotraukos");
+    }
+  }, [car?.id]);
+
+  const handleCropNewImage = useCallback((updatedImg: DraggableImage) => {
+    const index = parseInt(updatedImg.id.replace('new-', ''));
+    setImagePreviews(prev => {
+      const next = [...prev];
+      next[index] = updatedImg.url;
+      return next;
+    });
+    if (updatedImg.file) {
+      setImageFiles(prev => {
+        const next = [...prev];
+        next[index] = updatedImg.file!;
+        return next;
+      });
+    }
+  }, []);
+
+  const handleCropImportedImage = useCallback((updatedImg: DraggableImage) => {
+    const index = parseInt(updatedImg.id.replace('imported-', ''));
+    setImportedImageUrls(prev => {
+      const next = [...prev];
+      next[index] = updatedImg.url;
+      return next;
+    });
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     

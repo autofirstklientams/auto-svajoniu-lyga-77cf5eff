@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, CheckSquare } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { useDragAndDrop, useAiBackground } from "./draggable-image-grid/hooks";
 import { ImageGridItem } from "./draggable-image-grid/ImageGridItem";
+import { ImageCropDialog } from "./draggable-image-grid/ImageCropDialog";
 import { DraggableImage } from "./draggable-image-grid/types";
 
 export type { DraggableImage };
@@ -14,13 +15,15 @@ interface DraggableImageGridProps {
   onRemove: (id: string) => void;
   onReplaceUrl?: (id: string, newUrl: string) => void;
   onRotateImage?: (updatedImg: DraggableImage) => void;
+  onCropImage?: (updatedImg: DraggableImage) => void;
   title: string;
   carId?: string;
   showAiBackground?: boolean;
 }
 
-export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, onRotateImage, title, carId, showAiBackground = false }: DraggableImageGridProps) {
+export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, onRotateImage, onCropImage, title, carId, showAiBackground = false }: DraggableImageGridProps) {
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
+  const [croppingImage, setCroppingImage] = useState<DraggableImage | null>(null);
 
   const {
     draggedIndex,
@@ -45,6 +48,21 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
     clearSelectionForAi,
     handleBulkAiBackground
   } = useAiBackground(images, carId, onReplaceUrl);
+
+  const handleCropRequest = useCallback((img: DraggableImage) => {
+    setCroppingImage(img);
+  }, []);
+
+  const handleCropComplete = useCallback((blob: Blob) => {
+    if (!croppingImage || !onCropImage) return;
+    const newUrl = URL.createObjectURL(blob);
+    const croppedFile = new File([blob], croppingImage.file?.name || "cropped.jpg", {
+      type: "image/jpeg",
+      lastModified: Date.now(),
+    });
+    onCropImage({ ...croppingImage, url: newUrl, file: croppedFile });
+    setCroppingImage(null);
+  }, [croppingImage, onCropImage]);
 
   if (images.length === 0) return null;
 
@@ -144,6 +162,7 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
               onMakeMain={makeMainPhoto}
               onMoveImage={moveImage}
               onRotateImage={onRotateImage}
+              onCropImage={onCropImage ? handleCropRequest : undefined}
             />
           );
         })}
@@ -186,6 +205,15 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
           )}
         </DialogContent>
       </Dialog>
+
+      {croppingImage && (
+        <ImageCropDialog
+          open={!!croppingImage}
+          imageUrl={croppingImage.url}
+          onClose={() => setCroppingImage(null)}
+          onCropComplete={handleCropComplete}
+        />
+      )}
     </div>
   );
 }

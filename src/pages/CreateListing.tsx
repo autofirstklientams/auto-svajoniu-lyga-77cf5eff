@@ -1281,6 +1281,7 @@ const CreateListing = ({
                 onReorder={handleReorderImportedImages}
                 onRemove={handleRemoveImportedImage}
                 onRotateImage={handleRotateImportedImage}
+                onCropImage={handleCropImportedImage}
                 title={`Importuotos nuotraukos (${importedImageUrls.length}):`}
               />
             </div>

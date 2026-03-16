@@ -1272,6 +1272,7 @@ const CreateListing = ({
                 onReorder={handleReorderNewImages}
                 onRemove={handleRemoveNewImage}
                 onRotateImage={handleRotateNewImage}
+                onCropImage={handleCropNewImage}
                 title="Naujos nuotraukos:"
               />
 

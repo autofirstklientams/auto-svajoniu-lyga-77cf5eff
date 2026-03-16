@@ -88,7 +88,8 @@ export function ImageGridItem({
   onUndoBackground,
   onMakeMain,
   onMoveImage,
-  onRotateImage
+  onRotateImage,
+  onCropImage
 }: ImageGridItemProps) {
   const [isRotating, setIsRotating] = useState(false);
 

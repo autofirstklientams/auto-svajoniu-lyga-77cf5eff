@@ -61,6 +61,7 @@ interface Car {
   features: Record<string, string[]> | null;
   is_reserved: boolean;
   is_sold: boolean;
+  sdk_code: string | null;
 }
 
 const CarDetail = () => {
@@ -92,7 +93,7 @@ const CarDetail = () => {
     
     let query = supabase
       .from("cars")
-      .select("id, slug, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features, is_reserved, is_sold")
+      .select("id, slug, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features, is_reserved, is_sold, sdk_code")
       .eq("visible_web", true);
 
     if (isUuid) {
@@ -493,12 +494,12 @@ const CarDetail = () => {
                 </div>
 
                 {/* Additional specs */}
-                {(car.engine_capacity || car.power_kw || car.vin || car.steering_wheel) && (
+                {(car.engine_capacity || car.power_kw || car.vin || car.steering_wheel || car.sdk_code) && (
                   <div className="mt-4 pt-4 border-t grid grid-cols-2 md:grid-cols-4 gap-4">
                     {car.engine_capacity && (
                       <div className="p-3 bg-muted/50 rounded-lg">
                         <p className="text-xs text-muted-foreground">Variklis</p>
-                        <p className="font-medium text-foreground">{Math.round(car.engine_capacity * 1000)} cm³</p>
+                        <p className="font-medium text-foreground">{Math.round(car.engine_capacity)} cm³</p>
                       </div>
                     )}
                     {car.power_kw && (
@@ -517,6 +518,12 @@ const CarDetail = () => {
                       <div className="p-3 bg-muted/50 rounded-lg">
                         <p className="text-xs text-muted-foreground">VIN</p>
                         <p className="font-medium text-foreground text-sm">{car.vin}</p>
+                      </div>
+                    )}
+                    {car.sdk_code && (
+                      <div className="p-3 bg-muted/50 rounded-lg">
+                        <p className="text-xs text-muted-foreground">SDK kodas</p>
+                        <p className="font-medium text-foreground">{car.sdk_code}</p>
                       </div>
                     )}
                   </div>

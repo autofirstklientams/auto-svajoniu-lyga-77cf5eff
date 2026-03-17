@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { type PointerEvent, useCallback, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";

@@ -924,6 +924,23 @@ const handler = async (req: Request): Promise<Response> => {
           if (!resolvedModelId && modelLower.includes(' ')) {
             const firstWord = modelLower.split(' ')[0];
             resolvedModelId = modelIdCache[makeId][firstWord] || "";
+            if (!resolvedModelId) {
+              for (const [name, id] of Object.entries(modelIdCache[makeId])) {
+                if (name.startsWith(firstWord + ' ') || name.replace(' klasė', '') === firstWord) {
+                  resolvedModelId = id;
+                  break;
+                }
+              }
+            }
+          }
+          if (!resolvedModelId) {
+            const firstWord = modelLower.split(' ')[0];
+            for (const [name, id] of Object.entries(modelIdCache[makeId])) {
+              if (name.split(' ')[0] === firstWord || name.replace(' klasė', '') === firstWord) {
+                resolvedModelId = id;
+                break;
+              }
+            }
           }
         }
         if (!resolvedModelId) {

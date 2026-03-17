@@ -75,7 +75,25 @@ ${forbiddenSigns}
 
 Output one photorealistic image.`;
 
-    // Call Lovable AI Gateway with the image
+    // Download the image and convert to base64 so AI Gateway doesn't need to fetch it
+    let imageBase64: string;
+    try {
+      const imgResponse = await fetch(imageUrl);
+      if (!imgResponse.ok) {
+        throw new Error(`Failed to fetch image: ${imgResponse.status}`);
+      }
+      const imgBuffer = await imgResponse.arrayBuffer();
+      const imgBytes = new Uint8Array(imgBuffer);
+      const binaryStr = Array.from(imgBytes).map(b => String.fromCharCode(b)).join('');
+      const base64 = btoa(binaryStr);
+      const contentType = imgResponse.headers.get('content-type') || 'image/jpeg';
+      imageBase64 = `data:${contentType};base64,${base64}`;
+    } catch (fetchErr) {
+      console.error('Failed to download source image:', fetchErr);
+      throw new Error('Nepavyko atsisiųsti originalios nuotraukos');
+    }
+
+    // Call Lovable AI Gateway with the base64 image
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -95,7 +113,7 @@ Output one photorealistic image.`;
               {
                 type: 'image_url',
                 image_url: {
-                  url: imageUrl,
+                  url: imageBase64,
                 },
               },
             ],

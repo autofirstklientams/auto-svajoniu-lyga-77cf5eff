@@ -199,19 +199,14 @@ export function useAiBackground(
       return;
     }
 
-    if (!window.confirm(`Ar tikrai norite pakeisti ${imagesToProcess.length} nuotraukų fonus? Tai gali užtrukti (po ~10s kiekvienai).`)) {
-      return;
-    }
-
     let successCount = 0;
     let failCount = 0;
-    
-    toast.info(`Pradedamas fono keitimas (${imagesToProcess.length} nuotr.). Prašome palaukti...`);
 
     for (let i = 0; i < imagesToProcess.length; i++) {
       const img = imagesToProcess[i];
       const imageIndex = images.findIndex(im => im.id === img.id);
       
+      toast.info(`Keičiamas fonas ${i + 1}/${imagesToProcess.length}...`);
       setProcessingIds(prev => new Set(prev).add(img.id));
       
       try {
@@ -247,11 +242,7 @@ export function useAiBackground(
 
         onReplaceUrl(img.id, data.url);
         successCount++;
-        setSelectedForAi(prev => {
-          const next = new Set(prev);
-          next.delete(img.id);
-          return next;
-        });
+        toast.success(`Nuotrauka ${i + 1}/${imagesToProcess.length} – fonas pakeistas! Spauskite ↩ grąžinti.`);
       } catch (err: any) {
         console.error('Bulk AI error for image', imageIndex, err);
         setOriginalUrls(prev => {
@@ -260,8 +251,14 @@ export function useAiBackground(
           return next;
         });
         failCount++;
+        toast.error(`Nuotrauka ${i + 1} – nepavyko: ${err.message}`);
       } finally {
         setProcessingIds(prev => {
+          const next = new Set(prev);
+          next.delete(img.id);
+          return next;
+        });
+        setSelectedForAi(prev => {
           const next = new Set(prev);
           next.delete(img.id);
           return next;
@@ -273,11 +270,9 @@ export function useAiBackground(
       }
     }
     
-    if (successCount > 0) {
-      toast.success(`Sėkmingai pakeistas ${successCount} nuotraukų fonas!`);
-    }
-    if (failCount > 0) {
-      toast.error(`Nepavyko pakeisti ${failCount} nuotraukų fono.`);
+    if (imagesToProcess.length > 1) {
+      if (successCount > 0) toast.success(`Baigta! Pakeista ${successCount}/${imagesToProcess.length}. Kiekvieną galite atsaukti ↩ mygtuku.`);
+      if (failCount > 0) toast.error(`Nepavyko pakeisti ${failCount} nuotraukų fono.`);
     }
   }, [carId, images, onReplaceUrl, processingIds, originalUrls, selectedForAi]);
 

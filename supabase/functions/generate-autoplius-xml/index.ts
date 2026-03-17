@@ -635,11 +635,32 @@ const handler = async (req: Request): Promise<Response> => {
             }
           }
         }
-        // Try matching first word only (e.g. "Golf" from "Golf Plus")
+        // Try matching first word only (e.g. "Golf" from "Golf Plus", "GLE 500" -> "GLE klasė")
         if (!resolvedModelId && modelLower.includes(' ')) {
           const firstWord = modelLower.split(' ')[0];
           if (modelIdCache[makeId][firstWord]) {
             resolvedModelId = modelIdCache[makeId][firstWord];
+          }
+          // Also check if any cached model starts with the first word (e.g. "gle" matches "gle klasė")
+          if (!resolvedModelId) {
+            for (const [name, id] of Object.entries(modelIdCache[makeId])) {
+              if (name.startsWith(firstWord + ' ') || name.startsWith(firstWord + ' ')) {
+                resolvedModelId = id;
+                console.log(`Fuzzy matched "${car.model}" -> "${name}" (${id})`);
+                break;
+              }
+            }
+          }
+        }
+        // Last resort: check if any cached model contains the first word as a standalone token
+        if (!resolvedModelId) {
+          const firstWord = modelLower.split(' ')[0];
+          for (const [name, id] of Object.entries(modelIdCache[makeId])) {
+            if (name.split(' ')[0] === firstWord || name.replace(' klasė', '') === firstWord) {
+              resolvedModelId = id;
+              console.log(`Class matched "${car.model}" -> "${name}" (${id})`);
+              break;
+            }
           }
         }
       }

@@ -32,7 +32,19 @@ Deno.serve(async (req) => {
       });
     }
 
-    console.log(`Processing background replacement for car ${carId}, isMainPhoto: ${isMainPhoto}`);
+    console.log(`Processing background replacement for car ${carId}, isMainPhoto: ${isMainPhoto}, imageUrl: ${imageUrl.substring(0, 100)}`);
+
+    // Normalize URL: convert render/image URLs back to object URLs and strip query params
+    let normalizedUrl = imageUrl;
+    if (normalizedUrl.includes('/storage/v1/render/image/public/')) {
+      normalizedUrl = normalizedUrl.replace('/storage/v1/render/image/public/', '/storage/v1/object/public/');
+    }
+    // Strip any query parameters (width, quality, resize, etc.)
+    const qIdx = normalizedUrl.indexOf('?');
+    if (qIdx !== -1) {
+      normalizedUrl = normalizedUrl.substring(0, qIdx);
+    }
+    console.log(`Normalized URL: ${normalizedUrl.substring(0, 100)}`);
 
     const brandingSection = isMainPhoto ? `
 === BRANDING ON WALL ===
@@ -49,12 +61,13 @@ On the back wall behind the car, place a company logo/sign reading "AUTOKOPERS" 
       ? '- No other cars, people, plants, signs (except the AUTOKOPERS sign), text, watermarks'
       : '- No other cars, people, plants, signs, logos, text, watermarks';
 
-    const prompt = `You are an expert photo compositor. Your ONLY task: remove the existing background and replace it with a SPECIFIC showroom environment. Do NOT alter the car.
+    const prompt = `You are an expert photo compositor. Your ONLY task: replace the OUTDOOR/EXTERIOR background behind and around the car with a showroom environment. Do NOT touch any part of the car itself, including dark/black areas like tires, grilles, window tints, shadows under the car, or dark paint.
 
 === CAR PRESERVATION (ABSOLUTE) ===
 - The car pixels must remain 100% unchanged: shape, color, reflections, dirt, scratches, wheels, license plate, angle, size, position in frame
 - Do NOT relight, recolor, sharpen, blur, crop, scale, or reposition the car
 - Preserve the exact pixel boundary/silhouette of the car
+- CRITICAL: Dark areas that are PART OF THE CAR (black paint, dark tires, tinted windows, grille, exhaust, shadow underneath) must NOT be treated as background. Only replace what is clearly outdoor scenery (sky, trees, buildings, road, grass, parking lot, etc.)
 
 === SHOWROOM SPECIFICATION (MUST MATCH EXACTLY) ===
 Environment: A single large empty rectangular room, no columns, no furniture, no decorations
@@ -72,6 +85,7 @@ ${forbiddenSigns}
 - No colored accent lighting, neon, spotlights
 - No visible ceiling structure, beams, or vents
 - No gradients on walls (keep solid flat white)
+- Do NOT replace dark car parts (tires, grille, black trim, tinted glass) with showroom — only replace actual outdoor background
 
 Output one photorealistic image.`;
 

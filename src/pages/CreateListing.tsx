@@ -548,10 +548,26 @@ const CreateListing = ({
   }, []);
 
   const handleReplaceExistingImageUrl = useCallback(async (id: string, newUrl: string) => {
+    // Find old image to delete from storage
+    const oldImage = existingImages.find(img => img.id === id);
+    const oldUrl = oldImage?.url;
+
     // Update in DB
     await supabase.from("car_images").update({ image_url: newUrl }).eq("id", id);
     setExistingImages(prev => prev.map(img => img.id === id ? { ...img, url: newUrl } : img));
-  }, []);
+
+    // Delete old file from storage if it's a supabase storage URL
+    if (oldUrl && oldUrl.includes("/storage/v1/object/public/car-images/")) {
+      try {
+        const filePath = oldUrl.split("/storage/v1/object/public/car-images/")[1];
+        if (filePath) {
+          await supabase.storage.from("car-images").remove([decodeURIComponent(filePath)]);
+        }
+      } catch (e) {
+        console.warn("Failed to delete old image from storage:", e);
+      }
+    }
+  }, [existingImages]);
 
   const handleRotateExistingImage = useCallback(async (updatedImg: DraggableImage) => {
     // For existing images, upload the rotated version and update DB

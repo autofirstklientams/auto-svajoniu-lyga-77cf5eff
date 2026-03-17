@@ -31,6 +31,7 @@ interface SearchableComboboxProps {
   isLoading?: boolean;
   disabled?: boolean;
   className?: string;
+  allowCustomValue?: boolean;
 }
 
 export function SearchableCombobox({
@@ -43,10 +44,20 @@ export function SearchableCombobox({
   isLoading = false,
   disabled = false,
   className,
+  allowCustomValue = false,
 }: SearchableComboboxProps) {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const selectedLabel = options.find((o) => o.value === value)?.label || value;
+
+  const handleCustomSelect = () => {
+    if (allowCustomValue && searchQuery.trim()) {
+      onValueChange(searchQuery.trim());
+      setOpen(false);
+      setSearchQuery("");
+    }
+  };
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -73,9 +84,27 @@ export function SearchableCombobox({
       </PopoverTrigger>
       <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
         <Command>
-          <CommandInput placeholder={searchPlaceholder} />
+          <CommandInput 
+            placeholder={searchPlaceholder} 
+            onValueChange={allowCustomValue ? setSearchQuery : undefined}
+          />
           <CommandList>
-            <CommandEmpty>{emptyMessage}</CommandEmpty>
+            <CommandEmpty>
+              {allowCustomValue && searchQuery.trim() ? (
+                <button
+                  type="button"
+                  className="w-full px-2 py-1.5 text-sm text-left hover:bg-accent rounded cursor-pointer"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    handleCustomSelect();
+                  }}
+                >
+                  Naudoti: <span className="font-medium">"{searchQuery.trim()}"</span>
+                </button>
+              ) : (
+                emptyMessage
+              )}
+            </CommandEmpty>
             <CommandGroup>
               {options.map((option) => (
                 <CommandItem
@@ -84,6 +113,7 @@ export function SearchableCombobox({
                   onSelect={() => {
                     onValueChange(option.value === value ? "" : option.value);
                     setOpen(false);
+                    setSearchQuery("");
                   }}
                 >
                   <Check

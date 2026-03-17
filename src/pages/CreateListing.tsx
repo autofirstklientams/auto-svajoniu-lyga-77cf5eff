@@ -902,7 +902,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label htmlFor="price">Kaina (€) *</Label>
-                <Input id="price" type="number" step="1" value={formData.price} onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })} required />
+                <Input id="price" type="number" step="1" value={formData.price || ""} onChange={(e) => setFormData({ ...formData, price: parseInt(e.target.value) || 0 })} required />
               </div>
 
               <div className="space-y-2">

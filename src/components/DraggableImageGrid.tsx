@@ -56,8 +56,10 @@ export function DraggableImageGrid({ images, onReorder, onRemove, onReplaceUrl, 
   const handleCropComplete = useCallback((blob: Blob) => {
     if (!croppingImage || !onCropImage) return;
     const newUrl = URL.createObjectURL(blob);
-    const croppedFile = new File([blob], croppingImage.file?.name || "cropped.jpg", {
-      type: "image/jpeg",
+    const ext = blob.type === "image/png" ? ".png" : ".jpg";
+    const baseName = croppingImage.file?.name?.replace(/\.[^.]+$/, "") || "cropped";
+    const croppedFile = new File([blob], baseName + ext, {
+      type: blob.type,
       lastModified: Date.now(),
     });
     onCropImage({ ...croppingImage, url: newUrl, file: croppedFile });

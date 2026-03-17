@@ -111,7 +111,7 @@ export function ImageCropDialog({ open, imageUrl, onClose, onCropComplete }: Ima
     };
   }, []);
 
-  const handlePointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if (!imageMetrics) return;
 
     event.preventDefault();

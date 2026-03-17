@@ -103,7 +103,7 @@ export function ImageCropDialog({ open, imageUrl, onClose, onCropComplete }: Ima
     });
   }, []);
 
-  const getPointerCoordinates = useCallback((event: React.PointerEvent<HTMLDivElement>) => {
+  const getPointerCoordinates = useCallback((event: PointerEvent<HTMLDivElement>) => {
     const bounds = event.currentTarget.getBoundingClientRect();
     return {
       x: clamp(event.clientX - bounds.left, 0, bounds.width),

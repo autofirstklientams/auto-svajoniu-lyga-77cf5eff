@@ -402,7 +402,7 @@ const featureIdMapping: Record<string, string> = {
   "USB-C jungtis": "1035", "Laisvų rankų įranga": "45", "Apple CarPlay / Android Auto": "1001",
   // Eksterjeras
   "Lengvojo lydinio ratlankiai": "19", "LED dienos žibintai": "34", "LED žibintai": "1002",
-  "Žibintai Xenon": "46", "Rūko žibintai": "42", "Kablys": "17",
+  "Žibintai Xenon": "46", 'Žibintai „Xenon"': "46", "Rūko žibintai": "42", "Kablys": "17",
   "Priekinių žibintų plovimo įtaisas": "25", "Stogo bagažinės laikikliai": "75",
   "Automatiškai užsilenkiantys veidrodėliai": "1005", "Žieminių padangų komplektas": "44",
   "Durelių pritraukimas": "1016", "Matriciniai žibintai": "1021",

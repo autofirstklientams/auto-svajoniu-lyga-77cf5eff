@@ -12,11 +12,11 @@ export const CAR_FEATURES = {
     title: "Salonas",
     description: "Pasirinkite vidaus komforto ir apdailos elementus",
     options: [
-      "Odinis salonas", "Iš dalies odinis", "Alcantara", "Sportinės sėdynės", "Tamsinti stiklai",
-      "Daugiafunkcinis vairas", "Šildomos sėdynės", "Stoglangis", "Elektra valdomos sėdynės",
-      "Panoraminis stoglangis", "Autonominis šildymas", "Ventiliuojamos sėdynės", "Elektra valdomos sėdynės su atmintimi",
-      "Bagažinės uždangalas", "Šildomas vairas", "Masažuojančios sėdynės", "Dvi bagažinės", "Dvigubi stiklai",
-      "Atlenkiamos sėdynės", "Stiklo paketai", "Personalinė ventiliacija", "Personalinis apšvietimas"
+      "Sportinės sėdynės", "Tamsinti stiklai", "Daugiafunkcinis vairas", "Šildomos sėdynės",
+      "Odinis salonas", "Iš dalies odinis", "Alcantara", "Stoglangis", "Elektra valdomos sėdynės",
+      "Panoraminis stogas", "Autonominis šildymas", "Ventiliuojamos sėdynės",
+      "Elektra valdomos sėdynės su atmintimi", "Bagažinės uždangalas", "Šildomas vairas",
+      "Masažuojančios sėdynės", "Dvi bagažinės", "Dvigubi stiklai"
     ]
   },
   elektronika: {
@@ -51,10 +51,10 @@ export const CAR_FEATURES = {
     title: "Eksterjeras",
     description: "Pažymėkite išorės ypatumus",
     options: [
-      "Lengvojo lydinio ratlankiai", "LED dienos žibintai", "LED žibintai", "Žibintai Xenon",
+      "Lengvojo lydinio ratlankiai", "LED dienos žibintai", "LED žibintai", 'Žibintai „Xenon"',
       "Rūko žibintai", "Kablys", "Priekinių žibintų plovimo įtaisas", "Stogo bagažinės laikikliai",
       "Automatiškai užsilenkiantys veidrodėliai", "Žieminių padangų komplektas", "Durelių pritraukimas",
-      "Matriciniai žibintai", "Dvigubi ratai", "Dvejos slankiojančios durys"
+      "Matriciniai žibintai"
     ]
   },
   kitiYpatumai: {
@@ -78,19 +78,21 @@ export const CAR_FEATURES = {
       "Galinio vaizdo kamera", "Priekinio vaizdo kamera", "360° vaizdo kamera"
     ]
   },
+  mikroautobusuYpatumai: {
+    title: "Mikroautobusų ypatumai",
+    description: "Papildomos ypatybės mikroautobusams ir komerciniams automobiliams",
+    options: [
+      "Dvigubi ratai", "Atlenkiamos sėdynės", "Stiklo paketai", "Dvejos slankiojančios durys",
+      "Personalinė ventiliacija", "Personalinis apšvietimas", "Dviguba kabina", "Bortinis",
+      "Su tentu", "Pritaikytas prekybai", "Šaldymo įranga", "Liftas"
+    ]
+  },
   elektromobiliuYpatumai: {
     title: "Elektromobilių ypatumai",
     description: "Pažymėkite ypatybes apie elektromobilį",
     options: [
       "Greitasis krovimas", "Trifazis krovimas", "Dvipusis energijos perdavimas", "Šilumos siurblys",
       "Baterijos garantija", "APVA kompensacija nepanaudota"
-    ]
-  },
-  komerciniaiYpatumai: {
-    title: "Komercinių automobilių ypatumai",
-    description: "Papildomos ypatybės komerciniams automobiliams",
-    options: [
-      "Pritaikytas prekybai", "Su tentu", "Bortinis", "Dviguba kabina", "Šaldymo įranga", "Liftas"
     ]
   }
 };

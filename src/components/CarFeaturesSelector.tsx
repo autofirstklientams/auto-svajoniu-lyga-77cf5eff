@@ -51,7 +51,7 @@ export const CAR_FEATURES = {
     title: "Eksterjeras",
     description: "Pažymėkite išorės ypatumus",
     options: [
-      "Lengvojo lydinio ratlankiai", "LED dienos žibintai", "LED žibintai", "Žibintai „Xenon"",
+      "Lengvojo lydinio ratlankiai", "LED dienos žibintai", "LED žibintai", 'Žibintai „Xenon"',
       "Rūko žibintai", "Kablys", "Priekinių žibintų plovimo įtaisas", "Stogo bagažinės laikikliai",
       "Automatiškai užsilenkiantys veidrodėliai", "Žieminių padangų komplektas", "Durelių pritraukimas",
       "Matriciniai žibintai"

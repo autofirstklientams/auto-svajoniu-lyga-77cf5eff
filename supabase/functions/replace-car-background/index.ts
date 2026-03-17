@@ -92,9 +92,9 @@ Output one photorealistic image.`;
     // Download the image and convert to base64 so AI Gateway doesn't need to fetch it
     let imageBase64: string;
     try {
-      const imgResponse = await fetch(imageUrl);
+      const imgResponse = await fetch(normalizedUrl);
       if (!imgResponse.ok) {
-        throw new Error(`Failed to fetch image: ${imgResponse.status}`);
+        throw new Error(`Failed to fetch image: ${imgResponse.status} from ${normalizedUrl.substring(0, 80)}`);
       }
       const imgBuffer = await imgResponse.arrayBuffer();
       const imgBytes = new Uint8Array(imgBuffer);

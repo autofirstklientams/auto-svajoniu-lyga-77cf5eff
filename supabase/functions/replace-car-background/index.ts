@@ -89,19 +89,48 @@ ${forbiddenSigns}
 
 Output one photorealistic image.`;
 
-    // Download the image and convert to base64 so AI Gateway doesn't need to fetch it
+    // Download image using Supabase storage client (more reliable than raw fetch)
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
     let imageBase64: string;
     try {
-      const imgResponse = await fetch(normalizedUrl);
-      if (!imgResponse.ok) {
-        throw new Error(`Failed to fetch image: ${imgResponse.status} from ${normalizedUrl.substring(0, 80)}`);
+      // Extract storage path from URL: everything after /object/public/car-images/
+      const bucketPrefix = '/storage/v1/object/public/car-images/';
+      const pathStart = normalizedUrl.indexOf(bucketPrefix);
+      if (pathStart === -1) {
+        throw new Error('URL nėra Supabase storage URL');
       }
-      const imgBuffer = await imgResponse.arrayBuffer();
-      const imgBytes = new Uint8Array(imgBuffer);
-      const binaryStr = Array.from(imgBytes).map(b => String.fromCharCode(b)).join('');
-      const base64 = btoa(binaryStr);
-      const contentType = imgResponse.headers.get('content-type') || 'image/jpeg';
-      imageBase64 = `data:${contentType};base64,${base64}`;
+      const storagePath = normalizedUrl.substring(pathStart + bucketPrefix.length);
+      console.log('Downloading from storage path:', storagePath);
+
+      const { data: fileData, error: downloadError } = await supabase.storage
+        .from('car-images')
+        .download(storagePath);
+
+      if (downloadError || !fileData) {
+        console.error('Storage download error:', downloadError);
+        // Fallback: try raw fetch with full URL
+        console.log('Trying raw fetch fallback...');
+        const imgResponse = await fetch(normalizedUrl);
+        if (!imgResponse.ok) {
+          throw new Error(`Fetch fallback failed: ${imgResponse.status}`);
+        }
+        const imgBuffer = await imgResponse.arrayBuffer();
+        const imgBytes = new Uint8Array(imgBuffer);
+        const binaryStr = Array.from(imgBytes).map(b => String.fromCharCode(b)).join('');
+        const base64 = btoa(binaryStr);
+        const contentType = imgResponse.headers.get('content-type') || 'image/jpeg';
+        imageBase64 = `data:${contentType};base64,${base64}`;
+      } else {
+        const arrayBuffer = await fileData.arrayBuffer();
+        const bytes = new Uint8Array(arrayBuffer);
+        const binaryStr = Array.from(bytes).map(b => String.fromCharCode(b)).join('');
+        const base64 = btoa(binaryStr);
+        const contentType = fileData.type || 'image/jpeg';
+        imageBase64 = `data:${contentType};base64,${base64}`;
+      }
     } catch (fetchErr) {
       console.error('Failed to download source image:', fetchErr);
       throw new Error('Nepavyko atsisiųsti originalios nuotraukos');
@@ -169,9 +198,7 @@ Output one photorealistic image.`;
     const base64Data = generatedImageUrl.replace(/^data:image\/\w+;base64,/, '');
     const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    // Reuse the supabase client created earlier
 
     const fileName = `showroom/${carId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.png`;
 

@@ -876,6 +876,7 @@ const CreateListing = ({
                   placeholder="Pasirinkite modelį"
                   searchPlaceholder="Ieškoti modelio..."
                   emptyMessage="Modelis nerastas"
+                  allowCustomValue={true}
                   isLoading={isLoadingModels}
                   disabled={!formData.make}
                 />

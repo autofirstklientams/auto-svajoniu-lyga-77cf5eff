@@ -123,7 +123,7 @@ export function ImageCropDialog({ open, imageUrl, onClose, onCropComplete }: Ima
     setCropArea({ x: point.x, y: point.y, width: 0, height: 0 });
   };
 
-  const handlePointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
     if (!isDrawing || !pointerStartRef.current) return;
 
     const point = getPointerCoordinates(event);

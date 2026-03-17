@@ -137,7 +137,7 @@ export function ImageCropDialog({ open, imageUrl, onClose, onCropComplete }: Ima
     setCropArea({ x, y, width, height });
   };
 
-  const handlePointerUp = (event: React.PointerEvent<HTMLDivElement>) => {
+  const handlePointerUp = (event: PointerEvent<HTMLDivElement>) => {
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }

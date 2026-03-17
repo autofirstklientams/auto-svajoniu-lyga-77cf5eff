@@ -31,6 +31,7 @@ interface SearchableComboboxProps {
   isLoading?: boolean;
   disabled?: boolean;
   className?: string;
+  allowCustomValue?: boolean;
 }
 
 export function SearchableCombobox({

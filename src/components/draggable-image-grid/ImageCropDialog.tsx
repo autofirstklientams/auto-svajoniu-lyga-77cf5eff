@@ -64,8 +64,7 @@ function createCroppedImage(imageSrc: string, pixelCrop: CropArea): Promise<Blob
           }
           resolve(blob);
         },
-        "image/jpeg",
-        0.92
+        "image/png"
       );
     };
 

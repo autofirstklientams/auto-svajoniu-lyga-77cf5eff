@@ -61,15 +61,20 @@ On the back wall behind the car, place a company logo/sign reading "AUTOKOPERS" 
       ? '- No other cars, people, plants, signs (except the AUTOKOPERS sign), text, watermarks'
       : '- No other cars, people, plants, signs, logos, text, watermarks';
 
-    const prompt = `You are an expert photo compositor. Your ONLY task: replace the OUTDOOR/EXTERIOR background behind and around the car with a showroom environment. Do NOT touch any part of the car itself, including dark/black areas like tires, grilles, window tints, shadows under the car, or dark paint.
+    const prompt = `You are an expert photo compositor. Analyze the image first:
 
-=== CAR PRESERVATION (ABSOLUTE) ===
+=== STEP 1: DETECT IMAGE TYPE ===
+- If this is an INTERIOR/CABIN photo (showing dashboard, steering wheel, seats, gear shift, instrument panel, infotainment screen, door panels from inside) → return the image COMPLETELY UNCHANGED. Do not modify a single pixel. Interior photos should never have background replacement.
+- If this is an EXTERIOR photo of a car → proceed with background replacement below.
+
+=== CAR PRESERVATION (ABSOLUTE — for exterior photos only) ===
 - The car pixels must remain 100% unchanged: shape, color, reflections, dirt, scratches, wheels, license plate, angle, size, position in frame
 - Do NOT relight, recolor, sharpen, blur, crop, scale, or reposition the car
 - Preserve the exact pixel boundary/silhouette of the car
-- CRITICAL: Dark areas that are PART OF THE CAR (black paint, dark tires, tinted windows, grille, exhaust, shadow underneath) must NOT be treated as background. Only replace what is clearly outdoor scenery (sky, trees, buildings, road, grass, parking lot, etc.)
+- CRITICAL: Dark areas that are PART OF THE CAR (black paint, dark tires, tinted windows, grille, exhaust, shadow underneath, dark trim, mirrors) must NOT be treated as background
+- Only replace what is clearly outdoor scenery: sky, trees, buildings, road, grass, parking lot, other cars in background, fences, poles, etc.
 
-=== SHOWROOM SPECIFICATION (MUST MATCH EXACTLY) ===
+=== SHOWROOM SPECIFICATION (MUST MATCH EXACTLY — for exterior photos only) ===
 Environment: A single large empty rectangular room, no columns, no furniture, no decorations
 Floor: Smooth polished LIGHT GREY epoxy (hex ~#D0D0D0), perfectly flat, extends to walls. Shows a soft diffused reflection of the car (not mirror-sharp, ~30% opacity)
 Walls: Flat matte white (#F0F0F0), completely blank, no panels, no windows, no doors, no trim

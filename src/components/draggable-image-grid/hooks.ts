@@ -161,7 +161,12 @@ export function useAiBackground(
       next.delete(img.id);
       return next;
     });
-    toast.success('Originalus fonas grąžintas!');
+    setSelectedForAi(prev => {
+      const next = new Set(prev);
+      next.delete(img.id);
+      return next;
+    });
+    toast.success('Originalus fonas grąžintas! Galite bandyti dar kartą.');
   }, [onReplaceUrl, originalUrls]);
 
   const toggleSelectForAi = useCallback((id: string) => {

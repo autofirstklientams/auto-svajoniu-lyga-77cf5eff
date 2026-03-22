@@ -64,7 +64,7 @@ On the back wall behind the car, place a company logo/sign reading "AUTOKOPERS" 
     const prompt = `You are an expert photo compositor. Analyze the image first:
 
 === STEP 1: DETECT IMAGE TYPE ===
-- If this is an INTERIOR/CABIN photo (showing dashboard, steering wheel, seats, gear shift, instrument panel, infotainment screen, door panels from inside) → return the image COMPLETELY UNCHANGED. Do not modify a single pixel. Interior photos should never have background replacement.
+- If this is an INTERIOR/CABIN photo (showing dashboard, steering wheel, seats, gear shift, instrument panel, infotainment screen, door panels from inside) → keep ALL interior elements 100% unchanged. ONLY replace what is visible THROUGH the car windows (outdoor scenery like sky, trees, buildings, parking lots seen through windshield/side windows/rear window) with a clean, bright, neutral white/light grey studio backdrop (~#F0F0F0). The window glass, reflections on glass, and all interior surfaces must remain untouched. Then output the result — do NOT proceed to the showroom section below.
 - If this is an EXTERIOR photo of a car → proceed with background replacement below.
 
 === CAR PRESERVATION (ABSOLUTE — for exterior photos only) ===

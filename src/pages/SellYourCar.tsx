@@ -1,44 +1,16 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Phone } from "lucide-react";
+import { Helmet } from "react-helmet";
 import CarPurchaseForm from "@/components/CarPurchaseForm";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import hero from "@/assets/hero-car.jpg";
 import { useLanguage } from "@/contexts/LanguageContext";
 
-const setMeta = (name: string, content: string) => {
-  let tag = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
-  if (!tag) {
-    tag = document.createElement("meta");
-    tag.setAttribute("name", name);
-    document.head.appendChild(tag);
-  }
-  tag.setAttribute("content", content);
-};
-
-const ensureCanonical = (href: string) => {
-  let link = document.querySelector('link[rel="canonical"]') as HTMLLinkElement | null;
-  if (!link) {
-    link = document.createElement("link");
-    link.setAttribute("rel", "canonical");
-    document.head.appendChild(link);
-  }
-  link.setAttribute("href", href);
-};
-
 export default function SellYourCar() {
   const [open, setOpen] = useState(false);
   const { t } = useLanguage();
-
-  useEffect(() => {
-    document.title = t("nav.carPurchase") + " | AutoKopers";
-    setMeta(
-      "description",
-      t("sellCar.heroDesc")
-    );
-    ensureCanonical(window.location.origin + "/sell-your-car");
-  }, [t]);
 
   return (
     <div className="min-h-screen bg-background">

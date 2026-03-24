@@ -295,8 +295,45 @@ const CarDetail = () => {
     { icon: DoorOpen, label: "Durys", value: car.doors || "-" },
   ];
 
+  const carTitle = `${car.make} ${car.model} ${car.year}`;
+  const carDesc = `${carTitle} – ${car.mileage ? car.mileage.toLocaleString() + ' km' : ''} ${car.fuel_type || ''} ${car.transmission || ''}. Kaina: ${formatPrice(car.price)}. Autokopers, Kaunas.`;
+  const carUrl = `https://www.autokopers.lt/automobiliai/${car.slug || car.id}`;
+  const carImage = allImages[0] || car.image_url || "https://www.autokopers.lt/autokopers-social.jpg";
+
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{carTitle} | Autokopers</title>
+        <meta name="description" content={carDesc} />
+        <link rel="canonical" href={carUrl} />
+        <meta property="og:title" content={`${carTitle} | Autokopers`} />
+        <meta property="og:description" content={carDesc} />
+        <meta property="og:url" content={carUrl} />
+        <meta property="og:image" content={carImage} />
+        <meta property="og:type" content="product" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Car",
+          "name": carTitle,
+          "description": car.description || carDesc,
+          "image": carImage,
+          "url": carUrl,
+          "brand": { "@type": "Brand", "name": car.make },
+          "model": car.model,
+          "vehicleModelDate": String(car.year),
+          "mileageFromOdometer": car.mileage ? { "@type": "QuantitativeValue", "value": car.mileage, "unitCode": "KMT" } : undefined,
+          "fuelType": car.fuel_type || undefined,
+          "vehicleTransmission": car.transmission || undefined,
+          "color": car.color || undefined,
+          "offers": {
+            "@type": "Offer",
+            "price": car.price,
+            "priceCurrency": "EUR",
+            "availability": car.is_sold ? "https://schema.org/SoldOut" : car.is_reserved ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock",
+            "seller": { "@type": "AutoDealer", "name": "Autokopers", "url": "https://www.autokopers.lt" }
+          }
+        })}</script>
+      </Helmet>
       <Header />
       
       <main className="container mx-auto px-4 py-4 sm:py-8">

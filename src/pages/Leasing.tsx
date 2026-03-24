@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Helmet } from "react-helmet";
 import { Calculator, ChevronRight, Info, Clock, FileCheck, CreditCard, CheckCircle2, Shield, TrendingDown, Users, Scale } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -97,6 +98,14 @@ const Leasing = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Automobilių lizingas nuo 6.9% | Autokopers</title>
+        <meta name="description" content="Automobilių lizingas ir finansavimas nuo 6.9% metinių palūkanų. Greitas sprendimas per 1 darbo dieną. Skaičiuoklė ir paraiškos forma." />
+        <link rel="canonical" href="https://www.autokopers.lt/lizingas" />
+        <meta property="og:title" content="Automobilių lizingas nuo 6.9% | Autokopers" />
+        <meta property="og:description" content="Greitas automobilių finansavimas nuo 6.9% metinių palūkanų. Sprendimas per 1 darbo dieną." />
+        <meta property="og:url" content="https://www.autokopers.lt/lizingas" />
+      </Helmet>
       <Header />
       <main>
         {/* Hero Section */}

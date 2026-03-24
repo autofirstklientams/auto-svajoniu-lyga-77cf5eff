@@ -2,11 +2,20 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import FeaturedCars from "@/components/FeaturedCars";
 import CarSearchForm from "@/components/CarSearchForm";
+import { Helmet } from "react-helmet";
 import { Search } from "lucide-react";
 
 const CarSearch = () => {
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Automobilių paieška pagal užsakymą | Autokopers</title>
+        <meta name="description" content="Ieškome automobilių visoje Europoje pagal jūsų poreikius. Patikriname istoriją, parvežame iki durų. Naudoti automobiliai su garantija Kaune." />
+        <link rel="canonical" href="https://www.autokopers.lt/car-search" />
+        <meta property="og:title" content="Automobilių paieška pagal užsakymą | Autokopers" />
+        <meta property="og:description" content="Ieškome automobilių visoje Europoje pagal jūsų poreikius. Patikriname istoriją, parvežame iki durų." />
+        <meta property="og:url" content="https://www.autokopers.lt/car-search" />
+      </Helmet>
       <Header />
       <main>
         <section className="relative min-h-[300px] flex items-center overflow-hidden bg-gradient-to-r from-primary to-primary/90">

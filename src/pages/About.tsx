@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { Helmet } from "react-helmet";
 import { Shield, Users, Award, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LoanApplicationForm from "@/components/LoanApplicationForm";
@@ -68,6 +69,14 @@ const About = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Apie mus – Autokopers | Automobilių prekyba Kaune</title>
+        <meta name="description" content="Autokopers – patikima automobilių prekybos įmonė Kaune. Siūlome naudotų automobilių pardavimą, supirkimą, lizingą ir profesionalų aptarnavimą." />
+        <link rel="canonical" href="https://www.autokopers.lt/about" />
+        <meta property="og:title" content="Apie mus – Autokopers" />
+        <meta property="og:description" content="Patikima automobilių prekybos įmonė Kaune. Pardavimas, supirkimas, lizingas." />
+        <meta property="og:url" content="https://www.autokopers.lt/about" />
+      </Helmet>
       <Header />
       <main>
         <section className="relative min-h-[400px] flex items-center overflow-hidden bg-gradient-to-r from-primary to-primary/90">

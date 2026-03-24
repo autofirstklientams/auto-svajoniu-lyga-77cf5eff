@@ -235,8 +235,12 @@ const CarCatalog = () => {
   return (
     <>
       <Helmet>
-        <title>Automobiliai | AutoKOPERS</title>
-        <meta name="description" content="Peržiūrėkite visus AutoKOPERS siūlomus automobilius. Platus pasirinkimas naudotų automobilių su patikrinta istorija." />
+        <title>Naudoti automobiliai Kaune | Autokopers</title>
+        <meta name="description" content="Naudotų automobilių katalogas Kaune. Platus pasirinkimas patikrintų automobilių su garantija ir finansavimo galimybe nuo 6.9%." />
+        <link rel="canonical" href="https://www.autokopers.lt/automobiliai" />
+        <meta property="og:title" content="Naudoti automobiliai Kaune | Autokopers" />
+        <meta property="og:description" content="Platus naudotų automobilių pasirinkimas su garantija ir finansavimu." />
+        <meta property="og:url" content="https://www.autokopers.lt/automobiliai" />
       </Helmet>
 
       <div className="min-h-screen bg-background">

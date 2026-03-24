@@ -9,10 +9,11 @@ import Footer from "@/components/Footer";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { Helmet } from "react-helmet";
 
 const Index = () => {
   const location = useLocation();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   useEffect(() => {
     if (location.hash) {
@@ -23,6 +24,35 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>{language === "lt" ? "Autokopers – Automobilių Pardavimas ir Finansavimas Kaune" : "Autokopers – Car Sales & Financing in Kaunas"}</title>
+        <meta name="description" content={language === "lt" ? "Naudotų automobilių pardavimas, supirkimas ir lizingas Kaune. Greitas finansavimas nuo 6.9%. Patikimi automobiliai su garantija." : "Used car sales, purchasing and leasing in Kaunas. Fast financing from 6.9%. Reliable cars with warranty."} />
+        <link rel="canonical" href="https://www.autokopers.lt/" />
+        <meta property="og:title" content="Autokopers – Automobilių Pardavimas ir Finansavimas" />
+        <meta property="og:description" content="Naudotų automobilių pardavimas, supirkimas ir lizingas Kaune. Greitas finansavimas nuo 6.9%." />
+        <meta property="og:url" content="https://www.autokopers.lt/" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "AutoDealer",
+          "name": "Autokopers",
+          "url": "https://www.autokopers.lt",
+          "logo": "https://www.autokopers.lt/autokopers-social.jpg",
+          "image": "https://www.autokopers.lt/autokopers-social.jpg",
+          "telephone": "+37062851439",
+          "email": "labas@autokopers.lt",
+          "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "Palemono g. 173",
+            "addressLocality": "Kaunas",
+            "addressCountry": "LT"
+          },
+          "openingHoursSpecification": [
+            { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "09:00", "closes": "18:00" },
+            { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "10:00", "closes": "19:00" }
+          ],
+          "sameAs": ["https://www.facebook.com/AutoKopersLT", "https://www.instagram.com/autokoperslt/"]
+        })}</script>
+      </Helmet>
       {/* Announcement banner - auto-hides after May 3, 2026 */}
       {new Date() < new Date('2026-05-03') && (
         <a

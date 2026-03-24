@@ -14,6 +14,14 @@ export default function SellYourCar() {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>Automobilių supirkimas | Autokopers</title>
+        <meta name="description" content="Greitai ir patikimai superkame automobilius Kaune. Nemokamas įvertinimas, sąžininga kaina, greitas atsiskaitymas. Pateikite užklausą dabar!" />
+        <link rel="canonical" href="https://www.autokopers.lt/sell-your-car" />
+        <meta property="og:title" content="Automobilių supirkimas | Autokopers" />
+        <meta property="og:description" content="Greitai ir patikimai superkame automobilius Kaune. Nemokamas įvertinimas." />
+        <meta property="og:url" content="https://www.autokopers.lt/sell-your-car" />
+      </Helmet>
       <Header />
       <main>
         <section className="relative min-h-[500px] flex items-center overflow-hidden">

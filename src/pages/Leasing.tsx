@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { Helmet } from "react-helmet";
 import { Calculator, ChevronRight, Info, Clock, FileCheck, CreditCard, CheckCircle2, Shield, TrendingDown, Users, Scale } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";

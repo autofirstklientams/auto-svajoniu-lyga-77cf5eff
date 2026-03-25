@@ -552,6 +552,12 @@ const CarDetail = () => {
                         <p className="font-medium text-foreground">{car.steering_wheel}</p>
                       </div>
                     )}
+                    {car.vin && (
+                      <div className="p-3 bg-muted/50 rounded-lg">
+                        <p className="text-xs text-muted-foreground">VIN</p>
+                        <p className="font-medium text-foreground text-sm">{car.vin}</p>
+                      </div>
+                    )}
                     {car.sdk_code && (
                       <div className="p-3 bg-muted/50 rounded-lg">
                         <p className="text-xs text-muted-foreground">SDK kodas</p>

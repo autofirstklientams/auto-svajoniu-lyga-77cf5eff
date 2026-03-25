@@ -265,6 +265,27 @@ export type Database = {
           },
         ]
       }
+      form_rate_limits: {
+        Row: {
+          created_at: string
+          form_type: string
+          id: string
+          ip_hash: string
+        }
+        Insert: {
+          created_at?: string
+          form_type: string
+          id?: string
+          ip_hash: string
+        }
+        Update: {
+          created_at?: string
+          form_type?: string
+          id?: string
+          ip_hash?: string
+        }
+        Relationships: []
+      }
       inquiries: {
         Row: {
           amount: number | null
@@ -602,6 +623,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_rate_limits: { Args: never; Returns: undefined }
       has_car_access: {
         Args: { _car_id: string; _user_id: string }
         Returns: boolean

@@ -57,7 +57,7 @@ interface Car {
   color: string | null;
   steering_wheel: string | null;
   condition: string | null;
-  
+  vin: string | null;
   defects: string | null;
   features: Record<string, string[]> | null;
   is_reserved: boolean;

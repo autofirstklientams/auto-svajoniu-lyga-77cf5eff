@@ -7,6 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+
+const formSchema = z.object({
+  name: z.string().trim().min(1, "Vardas privalomas").max(100),
+  email: z.string().trim().email("Neteisingas el. pašto formatas").max(255),
+  phone: z.string().trim().regex(/^\+?[0-9\s-]{8,15}$/, "Neteisingas telefono numerio formatas"),
+});
 
 const CarSearchForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -27,6 +34,18 @@ const CarSearchForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = formSchema.safeParse({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+    });
+
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {

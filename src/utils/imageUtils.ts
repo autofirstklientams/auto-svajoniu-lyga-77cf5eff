@@ -1,7 +1,7 @@
-const MAX_WIDTH = 1920;
-const MAX_HEIGHT = 1080;
-const MAX_FILE_SIZE = 1024 * 1024; // 1MB target after compression
-const QUALITY = 0.85;
+const MAX_WIDTH = 2560;
+const MAX_HEIGHT = 1440;
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB target after compression
+const QUALITY = 0.92;
 
 export interface ResizedImage {
   file: File;
@@ -135,14 +135,14 @@ export function getOptimizedImageUrl(
  * Get thumbnail URL (small, fast loading for cards/grids)
  */
 export function getThumbnailUrl(url: string | null | undefined): string {
-  return getOptimizedImageUrl(url, { width: 600, quality: 80 });
+  return getOptimizedImageUrl(url, { width: 800, quality: 85 });
 }
 
 /**
  * Get medium-sized URL (for detail page)
  */
 export function getMediumUrl(url: string | null | undefined): string {
-  return getOptimizedImageUrl(url, { width: 900, quality: 80 });
+  return getOptimizedImageUrl(url, { width: 1200, quality: 85 });
 }
 
 /**

@@ -131,6 +131,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Received inquiry:", { name: safeName, email: safeEmail, source: safeSource, amount, loanType: safeLoanType });
 
     // Save to database (supabase client already created above)
+    const { data: insertedData, error: insertError } = await supabase
       .from("inquiries")
       .insert({
         name: sanitizedName,

@@ -94,7 +94,7 @@ const CarDetail = () => {
     
     let query = supabase
       .from("cars")
-      .select("id, slug, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, defects, features, is_reserved, is_sold, sdk_code")
+      .select("id, slug, make, model, year, price, mileage, fuel_type, transmission, description, image_url, body_type, engine_capacity, power_kw, doors, seats, color, steering_wheel, condition, vin, defects, features, is_reserved, is_sold, sdk_code")
       .eq("visible_web", true);
 
     if (isUuid) {

@@ -532,7 +532,7 @@ const CarDetail = () => {
                 </div>
 
                 {/* Additional specs */}
-                {(car.engine_capacity || car.power_kw || car.steering_wheel || car.sdk_code) && (
+                {(car.engine_capacity || car.power_kw || car.vin || car.steering_wheel || car.sdk_code) && (
                   <div className="mt-4 pt-4 border-t grid grid-cols-2 md:grid-cols-4 gap-4">
                     {car.engine_capacity && (
                       <div className="p-3 bg-muted/50 rounded-lg">

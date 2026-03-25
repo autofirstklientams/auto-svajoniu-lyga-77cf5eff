@@ -34,6 +34,18 @@ const CarSearchForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const validation = formSchema.safeParse({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+    });
+
+    if (!validation.success) {
+      toast.error(validation.error.errors[0].message);
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {

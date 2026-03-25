@@ -58,6 +58,33 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Rate limiting
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("cf-connecting-ip") || "unknown";
+    const ipHash = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(clientIp)).then(
+      buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("")
+    );
+
+    await supabase.rpc("cleanup_old_rate_limits");
+
+    const { count } = await supabase
+      .from("form_rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("ip_hash", ipHash)
+      .eq("form_type", "car_search")
+      .gte("created_at", new Date(Date.now() - 60 * 60 * 1000).toISOString());
+
+    if ((count || 0) >= 5) {
+      return new Response(
+        JSON.stringify({ error: "Per daug užklausų. Bandykite vėliau." }),
+        { status: 429, headers: { "Content-Type": "application/json", ...corsHeaders } }
+      );
+    }
+
+    await supabase.from("form_rate_limits").insert({ ip_hash: ipHash, form_type: "car_search" });
     const body = await req.json();
     
     const { 

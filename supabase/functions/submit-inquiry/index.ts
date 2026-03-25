@@ -130,12 +130,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Received inquiry:", { name: safeName, email: safeEmail, source: safeSource, amount, loanType: safeLoanType });
 
-    // Save to database
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    const { data: insertedData, error: insertError } = await supabase
+    // Save to database (supabase client already created above)
       .from("inquiries")
       .insert({
         name: sanitizedName,

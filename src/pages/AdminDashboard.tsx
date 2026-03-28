@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText, Shield, ShieldOff, Pencil, Search } from "lucide-react";
+import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText, Shield, ShieldOff, Pencil, Search, Sparkles } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

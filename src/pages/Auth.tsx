@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,28 @@ import { z } from "zod";
 import logo from "@/assets/autokopers-logo.jpeg";
 import { useLanguage } from "@/contexts/LanguageContext";
 
+const SIGNUP_RATE_LIMIT = 3;
+const SIGNUP_RATE_WINDOW_MS = 60 * 60 * 1000; // 1 hour
+const MIN_FORM_TIME_MS = 3000; // 3 seconds minimum
+
+const getSignupAttempts = (): number[] => {
+  try {
+    const raw = sessionStorage.getItem("_sa");
+    if (!raw) return [];
+    const attempts: number[] = JSON.parse(raw);
+    const now = Date.now();
+    return attempts.filter(t => now - t < SIGNUP_RATE_WINDOW_MS);
+  } catch {
+    return [];
+  }
+};
+
+const recordSignupAttempt = () => {
+  const attempts = getSignupAttempts();
+  attempts.push(Date.now());
+  sessionStorage.setItem("_sa", JSON.stringify(attempts));
+};
+
 const Auth = () => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
@@ -19,11 +41,19 @@ const Auth = () => {
   const [signupData, setSignupData] = useState({ email: "", password: "", fullName: "" });
   const [resetEmail, setResetEmail] = useState("");
   const [showResetForm, setShowResetForm] = useState(false);
+  // Honeypot — invisible field that bots fill in
+  const [honeypot, setHoneypot] = useState("");
+  // Track when form was rendered to detect bot-speed submissions
+  const formRenderedAt = useRef(Date.now());
+
+  useEffect(() => {
+    formRenderedAt.current = Date.now();
+  }, []);
 
   const authSchema = z.object({
     email: z.string().trim().email(language === "lt" ? "Neteisingas el. pašto formatas" : "Invalid email format"),
-    password: z.string().min(6, language === "lt" ? "Slaptažodis turi būti bent 6 simbolių" : "Password must be at least 6 characters"),
-    fullName: z.string().trim().min(1, language === "lt" ? "Vardas privalomas" : "Name is required").optional(),
+    password: z.string().min(8, language === "lt" ? "Slaptažodis turi būti bent 8 simbolių" : "Password must be at least 8 characters"),
+    fullName: z.string().trim().min(2, language === "lt" ? "Vardas per trumpas" : "Name too short").max(100).optional(),
   });
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -55,6 +85,29 @@ const Auth = () => {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Honeypot check — real users never fill this
+    if (honeypot) {
+      // Silently pretend success to confuse bots
+      toast.success(t("auth.signupSuccess"));
+      return;
+    }
+
+    // Speed check — bots submit instantly
+    const elapsed = Date.now() - formRenderedAt.current;
+    if (elapsed < MIN_FORM_TIME_MS) {
+      toast.success(t("auth.signupSuccess"));
+      return;
+    }
+
+    // Rate limit check
+    const attempts = getSignupAttempts();
+    if (attempts.length >= SIGNUP_RATE_LIMIT) {
+      toast.error(language === "lt" 
+        ? "Per daug registracijos bandymų. Bandykite vėliau." 
+        : "Too many signup attempts. Please try again later.");
+      return;
+    }
     
     const validation = authSchema.safeParse(signupData);
     if (!validation.success) {
@@ -62,7 +115,19 @@ const Auth = () => {
       return;
     }
 
+    // Block disposable email domains
+    const disposableDomains = ["mailinator.com", "tempmail.com", "throwaway.email", "guerrillamail.com", "sharklasers.com", "grr.la", "guerrillamailblock.com", "pokemail.net", "spam4.me", "yopmail.com", "10minutemail.com", "trashmail.com", "maildrop.cc", "dispostable.com", "nowhere.invalid"];
+    const emailDomain = signupData.email.split("@")[1]?.toLowerCase();
+    if (emailDomain && disposableDomains.includes(emailDomain)) {
+      toast.error(language === "lt" 
+        ? "Laikini el. pašto adresai neleidžiami" 
+        : "Temporary email addresses are not allowed");
+      return;
+    }
+
     setIsLoading(true);
+    recordSignupAttempt();
+    
     try {
       const { error } = await supabase.auth.signUp({
         email: signupData.email,
@@ -77,8 +142,9 @@ const Auth = () => {
 
       if (error) throw error;
       
-      toast.success(t("auth.signupSuccess"));
-      setLoginData({ email: signupData.email, password: signupData.password });
+      toast.success(language === "lt" 
+        ? "Registracija sėkminga! Patikrinkite el. paštą ir patvirtinkite paskyrą." 
+        : "Registration successful! Check your email to confirm your account.");
     } catch (error: any) {
       if (error.message.includes("already registered")) {
         toast.error(language === "lt" ? "Šis el. paštas jau registruotas" : "This email is already registered");
@@ -207,6 +273,18 @@ const Auth = () => {
             
             <TabsContent value="signup">
               <form onSubmit={handleSignup} className="space-y-4">
+                {/* Honeypot field — invisible to users, bots fill it in */}
+                <div className="absolute -left-[9999px] opacity-0" aria-hidden="true">
+                  <Input
+                    type="text"
+                    name="website_url"
+                    tabIndex={-1}
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
+                </div>
+                
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">{t("auth.fullName")}</Label>
                   <Input
@@ -214,6 +292,7 @@ const Auth = () => {
                     value={signupData.fullName}
                     onChange={(e) => setSignupData({ ...signupData, fullName: e.target.value })}
                     required
+                    maxLength={100}
                   />
                 </div>
                 <div className="space-y-2">
@@ -224,11 +303,12 @@ const Auth = () => {
                     value={signupData.email}
                     onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
                     required
+                    maxLength={255}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">
-                    {t("auth.password")} ({language === "lt" ? "min. 6 simboliai" : "min. 6 characters"})
+                    {t("auth.password")} ({language === "lt" ? "min. 8 simboliai" : "min. 8 characters"})
                   </Label>
                   <Input
                     id="signup-password"
@@ -236,6 +316,7 @@ const Auth = () => {
                     value={signupData.password}
                     onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
                     required
+                    minLength={8}
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>

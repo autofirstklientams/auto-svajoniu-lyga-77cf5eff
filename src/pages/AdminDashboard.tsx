@@ -48,6 +48,7 @@ const AdminDashboard = () => {
   const [allCars, setAllCars] = useState<CarListing[]>([]);
   const [editingCar, setEditingCar] = useState<CarListing | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [aiAccessUserIds, setAiAccessUserIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     checkAdminAccess();

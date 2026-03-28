@@ -1446,7 +1446,7 @@ const CreateListing = ({
             </h3>
             <div className="flex flex-wrap gap-6">
               <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox checked={visibleWeb} onCheckedChange={(checked) => setVisibleWeb(checked === true)} />
+                <Checkbox checked={visibleWeb} onCheckedChange={(checked) => { setVisibleWeb(checked === true); if (car?.id) autoSaveField('visible_web', checked === true); }} />
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-primary" />
                   <span className="font-medium">AutoKOPERS svetainė</span>

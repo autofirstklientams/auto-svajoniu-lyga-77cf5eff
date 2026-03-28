@@ -1548,7 +1548,7 @@ const CreateListing = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Atšaukti
             </Button>
-            {car?.id && autoSaveStatus !== 'idle' && (
+            {autoSaveStatus !== 'idle' && (
               <span className={`text-xs ml-auto ${
                 autoSaveStatus === 'saving' ? 'text-muted-foreground' :
                 autoSaveStatus === 'saved' ? 'text-green-600' :

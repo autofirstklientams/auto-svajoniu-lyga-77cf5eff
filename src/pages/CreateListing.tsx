@@ -146,12 +146,45 @@ const CreateListing = ({
       setModelOptions([]);
     }
   }, [formData.make, fetchModels]);
-  // Auto-save on blur (only for existing cars)
+  // Auto-save on blur
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [draftCarId, setDraftCarId] = useState<string | null>(car?.id || null);
+
+  const getOrCreateCarId = useCallback(async (): Promise<string | null> => {
+    if (draftCarId) return draftCarId;
+    
+    // Need at least make, model, year, price to create
+    if (!formData.make || !formData.model || !formData.year || !formData.price) return null;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data: newCar, error } = await supabase
+        .from("cars")
+        .insert({
+          make: formData.make,
+          model: formData.model,
+          year: formData.year,
+          price: formData.price,
+          partner_id: user.id,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      setDraftCarId(newCar.id);
+      return newCar.id;
+    } catch (err) {
+      console.error('Failed to create draft car:', err);
+      return null;
+    }
+  }, [draftCarId, formData.make, formData.model, formData.year, formData.price]);
 
   const autoSaveField = useCallback(async (fieldName: string, value: any) => {
-    if (!car?.id) return; // Only auto-save when editing existing car
+    const carId = await getOrCreateCarId();
+    if (!carId) return;
     
     // Convert empty strings to null for DB
     const dbValue = value === "" || value === 0 ? null : value;
@@ -161,7 +194,7 @@ const CreateListing = ({
       const { error } = await supabase
         .from("cars")
         .update({ [fieldName]: dbValue })
-        .eq("id", car.id);
+        .eq("id", carId);
       
       if (error) throw error;
       
@@ -174,7 +207,7 @@ const CreateListing = ({
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
       autoSaveTimerRef.current = setTimeout(() => setAutoSaveStatus('idle'), 3000);
     }
-  }, [car?.id]);
+  }, [getOrCreateCarId]);
 
   // Map form field IDs to DB column names
   const fieldIdToDbColumn: Record<string, string> = {
@@ -189,7 +222,6 @@ const CreateListing = ({
   };
 
   const handleFormBlur = useCallback((e: React.FocusEvent) => {
-    if (!car?.id) return;
     const target = e.target as HTMLInputElement | HTMLTextAreaElement;
     const fieldId = target.id;
     const dbColumn = fieldIdToDbColumn[fieldId];
@@ -197,12 +229,12 @@ const CreateListing = ({
     
     const value = formData[dbColumn as keyof typeof formData];
     autoSaveField(dbColumn, value);
-  }, [car?.id, formData, autoSaveField]);
+  }, [formData, autoSaveField]);
 
   const handleSelectChange = useCallback((fieldName: string, value: string) => {
     setFormData(prev => ({ ...prev, [fieldName]: value }));
-    if (car?.id) autoSaveField(fieldName, value);
-  }, [car?.id, autoSaveField]);
+    autoSaveField(fieldName, value);
+  }, [autoSaveField]);
 
   const handleImportFromAutoplius = async () => {
     if (!autopliusUrl.trim()) {

@@ -1039,7 +1039,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Būklė</Label>
-                <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
+                <Select value={formData.condition} onValueChange={(value) => handleSelectChange('condition', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Naujas">Naujas</SelectItem>

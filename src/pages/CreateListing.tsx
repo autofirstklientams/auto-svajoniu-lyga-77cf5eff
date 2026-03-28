@@ -1195,7 +1195,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Euro standartas</Label>
-                <Select value={formData.euro_standard} onValueChange={(value) => setFormData({ ...formData, euro_standard: value })}>
+                <Select value={formData.euro_standard} onValueChange={(value) => handleSelectChange('euro_standard', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Euro 1">Euro 1</SelectItem>

@@ -176,10 +176,27 @@ const CreateListing = ({
     }
   }, [car?.id]);
 
-  const handleFieldBlur = useCallback((fieldName: string) => {
+  // Map form field IDs to DB column names
+  const fieldIdToDbColumn: Record<string, string> = {
+    price: 'price', mileage: 'mileage', vin: 'vin', color: 'color',
+    description: 'description', defects: 'defects', engine_capacity: 'engine_capacity',
+    power_kw: 'power_kw', doors: 'doors', seats: 'seats', co2_emission: 'co2_emission',
+    fuel_cons_urban: 'fuel_cons_urban', fuel_cons_highway: 'fuel_cons_highway',
+    fuel_cons_combined: 'fuel_cons_combined', origin_country: 'origin_country',
+    city: 'city', sdk_code: 'sdk_code', wheel_size: 'wheel_size',
+    first_reg_date: 'first_reg_date', mot_date: 'mot_date',
+    euro_standard: 'euro_standard',
+  };
+
+  const handleFormBlur = useCallback((e: React.FocusEvent) => {
     if (!car?.id) return;
-    const value = formData[fieldName as keyof typeof formData];
-    autoSaveField(fieldName, value);
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const fieldId = target.id;
+    const dbColumn = fieldIdToDbColumn[fieldId];
+    if (!dbColumn) return;
+    
+    const value = formData[dbColumn as keyof typeof formData];
+    autoSaveField(dbColumn, value);
   }, [car?.id, formData, autoSaveField]);
 
   const handleImportFromAutoplius = async () => {

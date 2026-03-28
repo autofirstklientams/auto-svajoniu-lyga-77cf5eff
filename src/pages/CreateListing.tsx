@@ -1211,7 +1211,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Ratų dydis</Label>
-                <Select value={formData.wheel_size} onValueChange={(value) => setFormData({ ...formData, wheel_size: value })}>
+                <Select value={formData.wheel_size} onValueChange={(value) => handleSelectChange('wheel_size', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="R12">R12</SelectItem>

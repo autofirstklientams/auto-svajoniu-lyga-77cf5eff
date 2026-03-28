@@ -61,38 +61,57 @@ On the back wall behind the car, place a company logo/sign reading "AUTOKOPERS" 
       ? '- No other cars, people, plants, signs (except the AUTOKOPERS sign), text, watermarks'
       : '- No other cars, people, plants, signs, logos, text, watermarks';
 
-    const prompt = `You are an expert photo compositor. Analyze the image first:
+    const prompt = `You are a professional automotive photo editor specializing in dealership photography. Your task is to seamlessly composite a car into a studio environment.
 
-=== STEP 1: DETECT IMAGE TYPE ===
-- If this is an INTERIOR/CABIN photo (showing dashboard, steering wheel, seats, gear shift, instrument panel, infotainment screen, door panels from inside) → keep ALL interior elements 100% unchanged. ONLY replace what is visible THROUGH the car windows (outdoor scenery like sky, trees, buildings, parking lots seen through windshield/side windows/rear window) with a clean, bright, neutral white/light grey studio backdrop (~#F0F0F0). The window glass, reflections on glass, and all interior surfaces must remain untouched. Then output the result — do NOT proceed to the showroom section below.
-- If this is an EXTERIOR photo of a car → proceed with background replacement below.
+=== STEP 1: CLASSIFY THE IMAGE ===
+Determine the photo type by examining the PRIMARY subject matter:
+- INTERIOR photo: Dashboard, steering wheel, seats, gear shift, center console, door panels shot FROM INSIDE the cabin → Go to INTERIOR RULES
+- EXTERIOR photo: Car body visible from outside → Go to EXTERIOR RULES
+- ENGINE BAY / DETAIL photo: Close-up of engine, wheels, badges, damage → OUTPUT THE IMAGE UNCHANGED, no modifications needed
 
-=== CAR PRESERVATION (ABSOLUTE — for exterior photos only) ===
-- The car pixels must remain 100% unchanged: shape, color, reflections, dirt, scratches, wheels, license plate, angle, size, position in frame
-- Do NOT relight, recolor, sharpen, blur, crop, scale, or reposition the car
-- Preserve the exact pixel boundary/silhouette of the car
-- CRITICAL: Dark areas that are PART OF THE CAR (black paint, dark tires, tinted windows, grille, exhaust, shadow underneath, dark trim, mirrors) must NOT be treated as background
-- Only replace what is clearly outdoor scenery: sky, trees, buildings, road, grass, parking lot, other cars in background, fences, poles, etc.
+=== INTERIOR RULES ===
+1. Keep 100% of all interior surfaces, textures, materials, stitching, screens, buttons, trim UNCHANGED
+2. Keep all window glass and its reflections/tint UNCHANGED  
+3. ONLY replace the scenery VISIBLE THROUGH the windows (sky, trees, buildings, parking lot, other vehicles) with a clean neutral white/light grey backdrop (#F0F0F0)
+4. Maintain the original lighting on the interior — do not re-light or color-correct any cabin surface
+5. OUTPUT the result. Do NOT apply showroom rules.
 
-=== SHOWROOM SPECIFICATION (MUST MATCH EXACTLY — for exterior photos only) ===
-Environment: A single large empty rectangular room, no columns, no furniture, no decorations
-Floor: Smooth polished LIGHT GREY epoxy (hex ~#D0D0D0), perfectly flat, extends to walls. Shows a soft diffused reflection of the car (not mirror-sharp, ~30% opacity)
-Walls: Flat matte white (#F0F0F0), completely blank, no panels, no windows, no doors, no trim
-Ceiling: Not visible or implied by even overhead lighting
-Lighting: Bright diffused overhead LED panels creating EVEN illumination with NO visible light sources, NO spotlights, NO directional shadows. Soft ambient fill from all sides
-Color temperature: Neutral daylight ~5500K, no warm/cool tint
-Atmosphere: Clean, minimal, sterile — like a white photography studio with grey floor
-Shadow: The car casts a single soft contact shadow directly beneath it on the grey floor
+=== EXTERIOR RULES ===
+
+**CAR PRESERVATION (ABSOLUTE PRIORITY — violation = failure):**
+- Every pixel of the car body, paint, panels, bumpers, mirrors, door handles, roof rails, antenna, wipers MUST remain pixel-identical
+- Wheels, tires, wheel arches, brake calipers, lug nuts — UNCHANGED
+- All glass (windshield, side windows, rear window, sunroof) including reflections and tint — UNCHANGED
+- Grille, headlights, taillights, fog lights, indicators, exhaust tips — UNCHANGED
+- License plates, badges, emblems, model lettering — UNCHANGED  
+- Any dirt, scratches, stone chips, imperfections on the car — KEEP THEM, do not clean or restore
+- Shadow directly under the car (ground shadow) — preserve its natural shape
+- CRITICAL RULE: If a region is DARK, ask yourself "Is this part of the car?" — black paint, dark tires, tinted glass, black trim, carbon fiber, dark alloys are ALL car parts. NEVER replace them.
+
+**BACKGROUND SEGMENTATION:**
+- Background = everything that is NOT the car: sky, clouds, sun, trees, grass, bushes, buildings, fences, poles, road surface beyond the car's shadow, other vehicles in the distance, people, signs
+- The dividing line is the car's silhouette edge — trace it precisely
+- When in doubt whether a pixel is car or background, keep it as car
+
+**SHOWROOM ENVIRONMENT (replace background with this):**
+- Room: Large open rectangular space, completely empty
+- Floor: Polished light grey epoxy (#D0D0D0), seamless, extends to walls. Subtle diffused car reflection (~25-30% opacity, soft/blurred, not mirror-sharp)
+- Walls: Flat matte near-white (#F0F0F0), perfectly uniform, zero texture, no panels/joints/trim/doors/windows
+- Lighting: Even diffused overhead illumination, no visible light sources, no harsh shadows, no spotlights, no colored light. Neutral ~5500K daylight
+- The ONLY shadow in the scene is a soft contact shadow directly beneath the car on the floor
 ${brandingSection}
-=== FORBIDDEN ===
+**STRICTLY FORBIDDEN:**
 ${forbiddenSigns}
-- No windows, glass walls, outdoor scenery, sky reflections
-- No colored accent lighting, neon, spotlights
-- No visible ceiling structure, beams, or vents
-- No gradients on walls (keep solid flat white)
-- Do NOT replace dark car parts (tires, grille, black trim, tinted glass) with showroom — only replace actual outdoor background
+- No windows, glass walls, or any view to outside
+- No colored accent lighting, neon strips, or spotlights  
+- No visible ceiling structure, beams, ducts, or vents
+- No wall gradients — solid flat color only
+- No props, furniture, plants, or decorative elements
+- Do NOT alter the car's color temperature, exposure, contrast, or white balance
+- Do NOT sharpen, denoise, or apply any filter to the car pixels
+- Do NOT crop, resize, rotate, or reposition the car in the frame
 
-Output one photorealistic image.`;
+OUTPUT: One photorealistic composite image at the same resolution as the input.`;
 
     // Download image using Supabase storage client (more reliable than raw fetch)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

@@ -71,7 +71,7 @@ TAISYKLĖS:
 - Nenaudok šauktukų ar per daug emocinio teksto
 - Pradėk nuo automobilio pristatymo, ne nuo žodžio "Siūlome"`;
 
-    const response = await fetch('https://api.cohere.com/v2/chat', that
+    const response = await fetch('https://api.cohere.com/v2/chat', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${COHERE_API_KEY}`,
@@ -88,8 +88,7 @@ TAISYKLĖS:
       }),
     });
 
-    if (!response.ok) raising
-, {
+    if (!response.ok) {
       const errorText = await response.text();
       console.error('Cohere API error:', response.status, errorText);
 
@@ -118,11 +117,11 @@ TAISYKLĖS:
 
     return new Response(
       JSON.stringify({ success: true, description: description.trim() }),
-      { O headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (error) {
     console.error('Description generation error:', error);
-    return    Response(
+    return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'Nežinoma klaida' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

@@ -21,6 +21,8 @@ function OptimizedImageComponent({
   aspectRatio,
   objectPosition = "center",
   fit = "cover",
+  width,
+  height,
 }: OptimizedImageProps) {
   const objectClass =
     fit === "contain" || fit === "contain-fill" ? "object-contain" : "object-cover";

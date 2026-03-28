@@ -662,6 +662,51 @@ const CreateListing = ({
     });
   }, []);
 
+  const handleGenerateDescription = async () => {
+    if (!formData.make || !formData.model) {
+      toast.error("Nurodykite markę ir modelį prieš generuojant aprašymą");
+      return;
+    }
+    setIsGeneratingDescription(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-car-description', {
+        body: {
+          make: formData.make,
+          model: formData.model,
+          year: formData.year || undefined,
+          mileage: formData.mileage || undefined,
+          fuel_type: formData.fuel_type || undefined,
+          transmission: formData.transmission || undefined,
+          body_type: formData.body_type || undefined,
+          color: formData.color || undefined,
+          engine_capacity: formData.engine_capacity || undefined,
+          power_kw: formData.power_kw || undefined,
+          doors: formData.doors || undefined,
+          seats: formData.seats || undefined,
+          condition: formData.condition || undefined,
+          defects: formData.defects || undefined,
+          features: selectedFeatures,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data?.description) {
+        setFormData(prev => ({ ...prev, description: data.description }));
+        toast.success("Aprašymas sugeneruotas!");
+      }
+    } catch (err) {
+      console.error('Generate description error:', err);
+      toast.error("Nepavyko sugeneruoti aprašymo");
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     

@@ -55,21 +55,76 @@ Deno.serve(async (req) => {
       featureList || null,
     ].filter(Boolean).join('\n');
 
-    const prompt = `Esi profesionalus automobilių pardavėjas Lietuvoje, dirbantis AutoKOPERS įmonėje Kaune. 
-Parašyk patrauklų, profesionalų automobilio skelbimo aprašymą lietuvių kalba.
+    const prompt = `Esi profesionalus automobilių pardavėjas Lietuvoje, dirbantis „autokopers" įmonėje Kaune.
+Parašyk profesionalų automobilio skelbimo aprašymą lietuvių kalba pagal tikslią AutoKOPERS stilistiką.
 
 Automobilio duomenys:
 ${carInfo}
 
-TAISYKLĖS:
-- Rašyk TIKTAI lietuviškai, natūralia kalba
-- Aprašymas turi būti 3-5 sakinių, informatyvus ir patrauklus
-- Pabrėžk pagrindinius privalumus ir ypatybes
-- Jei yra defektų, paminėk juos sąžiningai bet diplomatiškai
-- Nerašyk kainos, kontaktų ar kvietimų susisiekti
-- Nerašyk "AutoKOPERS" ar įmonės pavadinimo
-- Nenaudok šauktukų ar per daug emocinio teksto
-- Pradėk nuo automobilio pristatymo, ne nuo žodžio "Siūlome"`;
+=== APRAŠYMO STRUKTŪRA (laikykis šios tvarkos) ===
+
+1. ĮŽANGINIS PARAGRAFAS:
+Pradėk nuo patrauklaus, bet santūraus įvado apie autokopers patirtį ir kompetenciją. Pvz.: "Pastebėjote šį skelbimą? Tuomet pataikėte į vietą, kur automobiliai – ne atsitiktinis užsiėmimas, o daugiau nei dešimtmetį trunkanti patirtis ir darbas su tuo, kas klientams svarbiausia."
+
+2. AUTOMOBILIO PRISTATYMAS:
+Vienas paragrafas apie automobilį – jo charakterį, paskirtį, variklio ypatybes, pavarų dėžę, varomųjų ratų sistemą (jei yra). Pabrėžk dinamiką, ekonomiškumą ir praktiškumą. Tonalumas – dalykiškas, bet šiltas.
+
+3. VAIRAVIMO PATIRTIS:
+Trumpas paragrafas apie vairavimo komfortą – sėdėseną, matomumą, manevringumą, važiuoklės stabilumą.
+
+4. KOMPLEKTACIJA IR ĮRANGA:
+Detalus paragrafas apie įrangą. Jei pateikti features duomenys – išvardink svarbiausius. Rašyk natūraliai, ne sausu sąrašu. Pabaigoje gali pridėti šmaikščią pastabą (pvz., "super mamasitos patirtį ;)"). Paminėk salono praktiškumą, keleivių erdvę ir bagažinę.
+
+5. PASLAUGŲ BLOKAS (visada identiškas):
+Tiksliai įrašyk šį tekstą:
+
+"Jei būtent šis automobilis atitinka tai, ko ieškote – toliau viskuo pasirūpinsime mes:
+• finansavimo pasiūlymai (lizingas / veiklos nuoma),
+• papildomos garantijos iki 3 metų,
+• draudimas bei visa lydinti dokumentacija."
+
+6. INDIVIDUALIOS PAIEŠKOS BLOKAS (visada identiškas):
+Tiksliai įrašyk:
+
+"Jeigu skelbime matomas automobilis nėra būtent toks, kokio ieškote, galime pasiūlyti individualią paiešką.
+Per kelias savaites surasime ir parvešime automobilį iš bet kurios Europos šalies pagal Jūsų kriterijus ir pageidaujamą išpildymą.
+
+Dėl individualios paieškos: info@autokopers.lt
++37062851439
+
+Į paslaugą įeina:
+• automobilio paieška Europoje,
+• pardavėjo ir automobilio patikra,
+• transportavimas į Lietuvą,
+• dokumentų tvarkymas,
+• automobilio paruošimas registracijai bei techninei apžiūrai,
+• pilnas sutvarkymas iki atidavimo.
+
+Dirbame tik su patikimais partneriais Europoje, turime finansavimo sprendimus ir galime pasiūlyti garantiją iki 3 metų.
+
+Jūsų turimą automobilį galime atpirkti ir užskaityti kaip pradinį įnašą."
+
+7. UŽBAIGIMAS (visada identiškas):
+Tiksliai įrašyk:
+
+"Mūsų darbas – sutaupyti laiką, sumažinti riziką ir užtikrinti sklandų procesą nuo pirmo pokalbio iki automobilio atidavimo.
+
+autokopers – skaidrus ir atsakingas procesas renkantis automobilį.
+
+Kilus papildomiems klausimams rašykite ar skambinkite:
+info@autokopers.lt
++37062851439
+www.autokopers.lt"
+
+=== STILIAUS TAISYKLĖS ===
+- Tonalumas: profesionalus, dalykiškas, bet šiltas ir draugiškas
+- Gali būti viena šmaikšti pastaba (pvz., apie komfortą ar patirtį)
+- NENAUDOK per daug šauktukų
+- Rašyk TIKTAI lietuviškai
+- Skyriai 1-4 turi būti UNIKALŪS ir pritaikyti konkrečiam automobiliui
+- Skyriai 5-7 turi būti IDENTIŠKAI nukopijuoti kaip pateikta aukščiau
+- Jei yra defektų – paminėk sąžiningai bet diplomatiškai automobilio pristatymo dalyje
+- Nerašyk kainos`;
 
     const response = await fetch('https://api.cohere.com/v2/chat', {
       method: 'POST',

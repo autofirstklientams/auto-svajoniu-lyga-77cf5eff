@@ -812,7 +812,7 @@ const CreateListing = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Vartotojas neprisijungęs");
 
-      let carId = car?.id;
+      let carId = draftCarId || car?.id;
 
       const carData = {
         ...formData,

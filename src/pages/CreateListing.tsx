@@ -146,12 +146,45 @@ const CreateListing = ({
       setModelOptions([]);
     }
   }, [formData.make, fetchModels]);
-  // Auto-save on blur (only for existing cars)
+  // Auto-save on blur
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const [draftCarId, setDraftCarId] = useState<string | null>(car?.id || null);
+
+  const getOrCreateCarId = useCallback(async (): Promise<string | null> => {
+    if (draftCarId) return draftCarId;
+    
+    // Need at least make, model, year, price to create
+    if (!formData.make || !formData.model || !formData.year || !formData.price) return null;
+    
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const { data: newCar, error } = await supabase
+        .from("cars")
+        .insert({
+          make: formData.make,
+          model: formData.model,
+          year: formData.year,
+          price: formData.price,
+          partner_id: user.id,
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      setDraftCarId(newCar.id);
+      return newCar.id;
+    } catch (err) {
+      console.error('Failed to create draft car:', err);
+      return null;
+    }
+  }, [draftCarId, formData.make, formData.model, formData.year, formData.price]);
 
   const autoSaveField = useCallback(async (fieldName: string, value: any) => {
-    if (!car?.id) return; // Only auto-save when editing existing car
+    const carId = await getOrCreateCarId();
+    if (!carId) return;
     
     // Convert empty strings to null for DB
     const dbValue = value === "" || value === 0 ? null : value;
@@ -161,7 +194,7 @@ const CreateListing = ({
       const { error } = await supabase
         .from("cars")
         .update({ [fieldName]: dbValue })
-        .eq("id", car.id);
+        .eq("id", carId);
       
       if (error) throw error;
       
@@ -174,7 +207,7 @@ const CreateListing = ({
       if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
       autoSaveTimerRef.current = setTimeout(() => setAutoSaveStatus('idle'), 3000);
     }
-  }, [car?.id]);
+  }, [getOrCreateCarId]);
 
   // Map form field IDs to DB column names
   const fieldIdToDbColumn: Record<string, string> = {
@@ -189,7 +222,6 @@ const CreateListing = ({
   };
 
   const handleFormBlur = useCallback((e: React.FocusEvent) => {
-    if (!car?.id) return;
     const target = e.target as HTMLInputElement | HTMLTextAreaElement;
     const fieldId = target.id;
     const dbColumn = fieldIdToDbColumn[fieldId];
@@ -197,12 +229,12 @@ const CreateListing = ({
     
     const value = formData[dbColumn as keyof typeof formData];
     autoSaveField(dbColumn, value);
-  }, [car?.id, formData, autoSaveField]);
+  }, [formData, autoSaveField]);
 
   const handleSelectChange = useCallback((fieldName: string, value: string) => {
     setFormData(prev => ({ ...prev, [fieldName]: value }));
-    if (car?.id) autoSaveField(fieldName, value);
-  }, [car?.id, autoSaveField]);
+    autoSaveField(fieldName, value);
+  }, [autoSaveField]);
 
   const handleImportFromAutoplius = async () => {
     if (!autopliusUrl.trim()) {
@@ -780,7 +812,7 @@ const CreateListing = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Vartotojas neprisijungęs");
 
-      let carId = car?.id;
+      let carId = draftCarId || car?.id;
 
       const carData = {
         ...formData,
@@ -821,11 +853,11 @@ const CreateListing = ({
       };
 
       // Create or update car
-      if (car?.id) {
+      if (carId) {
         const { error } = await supabase
           .from("cars")
           .update(carData)
-          .eq("id", car.id);
+          .eq("id", carId);
         if (error) throw error;
         
         // Always update all existing images order
@@ -1167,7 +1199,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Durų skaičius</Label>
-                <Select value={formData.doors?.toString()} onValueChange={(value) => { setFormData({ ...formData, doors: parseInt(value) }); if (car?.id) autoSaveField('doors', parseInt(value)); }}>
+                <Select value={formData.doors?.toString()} onValueChange={(value) => { setFormData({ ...formData, doors: parseInt(value) }); autoSaveField('doors', parseInt(value)); }}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="2">2/3</SelectItem>
@@ -1178,7 +1210,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Vietų skaičius</Label>
-                <Select value={formData.seats?.toString()} onValueChange={(value) => { setFormData({ ...formData, seats: parseInt(value) }); if (car?.id) autoSaveField('seats', parseInt(value)); }}>
+                <Select value={formData.seats?.toString()} onValueChange={(value) => { setFormData({ ...formData, seats: parseInt(value) }); autoSaveField('seats', parseInt(value)); }}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="2">2</SelectItem>
@@ -1446,7 +1478,7 @@ const CreateListing = ({
             </h3>
             <div className="flex flex-wrap gap-6">
               <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox checked={visibleWeb} onCheckedChange={(checked) => { setVisibleWeb(checked === true); if (car?.id) autoSaveField('visible_web', checked === true); }} />
+                <Checkbox checked={visibleWeb} onCheckedChange={(checked) => { setVisibleWeb(checked === true); autoSaveField('visible_web', checked === true); }} />
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-primary" />
                   <span className="font-medium">AutoKOPERS svetainė</span>
@@ -1455,7 +1487,7 @@ const CreateListing = ({
               
               {canExportAutoplius && (
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox checked={visibleAutoplius} onCheckedChange={(checked) => { setVisibleAutoplius(checked === true); if (car?.id) autoSaveField('visible_autoplius', checked === true); }} />
+                  <Checkbox checked={visibleAutoplius} onCheckedChange={(checked) => { setVisibleAutoplius(checked === true); autoSaveField('visible_autoplius', checked === true); }} />
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autoplius.lt</span>
@@ -1465,7 +1497,7 @@ const CreateListing = ({
 
               {canExportAutoplius && (
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox checked={visibleAutolizingas} onCheckedChange={(checked) => { setVisibleAutolizingas(checked === true); if (car?.id) autoSaveField('visible_autolizingas', checked === true); }} />
+                  <Checkbox checked={visibleAutolizingas} onCheckedChange={(checked) => { setVisibleAutolizingas(checked === true); autoSaveField('visible_autolizingas', checked === true); }} />
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autolizingas.lt</span>
@@ -1478,7 +1510,7 @@ const CreateListing = ({
               <>
                 <div className="mt-4 pt-4 border-t">
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox checked={isCompanyCar} onCheckedChange={(checked) => { setIsCompanyCar(checked === true); if (car?.id) autoSaveField('is_company_car', checked === true); }} />
+                    <Checkbox checked={isCompanyCar} onCheckedChange={(checked) => { setIsCompanyCar(checked === true); autoSaveField('is_company_car', checked === true); }} />
                     <div>
                       <span className="font-medium">AutoKOPERS įmonės automobilis</span>
                       <p className="text-sm text-muted-foreground">Pažymėkite, jei šis automobilis priklauso AutoKOPERS įmonei</p>
@@ -1490,14 +1522,14 @@ const CreateListing = ({
                   <h4 className="font-medium mb-3">Išskirtiniai nustatymai</h4>
                   <div className="space-y-3">
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <Checkbox checked={isFeatured} onCheckedChange={(checked) => { setIsFeatured(checked === true); if (car?.id) autoSaveField('is_featured', checked === true); }} />
+                      <Checkbox checked={isFeatured} onCheckedChange={(checked) => { setIsFeatured(checked === true); autoSaveField('is_featured', checked === true); }} />
                       <div>
                         <span className="font-medium">Rodyti pagrindiniame puslapyje</span>
                         <p className="text-sm text-muted-foreground">Automobilis bus matomas pagrindiniame puslapyje</p>
                       </div>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <Checkbox checked={isRecommended} onCheckedChange={(checked) => { setIsRecommended(checked === true); if (car?.id) autoSaveField('is_recommended', checked === true); }} />
+                      <Checkbox checked={isRecommended} onCheckedChange={(checked) => { setIsRecommended(checked === true); autoSaveField('is_recommended', checked === true); }} />
                       <div>
                         <span className="font-medium text-primary">✓ AUTOKOPERS rekomenduoja</span>
                         <p className="text-sm text-muted-foreground">Ant nuotraukos bus rodomas "AUTOKOPERS rekomenduoja" ženkliukas</p>
@@ -1516,7 +1548,7 @@ const CreateListing = ({
             <Button type="button" variant="outline" onClick={onClose}>
               Atšaukti
             </Button>
-            {car?.id && autoSaveStatus !== 'idle' && (
+            {autoSaveStatus !== 'idle' && (
               <span className={`text-xs ml-auto ${
                 autoSaveStatus === 'saving' ? 'text-muted-foreground' :
                 autoSaveStatus === 'saved' ? 'text-green-600' :

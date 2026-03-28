@@ -182,7 +182,7 @@ const CreateListing = ({
     autoSaveField(fieldName, value);
   }, [car?.id, formData, autoSaveField]);
 
-
+  const handleImportFromAutoplius = async () => {
     if (!autopliusUrl.trim()) {
       toast.error("Įveskite Autoplius nuorodą");
       return;

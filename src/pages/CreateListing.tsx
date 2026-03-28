@@ -853,11 +853,11 @@ const CreateListing = ({
       };
 
       // Create or update car
-      if (car?.id) {
+      if (carId) {
         const { error } = await supabase
           .from("cars")
           .update(carData)
-          .eq("id", car.id);
+          .eq("id", carId);
         if (error) throw error;
         
         // Always update all existing images order

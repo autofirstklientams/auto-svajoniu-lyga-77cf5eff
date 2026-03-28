@@ -1358,7 +1358,23 @@ const CreateListing = ({
             </h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="description">Aprašymas</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description">Aprašymas</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateDescription}
+                    disabled={isGeneratingDescription || !formData.make || !formData.model}
+                  >
+                    {isGeneratingDescription ? (
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                    )}
+                    {isGeneratingDescription ? "Generuojama..." : "Generuoti AI"}
+                  </Button>
+                </div>
                 <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} placeholder="Automobilio aprašymas..." />
               </div>
               <div className="space-y-2">

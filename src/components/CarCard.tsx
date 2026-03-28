@@ -67,7 +67,7 @@ function CarCardComponent({ id, slug, image, title, price, numericPrice, year, m
           </Badge>
         )}
         <OptimizedImage
-          src={getOptimizedImageUrl(image, { width: 600, quality: 80 })}
+          src={getOptimizedImageUrl(image, { width: 800, quality: 85 })}
           alt={title}
           className={`w-full transition-transform duration-500 group-hover:scale-105 ${isRecommended ? 'pt-0' : ''} ${isSold ? 'grayscale' : ''}`}
           priority={priority}

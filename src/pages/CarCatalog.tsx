@@ -362,6 +362,7 @@ const CarCatalog = () => {
                         isRecommended={car.is_recommended}
                         isReserved={car.is_reserved}
                         isSold={car.is_sold}
+                        priority={index < 4}
                       />
                     </div>
                   ))}

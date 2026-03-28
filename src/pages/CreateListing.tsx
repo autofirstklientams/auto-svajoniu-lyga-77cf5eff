@@ -146,8 +146,43 @@ const CreateListing = ({
       setModelOptions([]);
     }
   }, [formData.make, fetchModels]);
+  // Auto-save on blur (only for existing cars)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  const handleImportFromAutoplius = async () => {
+  const autoSaveField = useCallback(async (fieldName: string, value: any) => {
+    if (!car?.id) return; // Only auto-save when editing existing car
+    
+    // Convert empty strings to null for DB
+    const dbValue = value === "" || value === 0 ? null : value;
+    
+    setAutoSaveStatus('saving');
+    try {
+      const { error } = await supabase
+        .from("cars")
+        .update({ [fieldName]: dbValue })
+        .eq("id", car.id);
+      
+      if (error) throw error;
+      
+      setAutoSaveStatus('saved');
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    } catch (err) {
+      console.error('Auto-save error:', err);
+      setAutoSaveStatus('error');
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    }
+  }, [car?.id]);
+
+  const handleFieldBlur = useCallback((fieldName: string) => {
+    if (!car?.id) return;
+    const value = formData[fieldName as keyof typeof formData];
+    autoSaveField(fieldName, value);
+  }, [car?.id, formData, autoSaveField]);
+
+
     if (!autopliusUrl.trim()) {
       toast.error("Įveskite Autoplius nuorodą");
       return;

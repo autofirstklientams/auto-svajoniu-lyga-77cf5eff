@@ -9,6 +9,8 @@ interface OptimizedImageProps {
   aspectRatio?: string;
   objectPosition?: string;
   fit?: "cover" | "contain" | "contain-fill";
+  width?: number;
+  height?: number;
 }
 
 function OptimizedImageComponent({

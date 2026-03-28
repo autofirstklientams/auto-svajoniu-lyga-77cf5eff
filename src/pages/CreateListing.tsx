@@ -1490,7 +1490,7 @@ const CreateListing = ({
                   <h4 className="font-medium mb-3">Išskirtiniai nustatymai</h4>
                   <div className="space-y-3">
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <Checkbox checked={isFeatured} onCheckedChange={(checked) => setIsFeatured(checked === true)} />
+                      <Checkbox checked={isFeatured} onCheckedChange={(checked) => { setIsFeatured(checked === true); if (car?.id) autoSaveField('is_featured', checked === true); }} />
                       <div>
                         <span className="font-medium">Rodyti pagrindiniame puslapyje</span>
                         <p className="text-sm text-muted-foreground">Automobilis bus matomas pagrindiniame puslapyje</p>

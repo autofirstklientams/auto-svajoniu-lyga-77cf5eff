@@ -1086,7 +1086,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Kuro tipas</Label>
-                <Select value={formData.fuel_type} onValueChange={(value) => setFormData({ ...formData, fuel_type: value })}>
+                <Select value={formData.fuel_type} onValueChange={(value) => handleSelectChange('fuel_type', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Benzinas">Benzinas</SelectItem>

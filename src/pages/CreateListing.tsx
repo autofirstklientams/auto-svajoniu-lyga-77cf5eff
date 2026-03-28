@@ -1242,7 +1242,7 @@ const CreateListing = ({
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Miestas</Label>
-                <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
+                <Select value={formData.city} onValueChange={(value) => handleSelectChange('city', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Kaunas">Kaunas</SelectItem>

@@ -1,15 +1,24 @@
+import { lazy, Suspense } from "react";
 import { Mail, Phone, MapPin } from "lucide-react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import TrustSection from "@/components/TrustSection";
-import FeaturedCars from "@/components/FeaturedCars";
-import FinancingSection from "@/components/FinancingSection";
-import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Helmet } from "react-helmet";
+
+// Lazy load below-the-fold sections
+const TrustSection = lazy(() => import("@/components/TrustSection"));
+const FeaturedCars = lazy(() => import("@/components/FeaturedCars"));
+const FinancingSection = lazy(() => import("@/components/FinancingSection"));
+const Testimonials = lazy(() => import("@/components/Testimonials"));
+
+const SectionFallback = () => (
+  <div className="py-20 flex items-center justify-center">
+    <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const Index = () => {
   const location = useLocation();

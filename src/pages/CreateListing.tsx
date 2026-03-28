@@ -55,6 +55,7 @@ const CreateListing = ({
   isSuperAdmin = false,
   canExportAutoplius = false,
 }: CreateListingProps) => {
+  const { hasAiAccess } = useAiAccess();
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);

@@ -944,7 +944,7 @@ const CreateListing = ({
         <CardTitle className="text-xl">{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} onBlur={handleFormBlur} className="space-y-8">
           
           {/* ═══════════════ 1. PAGRINDINĖ INFORMACIJA ═══════════════ */}
           <section>

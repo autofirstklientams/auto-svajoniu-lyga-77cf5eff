@@ -1103,7 +1103,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Pavarų dėžė</Label>
-                <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
+                <Select value={formData.transmission} onValueChange={(value) => handleSelectChange('transmission', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Mechaninė">Mechaninė</SelectItem>

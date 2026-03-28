@@ -1510,7 +1510,7 @@ const CreateListing = ({
               <>
                 <div className="mt-4 pt-4 border-t">
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox checked={isCompanyCar} onCheckedChange={(checked) => { setIsCompanyCar(checked === true); if (car?.id) autoSaveField('is_company_car', checked === true); }} />
+                    <Checkbox checked={isCompanyCar} onCheckedChange={(checked) => { setIsCompanyCar(checked === true); autoSaveField('is_company_car', checked === true); }} />
                     <div>
                       <span className="font-medium">AutoKOPERS įmonės automobilis</span>
                       <p className="text-sm text-muted-foreground">Pažymėkite, jei šis automobilis priklauso AutoKOPERS įmonei</p>

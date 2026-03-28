@@ -9,9 +9,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const COHERE_API_KEY = Deno.env.get('COHERE_API_KEY');
-    if (!COHERE_API_KEY) {
-      throw new Error('COHERE_API_KEY is not configured');
+    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    if (!LOVABLE_API_KEY) {
+      throw new Error('LOVABLE_API_KEY is not configured');
     }
 
     const { make, model, year, mileage, fuel_type, transmission, body_type, color, engine_capacity, power_kw, doors, seats, condition, features, defects } = await req.json();
@@ -126,15 +126,19 @@ www.autokopers.lt"
 - Jei yra defektų – paminėk sąžiningai bet diplomatiškai automobilio pristatymo dalyje
 - Nerašyk kainos`;
 
-    const response = await fetch('https://api.cohere.com/v2/chat', {
+    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${COHERE_API_KEY}`,
+        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'command-r-plus',
+        model: 'google/gemini-3-flash-preview',
         messages: [
+          {
+            role: 'system',
+            content: 'Tu esi profesionalus automobilių skelbimų copywriter Lietuvoje. Rašai tik lietuviškai, laikaisi pateiktos struktūros.',
+          },
           {
             role: 'user',
             content: prompt,
@@ -145,7 +149,7 @@ www.autokopers.lt"
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Cohere API error:', response.status, errorText);
+      console.error('AI gateway error:', response.status, errorText);
 
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: 'Per daug užklausų, bandykite vėliau' }), {
@@ -153,18 +157,18 @@ www.autokopers.lt"
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (response.status === 401) {
-        return new Response(JSON.stringify({ error: 'Neteisingas Cohere API raktas' }), {
-          status: 401,
+      if (response.status === 402) {
+        return new Response(JSON.stringify({ error: 'AI kreditai išnaudoti, susisiekite su administratoriumi' }), {
+          status: 402,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
 
-      throw new Error(`Cohere API error: ${response.status}`);
+      throw new Error(`AI gateway error: ${response.status}`);
     }
 
     const data = await response.json();
-    const description = data.message?.content?.[0]?.text || '';
+    const description = data.choices?.[0]?.message?.content || '';
 
     if (!description) {
       throw new Error('AI nepateikė aprašymo');

@@ -1,15 +1,24 @@
+import { lazy, Suspense } from "react";
 import { Mail, Phone, MapPin } from "lucide-react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
-import TrustSection from "@/components/TrustSection";
-import FeaturedCars from "@/components/FeaturedCars";
-import FinancingSection from "@/components/FinancingSection";
-import Testimonials from "@/components/Testimonials";
 import Footer from "@/components/Footer";
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Helmet } from "react-helmet";
+
+// Lazy load below-the-fold sections
+const TrustSection = lazy(() => import("@/components/TrustSection"));
+const FeaturedCars = lazy(() => import("@/components/FeaturedCars"));
+const FinancingSection = lazy(() => import("@/components/FinancingSection"));
+const Testimonials = lazy(() => import("@/components/Testimonials"));
+
+const SectionFallback = () => (
+  <div className="py-20 flex items-center justify-center">
+    <div className="w-6 h-6 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const Index = () => {
   const location = useLocation();
@@ -67,21 +76,23 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        {/* Mobile: Calculator -> Cars -> Trust/Testimonials. Desktop: Trust first */}
-        <div className="hidden md:block">
-          <TrustSection />
-        </div>
-        <div id="featured-cars">
-          <FeaturedCars />
-        </div>
-        <div className="md:hidden">
-          <FinancingSection />
-          <TrustSection />
-        </div>
-        <div className="hidden md:block">
-          <FinancingSection />
-        </div>
-        <Testimonials />
+        <Suspense fallback={<SectionFallback />}>
+          {/* Mobile: Calculator -> Cars -> Trust/Testimonials. Desktop: Trust first */}
+          <div className="hidden md:block">
+            <TrustSection />
+          </div>
+          <div id="featured-cars">
+            <FeaturedCars />
+          </div>
+          <div className="md:hidden">
+            <FinancingSection />
+            <TrustSection />
+          </div>
+          <div className="hidden md:block">
+            <FinancingSection />
+          </div>
+          <Testimonials />
+        </Suspense>
         <section id="contact" className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">

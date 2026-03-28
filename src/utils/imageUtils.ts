@@ -135,7 +135,7 @@ export function getOptimizedImageUrl(
  * Get thumbnail URL (small, fast loading for cards/grids)
  */
 export function getThumbnailUrl(url: string | null | undefined): string {
-  return getOptimizedImageUrl(url, { width: 800, quality: 85 });
+  return getOptimizedImageUrl(url, { width: 600, quality: 80 });
 }
 
 /**

@@ -9,6 +9,8 @@ interface OptimizedImageProps {
   aspectRatio?: string;
   objectPosition?: string;
   fit?: "cover" | "contain" | "contain-fill";
+  width?: number;
+  height?: number;
 }
 
 function OptimizedImageComponent({
@@ -19,6 +21,8 @@ function OptimizedImageComponent({
   aspectRatio,
   objectPosition = "center",
   fit = "cover",
+  width,
+  height,
 }: OptimizedImageProps) {
   const objectClass =
     fit === "contain" || fit === "contain-fill" ? "object-contain" : "object-cover";
@@ -50,6 +54,8 @@ function OptimizedImageComponent({
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         fetchPriority={priority ? "high" : "auto"}
+        width={width}
+        height={height}
         className={cn("w-full h-full", objectClass)}
         style={{ objectPosition }}
       />

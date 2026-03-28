@@ -4,9 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     
-    <!-- Preconnect to Supabase storage for faster image loading -->
+    <!-- Preconnect for faster resource loading -->
     <link rel="preconnect" href="https://vjdzzaerrxfctkkiwkmn.supabase.co" crossorigin />
     <link rel="dns-prefetch" href="https://vjdzzaerrxfctkkiwkmn.supabase.co" />
+    <link rel="preconnect" href="https://connect.facebook.net" crossorigin />
+    <link rel="dns-prefetch" href="https://connect.facebook.net" />
     
     <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#1e88e5" />
@@ -34,18 +36,20 @@
 
     <title>Autokopers – Automobilių Pardavimas ir Finansavimas</title>
 
-    <!-- Meta Pixel Code -->
+    <!-- Meta Pixel Code - deferred to not block rendering -->
     <script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '867931301807401');
-    fbq('track', 'PageView');
+    window.addEventListener('load', function() {
+      !function(f,b,e,v,n,t,s)
+      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)}(window, document,'script',
+      'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '867931301807401');
+      fbq('track', 'PageView');
+    });
     </script>
     <!-- End Meta Pixel Code -->
   </head>

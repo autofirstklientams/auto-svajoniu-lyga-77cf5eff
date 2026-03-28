@@ -1199,7 +1199,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Durų skaičius</Label>
-                <Select value={formData.doors?.toString()} onValueChange={(value) => { setFormData({ ...formData, doors: parseInt(value) }); if (car?.id) autoSaveField('doors', parseInt(value)); }}>
+                <Select value={formData.doors?.toString()} onValueChange={(value) => { setFormData({ ...formData, doors: parseInt(value) }); autoSaveField('doors', parseInt(value)); }}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="2">2/3</SelectItem>

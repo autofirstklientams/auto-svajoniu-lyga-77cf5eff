@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { z } from "zod";
-import { Upload, Link, Loader2, Globe, ExternalLink, X } from "lucide-react";
+import { Upload, Link, Loader2, Globe, ExternalLink, X, Sparkles } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
@@ -56,6 +56,7 @@ const CreateListing = ({
 }: CreateListingProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
   
   const [autopliusUrl, setAutopliusUrl] = useState("");
   const [imageFiles, setImageFiles] = useState<File[]>([]);
@@ -660,6 +661,51 @@ const CreateListing = ({
       return next;
     });
   }, []);
+
+  const handleGenerateDescription = async () => {
+    if (!formData.make || !formData.model) {
+      toast.error("Nurodykite markę ir modelį prieš generuojant aprašymą");
+      return;
+    }
+    setIsGeneratingDescription(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-car-description', {
+        body: {
+          make: formData.make,
+          model: formData.model,
+          year: formData.year || undefined,
+          mileage: formData.mileage || undefined,
+          fuel_type: formData.fuel_type || undefined,
+          transmission: formData.transmission || undefined,
+          body_type: formData.body_type || undefined,
+          color: formData.color || undefined,
+          engine_capacity: formData.engine_capacity || undefined,
+          power_kw: formData.power_kw || undefined,
+          doors: formData.doors || undefined,
+          seats: formData.seats || undefined,
+          condition: formData.condition || undefined,
+          defects: formData.defects || undefined,
+          features: selectedFeatures,
+        },
+      });
+
+      if (error) throw error;
+      if (data?.error) {
+        toast.error(data.error);
+        return;
+      }
+
+      if (data?.description) {
+        setFormData(prev => ({ ...prev, description: data.description }));
+        toast.success("Aprašymas sugeneruotas!");
+      }
+    } catch (err) {
+      console.error('Generate description error:', err);
+      toast.error("Nepavyko sugeneruoti aprašymo");
+    } finally {
+      setIsGeneratingDescription(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1312,7 +1358,23 @@ const CreateListing = ({
             </h3>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="description">Aprašymas</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="description">Aprašymas</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleGenerateDescription}
+                    disabled={isGeneratingDescription || !formData.make || !formData.model}
+                  >
+                    {isGeneratingDescription ? (
+                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    ) : (
+                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                    )}
+                    {isGeneratingDescription ? "Generuojama..." : "Generuoti AI"}
+                  </Button>
+                </div>
                 <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} placeholder="Automobilio aprašymas..." />
               </div>
               <div className="space-y-2">

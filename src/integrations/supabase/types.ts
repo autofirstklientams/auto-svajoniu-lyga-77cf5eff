@@ -14,6 +14,27 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_feature_access: {
+        Row: {
+          created_at: string
+          granted_by: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       car_access: {
         Row: {
           car_id: string

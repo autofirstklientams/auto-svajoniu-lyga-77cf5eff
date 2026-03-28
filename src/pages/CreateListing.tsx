@@ -12,6 +12,7 @@ import { Upload, Link, Loader2, Globe, ExternalLink, X, Sparkles } from "lucide-
 import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
+import { useAiAccess } from "@/hooks/useAiAccess";
 import { processImages } from "@/utils/imageUtils";
 import { SearchableCombobox } from "@/components/SearchableCombobox";
 import { autopliusMakes } from "@/data/autopliusMakes";
@@ -54,6 +55,7 @@ const CreateListing = ({
   isSuperAdmin = false,
   canExportAutoplius = false,
 }: CreateListingProps) => {
+  const { hasAiAccess } = useAiAccess();
   const [isLoading, setIsLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false);
@@ -1327,7 +1329,7 @@ const CreateListing = ({
                 onCropImage={handleCropExistingImage}
                 title="Esamos nuotraukos:"
                 carId={car?.id}
-                showAiBackground={isSuperAdmin && !!car?.id}
+                showAiBackground={hasAiAccess && !!car?.id}
               />
 
               <DraggableImageGrid
@@ -1360,20 +1362,22 @@ const CreateListing = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="description">Aprašymas</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleGenerateDescription}
-                    disabled={isGeneratingDescription || !formData.make || !formData.model}
-                  >
-                    {isGeneratingDescription ? (
-                      <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
-                    ) : (
-                      <Sparkles className="h-3.5 w-3.5 mr-1.5" />
-                    )}
-                    {isGeneratingDescription ? "Generuojama..." : "Generuoti AI"}
-                  </Button>
+                  {hasAiAccess && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={handleGenerateDescription}
+                      disabled={isGeneratingDescription || !formData.make || !formData.model}
+                    >
+                      {isGeneratingDescription ? (
+                        <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                      ) : (
+                        <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+                      )}
+                      {isGeneratingDescription ? "Generuojama..." : "Generuoti AI"}
+                    </Button>
+                  )}
                 </div>
                 <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} placeholder="Automobilio aprašymas..." />
               </div>

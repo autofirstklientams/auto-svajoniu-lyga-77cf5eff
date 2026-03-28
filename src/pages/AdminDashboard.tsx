@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText, Shield, ShieldOff, Pencil, Search } from "lucide-react";
+import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText, Shield, ShieldOff, Pencil, Search, Sparkles } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -48,6 +48,7 @@ const AdminDashboard = () => {
   const [allCars, setAllCars] = useState<CarListing[]>([]);
   const [editingCar, setEditingCar] = useState<CarListing | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [aiAccessUserIds, setAiAccessUserIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     checkAdminAccess();
@@ -81,6 +82,7 @@ const AdminDashboard = () => {
       setIsAdmin(true);
       await fetchPartners();
       await fetchAllCars();
+      await fetchAiAccess();
     } catch (error) {
       console.error("Error checking admin access:", error);
       toast.error("Klaida tikrinant prieigą");
@@ -118,6 +120,41 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error fetching partners:", error);
       toast.error("Klaida gaunant partnerius");
+    }
+  };
+
+  const fetchAiAccess = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("ai_feature_access" as any)
+        .select("user_id");
+      if (error) throw error;
+      setAiAccessUserIds(new Set((data || []).map((r: any) => r.user_id)));
+    } catch (error) {
+      console.error("Error fetching AI access:", error);
+    }
+  };
+
+  const toggleAiAccess = async (userId: string) => {
+    try {
+      if (aiAccessUserIds.has(userId)) {
+        const { error } = await supabase
+          .from("ai_feature_access" as any)
+          .delete()
+          .eq("user_id", userId);
+        if (error) throw error;
+        toast.success("AI prieiga pašalinta");
+      } else {
+        const { error } = await supabase
+          .from("ai_feature_access" as any)
+          .insert({ user_id: userId, granted_by: currentUserId } as any);
+        if (error) throw error;
+        toast.success("AI prieiga suteikta");
+      }
+      await fetchAiAccess();
+    } catch (error) {
+      console.error("Error toggling AI access:", error);
+      toast.error("Klaida keičiant AI prieigą");
     }
   };
 
@@ -410,7 +447,21 @@ const AdminDashboard = () => {
                           )
                         )}
 
-                        {/* Delete button - not for super admin, self, or admins */}
+                        {/* AI access toggle */}
+                        {partner.id !== SUPER_ADMIN_ID && (
+                          <Button
+                            onClick={() => toggleAiAccess(partner.id)}
+                            variant="outline"
+                            size="sm"
+                            className={aiAccessUserIds.has(partner.id) 
+                              ? "text-violet-600 border-violet-300 hover:bg-violet-50" 
+                              : "text-muted-foreground"}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            {aiAccessUserIds.has(partner.id) ? "AI ✓" : "AI"}
+                          </Button>
+                        )}
+
                         {partner.id !== SUPER_ADMIN_ID && partner.id !== currentUserId && partner.role !== "admin" && (
                           <Button
                             onClick={() => handleDeleteUser(partner.id, partner.email)}

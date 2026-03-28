@@ -1497,7 +1497,7 @@ const CreateListing = ({
 
               {canExportAutoplius && (
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox checked={visibleAutolizingas} onCheckedChange={(checked) => { setVisibleAutolizingas(checked === true); if (car?.id) autoSaveField('visible_autolizingas', checked === true); }} />
+                  <Checkbox checked={visibleAutolizingas} onCheckedChange={(checked) => { setVisibleAutolizingas(checked === true); autoSaveField('visible_autolizingas', checked === true); }} />
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autolizingas.lt</span>

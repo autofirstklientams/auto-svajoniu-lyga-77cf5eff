@@ -317,7 +317,7 @@ const CarCatalog = () => {
             {/* Car Grid */}
             <div className="flex-1">
               {isLoading ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
                   {Array.from({ length: 6 }).map((_, i) => (
                     <div key={i} className="flex flex-col space-y-3">
                       <Skeleton className="h-[240px] w-full rounded-xl" />
@@ -343,8 +343,8 @@ const CarCatalog = () => {
                   </Button>
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {filteredCars.map((car) => (
+                <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+                  {filteredCars.map((car, index) => (
                     <div
                       key={car.id}
                       className="animate-fade-in"
@@ -362,6 +362,7 @@ const CarCatalog = () => {
                         isRecommended={car.is_recommended}
                         isReserved={car.is_reserved}
                         isSold={car.is_sold}
+                        priority={index < 4}
                       />
                     </div>
                   ))}

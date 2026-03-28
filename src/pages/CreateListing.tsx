@@ -1398,11 +1398,11 @@ const CreateListing = ({
                 <div className="flex items-center justify-between">
                   <Label htmlFor="description">Aprašymas</Label>
                 </div>
-                <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={4} placeholder="Automobilio aprašymas..." />
+                <Textarea id="description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} onBlur={() => handleFieldBlur('description')} rows={4} placeholder="Automobilio aprašymas..." />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="defects">Defektai / Trūkumai</Label>
-                <Textarea id="defects" value={formData.defects} onChange={(e) => setFormData({ ...formData, defects: e.target.value })} rows={4} placeholder="Jei yra defektų, nurodykite čia..." />
+                <Textarea id="defects" value={formData.defects} onChange={(e) => setFormData({ ...formData, defects: e.target.value })} onBlur={() => handleFieldBlur('defects')} rows={4} placeholder="Jei yra defektų, nurodykite čia..." />
               </div>
             </div>
           </section>

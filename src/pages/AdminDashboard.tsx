@@ -123,6 +123,41 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchAiAccess = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("ai_feature_access" as any)
+        .select("user_id");
+      if (error) throw error;
+      setAiAccessUserIds(new Set((data || []).map((r: any) => r.user_id)));
+    } catch (error) {
+      console.error("Error fetching AI access:", error);
+    }
+  };
+
+  const toggleAiAccess = async (userId: string) => {
+    try {
+      if (aiAccessUserIds.has(userId)) {
+        const { error } = await supabase
+          .from("ai_feature_access" as any)
+          .delete()
+          .eq("user_id", userId);
+        if (error) throw error;
+        toast.success("AI prieiga pašalinta");
+      } else {
+        const { error } = await supabase
+          .from("ai_feature_access" as any)
+          .insert({ user_id: userId, granted_by: currentUserId } as any);
+        if (error) throw error;
+        toast.success("AI prieiga suteikta");
+      }
+      await fetchAiAccess();
+    } catch (error) {
+      console.error("Error toggling AI access:", error);
+      toast.error("Klaida keičiant AI prieigą");
+    }
+  };
+
   const fetchAllCars = async () => {
     try {
       const { data, error } = await supabase

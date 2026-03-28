@@ -1259,7 +1259,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Kilmės šalis</Label>
-                <Select value={formData.origin_country} onValueChange={(value) => setFormData({ ...formData, origin_country: value })}>
+                <Select value={formData.origin_country} onValueChange={(value) => handleSelectChange('origin_country', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Lietuva">Lietuva</SelectItem>

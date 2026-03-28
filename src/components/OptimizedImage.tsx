@@ -54,6 +54,8 @@ function OptimizedImageComponent({
         loading={priority ? "eager" : "lazy"}
         decoding="async"
         fetchPriority={priority ? "high" : "auto"}
+        width={width}
+        height={height}
         className={cn("w-full h-full", objectClass)}
         style={{ objectPosition }}
       />

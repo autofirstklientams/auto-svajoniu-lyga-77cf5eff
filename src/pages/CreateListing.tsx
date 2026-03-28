@@ -1497,7 +1497,7 @@ const CreateListing = ({
                       </div>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <Checkbox checked={isRecommended} onCheckedChange={(checked) => setIsRecommended(checked === true)} />
+                      <Checkbox checked={isRecommended} onCheckedChange={(checked) => { setIsRecommended(checked === true); if (car?.id) autoSaveField('is_recommended', checked === true); }} />
                       <div>
                         <span className="font-medium text-primary">✓ AUTOKOPERS rekomenduoja</span>
                         <p className="text-sm text-muted-foreground">Ant nuotraukos bus rodomas "AUTOKOPERS rekomenduoja" ženkliukas</p>

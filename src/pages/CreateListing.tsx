@@ -1147,7 +1147,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Spalva</Label>
-                <Select value={formData.color} onValueChange={(value) => setFormData({ ...formData, color: value })}>
+                <Select value={formData.color} onValueChange={(value) => handleSelectChange('color', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Balta">Balta</SelectItem>

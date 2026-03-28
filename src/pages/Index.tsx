@@ -76,21 +76,23 @@ const Index = () => {
       <Header />
       <main>
         <Hero />
-        {/* Mobile: Calculator -> Cars -> Trust/Testimonials. Desktop: Trust first */}
-        <div className="hidden md:block">
-          <TrustSection />
-        </div>
-        <div id="featured-cars">
-          <FeaturedCars />
-        </div>
-        <div className="md:hidden">
-          <FinancingSection />
-          <TrustSection />
-        </div>
-        <div className="hidden md:block">
-          <FinancingSection />
-        </div>
-        <Testimonials />
+        <Suspense fallback={<SectionFallback />}>
+          {/* Mobile: Calculator -> Cars -> Trust/Testimonials. Desktop: Trust first */}
+          <div className="hidden md:block">
+            <TrustSection />
+          </div>
+          <div id="featured-cars">
+            <FeaturedCars />
+          </div>
+          <div className="md:hidden">
+            <FinancingSection />
+            <TrustSection />
+          </div>
+          <div className="hidden md:block">
+            <FinancingSection />
+          </div>
+          <Testimonials />
+        </Suspense>
         <section id="contact" className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">

@@ -1487,13 +1487,24 @@ const CreateListing = ({
             )}
           </section>
 
-          <div className="flex gap-2 sticky bottom-4 bg-background/95 backdrop-blur-sm py-3 px-1 -mx-1 rounded-lg border shadow-sm">
+          <div className="flex gap-2 items-center sticky bottom-4 bg-background/95 backdrop-blur-sm py-3 px-1 -mx-1 rounded-lg border shadow-sm">
             <Button type="submit" disabled={isLoading} className="flex-1 sm:flex-none">
               {isLoading ? "Saugoma..." : car ? "Atnaujinti" : "Sukurti skelbimą"}
             </Button>
             <Button type="button" variant="outline" onClick={onClose}>
               Atšaukti
             </Button>
+            {car?.id && autoSaveStatus !== 'idle' && (
+              <span className={`text-xs ml-auto ${
+                autoSaveStatus === 'saving' ? 'text-muted-foreground' :
+                autoSaveStatus === 'saved' ? 'text-green-600' :
+                'text-destructive'
+              }`}>
+                {autoSaveStatus === 'saving' ? '💾 Saugoma...' :
+                 autoSaveStatus === 'saved' ? '✅ Išsaugota' :
+                 '❌ Klaida saugant'}
+              </span>
+            )}
           </div>
         </form>
       </CardContent>

@@ -447,7 +447,21 @@ const AdminDashboard = () => {
                           )
                         )}
 
-                        {/* Delete button - not for super admin, self, or admins */}
+                        {/* AI access toggle */}
+                        {partner.id !== SUPER_ADMIN_ID && (
+                          <Button
+                            onClick={() => toggleAiAccess(partner.id)}
+                            variant="outline"
+                            size="sm"
+                            className={aiAccessUserIds.has(partner.id) 
+                              ? "text-violet-600 border-violet-300 hover:bg-violet-50" 
+                              : "text-muted-foreground"}
+                          >
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            {aiAccessUserIds.has(partner.id) ? "AI ✓" : "AI"}
+                          </Button>
+                        )}
+
                         {partner.id !== SUPER_ADMIN_ID && partner.id !== currentUserId && partner.role !== "admin" && (
                           <Button
                             onClick={() => handleDeleteUser(partner.id, partner.email)}

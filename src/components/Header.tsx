@@ -49,13 +49,13 @@ const Header = () => {
       
       <header className="bg-white border-b border-border sticky top-0 z-50 shadow-sm">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16 lg:h-20">
+          <div className="flex items-center justify-between h-16 md:h-20">
             <Link to="/" className="flex items-center flex-shrink-0">
-              <img src={logo} alt="AutoKOPERS logotipas" className="h-10 lg:h-12" />
+              <img src={logo} alt="AutoKOPERS logotipas" className="h-10 md:h-12" />
             </Link>
 
             {/* Desktop navigation */}
-            <nav className="hidden lg:flex items-center gap-6 xl:gap-8">
+            <nav className="hidden md:flex items-center gap-3 lg:gap-6 xl:gap-8 text-sm lg:text-base">
               <Link 
                 to="/automobiliai"
                 className="text-foreground hover:text-primary font-medium transition-colors"
@@ -106,8 +106,8 @@ const Header = () => {
               )}
             </nav>
 
-            {/* Mobile/Tablet navigation */}
-            <div className="lg:hidden flex items-center gap-2">
+            {/* Mobile navigation */}
+            <div className="md:hidden flex items-center gap-2">
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" size="icon" aria-label="Open menu">

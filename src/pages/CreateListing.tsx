@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -146,6 +146,63 @@ const CreateListing = ({
       setModelOptions([]);
     }
   }, [formData.make, fetchModels]);
+  // Auto-save on blur (only for existing cars)
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const autoSaveField = useCallback(async (fieldName: string, value: any) => {
+    if (!car?.id) return; // Only auto-save when editing existing car
+    
+    // Convert empty strings to null for DB
+    const dbValue = value === "" || value === 0 ? null : value;
+    
+    setAutoSaveStatus('saving');
+    try {
+      const { error } = await supabase
+        .from("cars")
+        .update({ [fieldName]: dbValue })
+        .eq("id", car.id);
+      
+      if (error) throw error;
+      
+      setAutoSaveStatus('saved');
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = setTimeout(() => setAutoSaveStatus('idle'), 2000);
+    } catch (err) {
+      console.error('Auto-save error:', err);
+      setAutoSaveStatus('error');
+      if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+      autoSaveTimerRef.current = setTimeout(() => setAutoSaveStatus('idle'), 3000);
+    }
+  }, [car?.id]);
+
+  // Map form field IDs to DB column names
+  const fieldIdToDbColumn: Record<string, string> = {
+    price: 'price', mileage: 'mileage', vin: 'vin', color: 'color',
+    description: 'description', defects: 'defects', engine_capacity: 'engine_capacity',
+    power_kw: 'power_kw', doors: 'doors', seats: 'seats', co2_emission: 'co2_emission',
+    fuel_cons_urban: 'fuel_cons_urban', fuel_cons_highway: 'fuel_cons_highway',
+    fuel_cons_combined: 'fuel_cons_combined', origin_country: 'origin_country',
+    city: 'city', sdk_code: 'sdk_code', wheel_size: 'wheel_size',
+    first_reg_date: 'first_reg_date', mot_date: 'mot_date',
+    euro_standard: 'euro_standard',
+  };
+
+  const handleFormBlur = useCallback((e: React.FocusEvent) => {
+    if (!car?.id) return;
+    const target = e.target as HTMLInputElement | HTMLTextAreaElement;
+    const fieldId = target.id;
+    const dbColumn = fieldIdToDbColumn[fieldId];
+    if (!dbColumn) return;
+    
+    const value = formData[dbColumn as keyof typeof formData];
+    autoSaveField(dbColumn, value);
+  }, [car?.id, formData, autoSaveField]);
+
+  const handleSelectChange = useCallback((fieldName: string, value: string) => {
+    setFormData(prev => ({ ...prev, [fieldName]: value }));
+    if (car?.id) autoSaveField(fieldName, value);
+  }, [car?.id, autoSaveField]);
 
   const handleImportFromAutoplius = async () => {
     if (!autopliusUrl.trim()) {
@@ -892,7 +949,7 @@ const CreateListing = ({
         <CardTitle className="text-xl">{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} onBlur={handleFormBlur} className="space-y-8">
           
           {/* ═══════════════ 1. PAGRINDINĖ INFORMACIJA ═══════════════ */}
           <section>
@@ -982,7 +1039,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Būklė</Label>
-                <Select value={formData.condition} onValueChange={(value) => setFormData({ ...formData, condition: value })}>
+                <Select value={formData.condition} onValueChange={(value) => handleSelectChange('condition', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Naujas">Naujas</SelectItem>
@@ -1008,7 +1065,7 @@ const CreateListing = ({
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Kėbulo tipas</Label>
-                <Select value={formData.body_type} onValueChange={(value) => setFormData({ ...formData, body_type: value })}>
+                <Select value={formData.body_type} onValueChange={(value) => handleSelectChange('body_type', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Sedanas">Sedanas</SelectItem>
@@ -1029,7 +1086,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Kuro tipas</Label>
-                <Select value={formData.fuel_type} onValueChange={(value) => setFormData({ ...formData, fuel_type: value })}>
+                <Select value={formData.fuel_type} onValueChange={(value) => handleSelectChange('fuel_type', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Benzinas">Benzinas</SelectItem>
@@ -1046,7 +1103,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Pavarų dėžė</Label>
-                <Select value={formData.transmission} onValueChange={(value) => setFormData({ ...formData, transmission: value })}>
+                <Select value={formData.transmission} onValueChange={(value) => handleSelectChange('transmission', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Mechaninė">Mechaninė</SelectItem>
@@ -1067,7 +1124,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Varantieji ratai</Label>
-                <Select value={formData.wheel_drive} onValueChange={(value) => setFormData({ ...formData, wheel_drive: value })}>
+                <Select value={formData.wheel_drive} onValueChange={(value) => handleSelectChange('wheel_drive', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Priekiniai">Priekiniai</SelectItem>
@@ -1079,7 +1136,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Vairas</Label>
-                <Select value={formData.steering_wheel} onValueChange={(value) => setFormData({ ...formData, steering_wheel: value })}>
+                <Select value={formData.steering_wheel} onValueChange={(value) => handleSelectChange('steering_wheel', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Kairė">Kairė</SelectItem>
@@ -1090,7 +1147,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Spalva</Label>
-                <Select value={formData.color} onValueChange={(value) => setFormData({ ...formData, color: value })}>
+                <Select value={formData.color} onValueChange={(value) => handleSelectChange('color', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Balta">Balta</SelectItem>
@@ -1110,7 +1167,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Durų skaičius</Label>
-                <Select value={formData.doors?.toString()} onValueChange={(value) => setFormData({ ...formData, doors: parseInt(value) })}>
+                <Select value={formData.doors?.toString()} onValueChange={(value) => { setFormData({ ...formData, doors: parseInt(value) }); if (car?.id) autoSaveField('doors', parseInt(value)); }}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="2">2/3</SelectItem>
@@ -1121,7 +1178,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Vietų skaičius</Label>
-                <Select value={formData.seats?.toString()} onValueChange={(value) => setFormData({ ...formData, seats: parseInt(value) })}>
+                <Select value={formData.seats?.toString()} onValueChange={(value) => { setFormData({ ...formData, seats: parseInt(value) }); if (car?.id) autoSaveField('seats', parseInt(value)); }}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="2">2</SelectItem>
@@ -1138,7 +1195,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Euro standartas</Label>
-                <Select value={formData.euro_standard} onValueChange={(value) => setFormData({ ...formData, euro_standard: value })}>
+                <Select value={formData.euro_standard} onValueChange={(value) => handleSelectChange('euro_standard', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Euro 1">Euro 1</SelectItem>
@@ -1154,7 +1211,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Ratų dydis</Label>
-                <Select value={formData.wheel_size} onValueChange={(value) => setFormData({ ...formData, wheel_size: value })}>
+                <Select value={formData.wheel_size} onValueChange={(value) => handleSelectChange('wheel_size', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="R12">R12</SelectItem>
@@ -1185,7 +1242,7 @@ const CreateListing = ({
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               <div className="space-y-2">
                 <Label>Miestas</Label>
-                <Select value={formData.city} onValueChange={(value) => setFormData({ ...formData, city: value })}>
+                <Select value={formData.city} onValueChange={(value) => handleSelectChange('city', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Kaunas">Kaunas</SelectItem>
@@ -1202,7 +1259,7 @@ const CreateListing = ({
 
               <div className="space-y-2">
                 <Label>Kilmės šalis</Label>
-                <Select value={formData.origin_country} onValueChange={(value) => setFormData({ ...formData, origin_country: value })}>
+                <Select value={formData.origin_country} onValueChange={(value) => handleSelectChange('origin_country', value)}>
                   <SelectTrigger><SelectValue placeholder="Pasirinkite" /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="Lietuva">Lietuva</SelectItem>
@@ -1389,7 +1446,7 @@ const CreateListing = ({
             </h3>
             <div className="flex flex-wrap gap-6">
               <label className="flex items-center gap-3 cursor-pointer">
-                <Checkbox checked={visibleWeb} onCheckedChange={(checked) => setVisibleWeb(checked === true)} />
+                <Checkbox checked={visibleWeb} onCheckedChange={(checked) => { setVisibleWeb(checked === true); if (car?.id) autoSaveField('visible_web', checked === true); }} />
                 <div className="flex items-center gap-2">
                   <Globe className="h-4 w-4 text-primary" />
                   <span className="font-medium">AutoKOPERS svetainė</span>
@@ -1398,7 +1455,7 @@ const CreateListing = ({
               
               {canExportAutoplius && (
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox checked={visibleAutoplius} onCheckedChange={(checked) => setVisibleAutoplius(checked === true)} />
+                  <Checkbox checked={visibleAutoplius} onCheckedChange={(checked) => { setVisibleAutoplius(checked === true); if (car?.id) autoSaveField('visible_autoplius', checked === true); }} />
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autoplius.lt</span>
@@ -1408,7 +1465,7 @@ const CreateListing = ({
 
               {canExportAutoplius && (
                 <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox checked={visibleAutolizingas} onCheckedChange={(checked) => setVisibleAutolizingas(checked === true)} />
+                  <Checkbox checked={visibleAutolizingas} onCheckedChange={(checked) => { setVisibleAutolizingas(checked === true); if (car?.id) autoSaveField('visible_autolizingas', checked === true); }} />
                   <div className="flex items-center gap-2">
                     <ExternalLink className="h-4 w-4 text-primary" />
                     <span className="font-medium">Autolizingas.lt</span>
@@ -1421,7 +1478,7 @@ const CreateListing = ({
               <>
                 <div className="mt-4 pt-4 border-t">
                   <label className="flex items-center gap-3 cursor-pointer">
-                    <Checkbox checked={isCompanyCar} onCheckedChange={(checked) => setIsCompanyCar(checked === true)} />
+                    <Checkbox checked={isCompanyCar} onCheckedChange={(checked) => { setIsCompanyCar(checked === true); if (car?.id) autoSaveField('is_company_car', checked === true); }} />
                     <div>
                       <span className="font-medium">AutoKOPERS įmonės automobilis</span>
                       <p className="text-sm text-muted-foreground">Pažymėkite, jei šis automobilis priklauso AutoKOPERS įmonei</p>
@@ -1433,14 +1490,14 @@ const CreateListing = ({
                   <h4 className="font-medium mb-3">Išskirtiniai nustatymai</h4>
                   <div className="space-y-3">
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <Checkbox checked={isFeatured} onCheckedChange={(checked) => setIsFeatured(checked === true)} />
+                      <Checkbox checked={isFeatured} onCheckedChange={(checked) => { setIsFeatured(checked === true); if (car?.id) autoSaveField('is_featured', checked === true); }} />
                       <div>
                         <span className="font-medium">Rodyti pagrindiniame puslapyje</span>
                         <p className="text-sm text-muted-foreground">Automobilis bus matomas pagrindiniame puslapyje</p>
                       </div>
                     </label>
                     <label className="flex items-center gap-3 cursor-pointer">
-                      <Checkbox checked={isRecommended} onCheckedChange={(checked) => setIsRecommended(checked === true)} />
+                      <Checkbox checked={isRecommended} onCheckedChange={(checked) => { setIsRecommended(checked === true); if (car?.id) autoSaveField('is_recommended', checked === true); }} />
                       <div>
                         <span className="font-medium text-primary">✓ AUTOKOPERS rekomenduoja</span>
                         <p className="text-sm text-muted-foreground">Ant nuotraukos bus rodomas "AUTOKOPERS rekomenduoja" ženkliukas</p>
@@ -1452,13 +1509,24 @@ const CreateListing = ({
             )}
           </section>
 
-          <div className="flex gap-2 sticky bottom-4 bg-background/95 backdrop-blur-sm py-3 px-1 -mx-1 rounded-lg border shadow-sm">
+          <div className="flex gap-2 items-center sticky bottom-4 bg-background/95 backdrop-blur-sm py-3 px-1 -mx-1 rounded-lg border shadow-sm">
             <Button type="submit" disabled={isLoading} className="flex-1 sm:flex-none">
               {isLoading ? "Saugoma..." : car ? "Atnaujinti" : "Sukurti skelbimą"}
             </Button>
             <Button type="button" variant="outline" onClick={onClose}>
               Atšaukti
             </Button>
+            {car?.id && autoSaveStatus !== 'idle' && (
+              <span className={`text-xs ml-auto ${
+                autoSaveStatus === 'saving' ? 'text-muted-foreground' :
+                autoSaveStatus === 'saved' ? 'text-green-600' :
+                'text-destructive'
+              }`}>
+                {autoSaveStatus === 'saving' ? '💾 Saugoma...' :
+                 autoSaveStatus === 'saved' ? '✅ Išsaugota' :
+                 '❌ Klaida saugant'}
+              </span>
+            )}
           </div>
         </form>
       </CardContent>

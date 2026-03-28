@@ -1329,7 +1329,7 @@ const CreateListing = ({
                 onCropImage={handleCropExistingImage}
                 title="Esamos nuotraukos:"
                 carId={car?.id}
-                showAiBackground={isSuperAdmin && !!car?.id}
+                showAiBackground={hasAiAccess && !!car?.id}
               />
 
               <DraggableImageGrid

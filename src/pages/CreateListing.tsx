@@ -12,6 +12,7 @@ import { Upload, Link, Loader2, Globe, ExternalLink, X, Sparkles } from "lucide-
 import { Checkbox } from "@/components/ui/checkbox";
 import CarFeaturesSelector, { CarFeatures } from "@/components/CarFeaturesSelector";
 import { DraggableImageGrid, DraggableImage } from "@/components/DraggableImageGrid";
+import { useAiAccess } from "@/hooks/useAiAccess";
 import { processImages } from "@/utils/imageUtils";
 import { SearchableCombobox } from "@/components/SearchableCombobox";
 import { autopliusMakes } from "@/data/autopliusMakes";

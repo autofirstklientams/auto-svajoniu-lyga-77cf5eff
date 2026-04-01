@@ -252,7 +252,7 @@ Deno.serve(async (req) => {
     }
 
     const originalBase64 = bytesToBase64(originalBytes);
-    const maskBytes = await generateMaskWithAi(geminiApiKey, sourceMimeType, originalBase64);
+    const maskBytes = await generateMaskWithAi(lovableApiKey, sourceMimeType, originalBase64);
     const composedPng = await composeWithOriginalCar(originalBytes, maskBytes);
 
     const fileName = `showroom/${carId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_bg-removed.png`;

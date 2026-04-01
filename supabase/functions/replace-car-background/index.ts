@@ -115,22 +115,30 @@ const replaceBackgroundWithAi = async (
   mimeType: string,
   imageBase64: string
 ): Promise<Uint8Array> => {
-  const prompt = `Replace ONLY the background of this car photo with a professional car dealership studio environment.
+  const prompt = `You are a background replacement tool. Your ONLY job is to replace the background. You must NOT touch the car AT ALL.
 
-Studio background requirements:
+STEP 1 — Identify the car:
+- Detect every single pixel that belongs to the car (body, paint, wheels, tires, rims, lights, mirrors, glass, reflections on paint, shadows on body, badges, emblems, license plates, antenna, wipers, door handles, exhaust pipes, interior visible through windows)
+- Create a precise mask around the car — every car pixel must be preserved EXACTLY as-is
+
+STEP 2 — Replace ONLY the background pixels with:
 - Clean, bright studio setting with soft professional lighting
 - Light gray to white gradient background, similar to a car showroom or photography studio
 - Subtle reflective floor surface beneath the car showing a gentle reflection/shadow
 - Soft, even lighting with no harsh shadows — like professional automotive photography
 - The environment should look like a high-end car dealership photo studio
 
-CRITICAL — Car preservation rules:
-- The car must remain PIXEL-PERFECT — do NOT redraw, repaint, reshape, or alter the vehicle in ANY way
-- Every detail must be identical to the input: paint color, reflections, wheels, tires, lights, badges, mirrors, glass, interior visible through windows, license plates
-- Do NOT change the car's position, angle, scale, or proportions
+ABSOLUTE RULES — VIOLATION = FAILURE:
+- The car must be IDENTICAL to the input — copy every car pixel exactly, do NOT regenerate, redraw, recolor, reshape, or enhance the car
+- Do NOT change paint color, shine, reflections, scratches, dirt — keep them ALL
+- Do NOT alter wheels, tires, rims, brake calipers — they must be IDENTICAL
+- Do NOT modify headlights, taillights, indicators, fog lights
+- Do NOT change the car's position, angle, scale, proportions, or perspective
+- Do NOT smooth, sharpen, denoise, or enhance ANY part of the car
+- Do NOT change window tint, glass reflections, or interior visibility
 - Do NOT add any text, watermarks, logos, or overlays
 - Output at the EXACT same resolution as the input
-- If in doubt, leave the car pixel untouched`;
+- If ANY pixel is uncertain whether it belongs to the car or background, treat it as CAR and leave it untouched`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,

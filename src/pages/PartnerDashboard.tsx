@@ -186,7 +186,8 @@ const PartnerDashboard = () => {
           condition, vin, defects, features, is_company_car, is_featured, 
           is_recommended, is_reserved, is_sold, euro_standard, fuel_cons_urban, fuel_cons_highway,
           fuel_cons_combined, origin_country, wheel_drive, co2_emission, city,
-          first_reg_date, mot_date, wheel_size, sdk_code, partner_id
+          first_reg_date, mot_date, wheel_size, sdk_code, partner_id,
+          profiles:partner_id(full_name)
         `)
         .order("created_at", { ascending: false });
 
@@ -198,10 +199,14 @@ const PartnerDashboard = () => {
       const { data, error } = await query;
       if (error) throw error;
       // Sort: sold cars go to the end, rest keep created_at desc order
-      const sorted = (data || []).sort((a: any, b: any) => {
+      const sorted = (data || []).map((car: any) => ({
+        ...car,
+        partner_name: car.profiles?.full_name || null,
+        profiles: undefined,
+      })).sort((a: any, b: any) => {
         if (a.is_sold && !b.is_sold) return 1;
         if (!a.is_sold && b.is_sold) return -1;
-        return 0; // preserve existing created_at desc order
+        return 0;
       });
       setCars(sorted);
     } catch (error: any) {
@@ -481,6 +486,8 @@ const PartnerDashboard = () => {
               onDelete={() => handleDelete(car.id)}
               onDuplicate={() => handleDuplicate(car)}
               onRefresh={fetchCars}
+              isOwner={car.partner_id === user?.id}
+              showPartnerName={isAdmin && car.partner_id !== user?.id}
             />
           ))}
         </div>

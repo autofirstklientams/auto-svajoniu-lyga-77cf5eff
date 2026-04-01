@@ -1,5 +1,5 @@
 import { useState, memo } from "react";
-import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare, ShieldCheck, CheckCircle2 } from "lucide-react";
+import { Pencil, Trash2, Copy, Globe, ExternalLink, MessageSquare, ShieldCheck, CheckCircle2, User } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -20,6 +20,7 @@ interface Car {
   image_url: string | null;
   visible_web: boolean;
   visible_autoplius: boolean;
+  partner_name?: string | null;
   [key: string]: any;
 }
 
@@ -30,9 +31,10 @@ interface CarListingCardProps {
   onDuplicate: () => void;
   onRefresh?: () => void;
   isOwner?: boolean;
+  showPartnerName?: boolean;
 }
 
-function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh, isOwner = true }: CarListingCardProps) {
+function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh, isOwner = true, showPartnerName = false }: CarListingCardProps) {
   const [showManagement, setShowManagement] = useState(false);
   const [isReserved, setIsReserved] = useState(car.is_reserved ?? false);
   const [isSold, setIsSold] = useState(car.is_sold ?? false);
@@ -198,6 +200,12 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
         </div>
 
         <CardContent className="p-4">
+          {showPartnerName && car.partner_name && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+              <User className="h-3 w-3" />
+              <span>{car.partner_name}</span>
+            </div>
+          )}
           <div className="flex justify-between items-start mb-2">
             <div>
               <h3 className="font-semibold text-foreground text-lg">

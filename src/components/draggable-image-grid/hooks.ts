@@ -249,7 +249,7 @@ export function useAiBackground(
         successCount++;
         toast.success(`Nuotrauka ${i + 1}/${imagesToProcess.length} – fonas pakeistas! Spauskite ↩ grąžinti.`);
       } catch (err: any) {
-        console.error('Bulk AI error for image', imageIndex, err);
+        console.error('Bulk AI error for image', i, err);
         setOriginalUrls(prev => {
           const next = new Map(prev);
           next.delete(img.id);

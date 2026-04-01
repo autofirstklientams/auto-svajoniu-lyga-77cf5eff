@@ -115,11 +115,18 @@ ${forbiddenSigns}
 - Do NOT alter the car's color temperature, exposure, contrast, or white balance
 - Do NOT sharpen, denoise, or apply any filter to the car pixels
 - Do NOT crop, resize, rotate, or reposition the car in the frame
-- Do NOT zoom out or make the car appear smaller/further away — the car must occupy the SAME proportion of the frame as in the original photo
-- Do NOT add extra space around the car — maintain the original framing and composition exactly
-- The car's size relative to the image dimensions MUST remain identical to the input
 
-OUTPUT: One photorealistic composite image at the EXACT same resolution and framing as the input. The car must be the same size and position as the original.`;
+**CRITICAL FRAMING RULE — THIS IS THE #1 PRIORITY AFTER CAR PRESERVATION:**
+- The car MUST occupy the EXACT SAME percentage of the image as in the input photo
+- If the car fills 70% of the frame width in the original, it must fill 70% in the output
+- Do NOT zoom out, pull back, or add ANY extra empty space around the car
+- Do NOT make the car appear smaller, further away, or more distant
+- Do NOT add more ceiling/wall/floor space than what replaces the original background
+- The car's pixel boundaries (top, bottom, left, right edges) must remain at the SAME positions in the frame
+- Simply REPLACE the background pixels — do not recompose or reframe the scene
+- Think of it as a mask operation: keep car pixels, swap only non-car pixels
+
+OUTPUT: One photorealistic composite image at the EXACT same resolution. The car must be IDENTICAL in size and position — only the background changes.`;
 
     // Download image using Supabase storage client (more reliable than raw fetch)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

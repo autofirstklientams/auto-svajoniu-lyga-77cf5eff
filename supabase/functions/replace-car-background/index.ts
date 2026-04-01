@@ -42,14 +42,16 @@ Deno.serve(async (req) => {
     console.log(`Normalized URL: ${normalizedUrl.substring(0, 100)}`);
 
     const brandingSection = isMainPhoto ? `
-=== BRANDING ON WALL ===
-On the back wall behind the car, place a company logo/sign reading "AUTOKOPERS" in large dark blue capital letters (hex #2B5A8C). The text should be:
-- Centered horizontally on the wall
-- Positioned in the upper third of the wall (above car roof level)
-- Clean sans-serif bold font
-- The word "AUTO" should have a dark blue rounded rectangle background behind it, and "KOPERS" should be dark grey (#4A4A4A) without background — like a professional dealership sign
-- Size: large enough to be clearly readable but not overwhelming — approximately 15-20% of wall width
-- Flat on the wall surface, not floating
+=== MANDATORY BRANDING ON WALL ===
+THIS IS REQUIRED FOR THE MAIN PHOTO. You MUST place a dealership sign on the back wall:
+- The sign reads "AUTOKOPERS" (one word, all capital letters)
+- Split into two parts: "AUTO" on a dark blue rounded rectangle background (hex #2B5A8C), and "KOPERS" in dark grey text (#4A4A4A) with no background
+- The sign should look like a professional car dealership wall sign — flat mounted on the wall
+- Position: centered horizontally on the wall, in the upper portion of the wall ABOVE the car's roofline
+- Font: clean, bold, modern sans-serif (similar to Montserrat Bold or similar)
+- Size: clearly readable, approximately 15-20% of the wall width
+- The sign must be flat on the wall surface — NOT floating in air, NOT on the floor
+- Do NOT skip this step — the sign MUST appear in the final image
 ` : '';
 
     const forbiddenSigns = isMainPhoto 

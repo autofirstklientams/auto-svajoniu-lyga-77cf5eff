@@ -112,17 +112,31 @@ const parseGeneratedImageBase64 = (aiData: any): string | null => {
 const replaceBackgroundWithAi = async (
   apiKey: string,
   mimeType: string,
-  imageBase64: string
+  imageBase64: string,
+  isMainPhoto: boolean
 ): Promise<Uint8Array> => {
-  const prompt = `Replace the background of this car photo with a clean, uniform light gray studio background (RGB approximately 240, 240, 240).
+  const basePrompt = `Replace the background of this car photo with a professional car dealership studio environment.
 
-Rules:
-- Keep the car EXACTLY as it is — do not modify, redraw, distort, or recolor any part of the vehicle.
-- Keep the car's position, angle, size, and all details (paint, wheels, lights, badges, mirrors, glass, reflections) 100% untouched.
-- Include a subtle natural shadow beneath the car on the gray surface.
-- The background must be smooth, even, and free of any patterns, gradients, or artifacts.
-- Do NOT add any text, watermarks, or logos.
-- Output at the EXACT same resolution as the input.`;
+Studio background requirements:
+- Clean, bright studio setting with soft professional lighting
+- Light gray to white gradient background, similar to a car showroom or photography studio
+- Subtle reflective floor surface beneath the car showing a gentle reflection/shadow
+- Soft, even lighting with no harsh shadows — like professional automotive photography
+- The environment should look like a high-end car dealership photo studio
+
+Car preservation rules:
+- Keep the car EXACTLY as it is — do not modify, redraw, distort, or recolor any part of the vehicle
+- Keep the car's position, angle, size, and all details (paint, wheels, lights, badges, mirrors, glass, reflections) 100% untouched
+- Do NOT add any text, watermarks, or logos
+- Output at the EXACT same resolution as the input`;
+
+  const mainPhotoAddition = isMainPhoto ? `
+
+Additional requirement for this photo:
+- Add the text "AUTO KOPERS" as a watermark/logo at the TOP CENTER of the image. The word "AUTO" should be in dark gray/black color and "KOPERS" should be in purple/violet color (similar to #6B46C1). Use a bold, modern sans-serif font. Make it clearly visible but not overwhelming — approximately 5-8% of image height.
+- Add a smaller "AUTO KOPERS" logo at the BOTTOM RIGHT corner of the image, same style but smaller (about 3-4% of image height).` : '';
+
+  const prompt = basePrompt + mainPhotoAddition;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,

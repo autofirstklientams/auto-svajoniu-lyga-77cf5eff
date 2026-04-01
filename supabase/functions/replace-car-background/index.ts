@@ -115,8 +115,11 @@ ${forbiddenSigns}
 - Do NOT alter the car's color temperature, exposure, contrast, or white balance
 - Do NOT sharpen, denoise, or apply any filter to the car pixels
 - Do NOT crop, resize, rotate, or reposition the car in the frame
+- Do NOT zoom out or make the car appear smaller/further away — the car must occupy the SAME proportion of the frame as in the original photo
+- Do NOT add extra space around the car — maintain the original framing and composition exactly
+- The car's size relative to the image dimensions MUST remain identical to the input
 
-OUTPUT: One photorealistic composite image at the same resolution as the input.`;
+OUTPUT: One photorealistic composite image at the EXACT same resolution and framing as the input. The car must be the same size and position as the original.`;
 
     // Download image using Supabase storage client (more reliable than raw fetch)
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

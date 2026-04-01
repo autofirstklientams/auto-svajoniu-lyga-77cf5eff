@@ -209,7 +209,7 @@ export function useAiBackground(
 
     for (let i = 0; i < imagesToProcess.length; i++) {
       const img = imagesToProcess[i];
-      const imageIndex = images.findIndex(im => im.id === img.id);
+      const isFirstImage = images.length > 0 && images[0].id === img.id;
       
       toast.info(`Keičiamas fonas ${i + 1}/${imagesToProcess.length}...`);
       setProcessingIds(prev => new Set(prev).add(img.id));

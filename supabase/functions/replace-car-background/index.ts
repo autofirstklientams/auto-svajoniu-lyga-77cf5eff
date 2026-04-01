@@ -1,20 +1,11 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { Image } from 'jsr:@matmen/imagescript';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const MASK_MODEL = 'gemini-2.5-flash-image';
-const BG_COLOR = { r: 240, g: 240, b: 240 };
-
-class HttpError extends Error {
-  constructor(public status: number, message: string) {
-    super(message);
-    this.name = 'HttpError';
-  }
-}
+const MODEL = 'gemini-2.5-flash-image';
 
 class RecoverableUserError extends Error {
   constructor(message: string) {
@@ -34,12 +25,10 @@ const normalizeImageUrl = (imageUrl: string) => {
   if (normalized.includes('/storage/v1/render/image/public/')) {
     normalized = normalized.replace('/storage/v1/render/image/public/', '/storage/v1/object/public/');
   }
-
   const queryIndex = normalized.indexOf('?');
   if (queryIndex !== -1) {
     normalized = normalized.slice(0, queryIndex);
   }
-
   return normalized;
 };
 
@@ -70,20 +59,46 @@ const base64ToBytes = (base64: string): Uint8Array => {
   return bytes;
 };
 
-const rgbaToPixel = (r: number, g: number, b: number, a: number) =>
-  ((((r & 255) << 24) >>> 0) | ((g & 255) << 16) | ((b & 255) << 8) | (a & 255)) >>> 0;
+const downloadSourceImage = async (
+  supabase: any,
+  normalizedUrl: string
+): Promise<{ bytes: Uint8Array; mimeType: string }> => {
+  const storagePath = extractStoragePath(normalizedUrl);
+  console.log('Downloading from storage path:', storagePath);
 
-const blendChannel = (foreground: number, background: number, keepStrength: number) =>
-  Math.round(foreground * keepStrength + background * (1 - keepStrength));
+  const { data: fileData, error: downloadError } = await supabase.storage
+    .from('car-images')
+    .download(storagePath);
 
-const getKeepStrength = (maskRgba: Uint8ClampedArray) => {
-  const luminance = (0.299 * maskRgba[0] + 0.587 * maskRgba[1] + 0.114 * maskRgba[2]) / 255;
-  const alpha = maskRgba[3] / 255;
-  const raw = Math.max(luminance, alpha);
+  if (downloadError || !fileData) {
+    console.error('Storage download error:', downloadError);
+    const statusCode = (downloadError as any)?.statusCode;
+    const message = (downloadError as any)?.message || '';
+    if (statusCode === '404' || statusCode === 404 || message.includes('Object not found')) {
+      throw new RecoverableUserError(
+        'Originali nuotrauka nerasta saugykloje. Įkelkite nuotrauką iš naujo ir bandykite dar kartą.'
+      );
+    }
 
-  if (raw <= 0.12) return 0;
-  if (raw >= 0.88) return 1;
-  return (raw - 0.12) / (0.88 - 0.12);
+    const fallbackResponse = await fetch(normalizedUrl);
+    if (!fallbackResponse.ok) {
+      if (fallbackResponse.status === 400 || fallbackResponse.status === 404) {
+        throw new RecoverableUserError(
+          'Originali nuotrauka nerasta saugykloje. Įkelkite nuotrauką iš naujo ir bandykite dar kartą.'
+        );
+      }
+      throw new Error(`Fetch fallback failed: ${fallbackResponse.status}`);
+    }
+    return {
+      bytes: new Uint8Array(await fallbackResponse.arrayBuffer()),
+      mimeType: fallbackResponse.headers.get('content-type') || 'image/jpeg',
+    };
+  }
+
+  return {
+    bytes: new Uint8Array(await fileData.arrayBuffer()),
+    mimeType: fileData.type || 'image/jpeg',
+  };
 };
 
 const parseGeneratedImageBase64 = (aiData: any): string | null => {
@@ -94,83 +109,64 @@ const parseGeneratedImageBase64 = (aiData: any): string | null => {
   return imagePart?.inlineData?.data ?? imagePart?.inline_data?.data ?? null;
 };
 
-const generateMaskWithAi = async (apiKey: string, mimeType: string, imageBase64: string) => {
-  const maskPrompt = `Create ONLY a binary segmentation mask for the main vehicle in this image.
+const replaceBackgroundWithAi = async (
+  apiKey: string,
+  mimeType: string,
+  imageBase64: string
+): Promise<Uint8Array> => {
+  const prompt = `Replace the background of this car photo with a clean, uniform light gray studio background (RGB approximately 240, 240, 240).
 
-Output rules:
-- Return one image only, at EXACTLY the same resolution.
-- White (#FFFFFF) = vehicle pixels to keep (body, paint, trim, lights, mirrors, wheels, tires, glass, badges, plate, visible interior through windows).
-- Include the natural contact shadow directly under the vehicle in white.
-- Black (#000000) = everything else (full background).
-- No colors, no text, no logos, no gradients, no gray background.
-- Do NOT crop, zoom, rotate, move, or redraw anything.`;
+Rules:
+- Keep the car EXACTLY as it is — do not modify, redraw, distort, or recolor any part of the vehicle.
+- Keep the car's position, angle, size, and all details (paint, wheels, lights, badges, mirrors, glass, reflections) 100% untouched.
+- Include a subtle natural shadow beneath the car on the gray surface.
+- The background must be smooth, even, and free of any patterns, gradients, or artifacts.
+- Do NOT add any text, watermarks, or logos.
+- Output at the EXACT same resolution as the input.`;
 
-  const aiResponse = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MASK_MODEL}:generateContent?key=${apiKey}`,
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         contents: [{
-          parts: [{ text: maskPrompt }, { inlineData: { mimeType, data: imageBase64 } }],
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType, data: imageBase64 } },
+          ],
         }],
         generationConfig: {
           responseModalities: ['IMAGE'],
           temperature: 0,
+          maxOutputTokens: 8192,
         },
       }),
     }
   );
 
-  if (!aiResponse.ok) {
-    const errorText = await aiResponse.text();
-    console.error('Mask generation API error:', aiResponse.status, errorText);
+  if (!response.ok) {
+    const errorText = await response.text();
+    console.error('Gemini API error:', response.status, errorText);
 
-    if (aiResponse.status === 429) {
-      throw new HttpError(429, 'Per daug užklausų, bandykite vėliau');
+    if (response.status === 429) {
+      throw new Error('Per daug užklausų, bandykite vėliau');
     }
-    if (aiResponse.status === 401 || aiResponse.status === 403) {
-      throw new HttpError(401, 'Neteisingas Gemini API raktas');
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Neteisingas Gemini API raktas');
     }
-    throw new HttpError(500, `AI API klaida: ${aiResponse.status}`);
+    throw new Error(`AI API klaida: ${response.status}`);
   }
 
-  const aiData = await aiResponse.json();
-  const maskBase64 = parseGeneratedImageBase64(aiData);
+  const aiData = await response.json();
+  const resultBase64 = parseGeneratedImageBase64(aiData);
 
-  if (!maskBase64) {
-    console.error('No mask image in AI response:', JSON.stringify(aiData).slice(0, 500));
-    throw new Error('AI nepateikė kaukės rezultato');
+  if (!resultBase64) {
+    console.error('No image in AI response:', JSON.stringify(aiData).slice(0, 500));
+    throw new Error('AI nepateikė nuotraukos rezultato');
   }
 
-  return base64ToBytes(maskBase64);
-};
-
-const composeWithOriginalCar = async (originalBytes: Uint8Array, maskBytes: Uint8Array) => {
-  const originalImage = await Image.decode(originalBytes);
-  const maskImage = await Image.decode(maskBytes);
-
-  if (maskImage.width !== originalImage.width || maskImage.height !== originalImage.height) {
-    maskImage.resize(originalImage.width, originalImage.height);
-  }
-
-  const outputImage = new Image(originalImage.width, originalImage.height);
-
-  for (let y = 1; y <= originalImage.height; y++) {
-    for (let x = 1; x <= originalImage.width; x++) {
-      const source = originalImage.getRGBAAt(x, y);
-      const mask = maskImage.getRGBAAt(x, y);
-      const keepStrength = getKeepStrength(mask);
-
-      const r = blendChannel(source[0], BG_COLOR.r, keepStrength);
-      const g = blendChannel(source[1], BG_COLOR.g, keepStrength);
-      const b = blendChannel(source[2], BG_COLOR.b, keepStrength);
-
-      outputImage.setPixelAt(x, y, rgbaToPixel(r, g, b, 255));
-    }
-  }
-
-  return await outputImage.encode();
+  return base64ToBytes(resultBase64);
 };
 
 Deno.serve(async (req) => {
@@ -190,7 +186,7 @@ Deno.serve(async (req) => {
     }
 
     const normalizedUrl = normalizeImageUrl(imageUrl);
-    console.log(`Processing strict background removal for car ${carId}, imageUrl: ${normalizedUrl.slice(0, 120)}`);
+    console.log(`Processing background replacement for car ${carId}`);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -205,57 +201,20 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    let originalBytes: Uint8Array;
-    let sourceMimeType = 'image/jpeg';
+    const { bytes: originalBytes, mimeType } = await downloadSourceImage(supabase, normalizedUrl);
+    console.log(`Downloaded image: ${originalBytes.length} bytes, ${mimeType}`);
 
-    try {
-      const storagePath = extractStoragePath(normalizedUrl);
-      console.log('Downloading from storage path:', storagePath);
-
-      const { data: fileData, error: downloadError } = await supabase.storage.from('car-images').download(storagePath);
-
-      if (downloadError || !fileData) {
-        console.error('Storage download error:', downloadError);
-
-        const storageStatusCode = (downloadError as { statusCode?: string | number } | null)?.statusCode;
-        const storageMessage = (downloadError as { message?: string } | null)?.message || '';
-        if (storageStatusCode === '404' || storageStatusCode === 404 || storageMessage.includes('Object not found')) {
-          throw new RecoverableUserError('Originali nuotrauka nerasta saugykloje. Įkelkite nuotrauką iš naujo ir bandykite dar kartą.');
-        }
-
-        const fallbackResponse = await fetch(normalizedUrl);
-        if (!fallbackResponse.ok) {
-          if (fallbackResponse.status === 400 || fallbackResponse.status === 404) {
-            throw new RecoverableUserError('Originali nuotrauka nerasta saugykloje. Įkelkite nuotrauką iš naujo ir bandykite dar kartą.');
-          }
-          throw new Error(`Fetch fallback failed: ${fallbackResponse.status}`);
-        }
-
-        sourceMimeType = fallbackResponse.headers.get('content-type') || sourceMimeType;
-        originalBytes = new Uint8Array(await fallbackResponse.arrayBuffer());
-      } else {
-        sourceMimeType = fileData.type || sourceMimeType;
-        originalBytes = new Uint8Array(await fileData.arrayBuffer());
-      }
-    } catch (downloadError) {
-      if (downloadError instanceof RecoverableUserError) {
-        throw downloadError;
-      }
-
-      console.error('Failed to download source image:', downloadError);
-      throw new Error('Nepavyko atsisiųsti originalios nuotraukos');
-    }
-
-    const originalBase64 = bytesToBase64(originalBytes);
-    const maskBytes = await generateMaskWithAi(geminiApiKey, sourceMimeType, originalBase64);
-    const composedPng = await composeWithOriginalCar(originalBytes, maskBytes);
+    const resultBytes = await replaceBackgroundWithAi(geminiApiKey, mimeType, bytesToBase64(originalBytes));
+    console.log(`AI result: ${resultBytes.length} bytes`);
 
     const fileName = `showroom/${carId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_bg-removed.png`;
 
-    const { error: uploadError } = await supabase.storage.from('car-images').upload(fileName, composedPng, {
-      contentType: 'image/png',
-      upsert: false,
-    });
+    const { error: uploadError } = await supabase.storage
+      .from('car-images')
+      .upload(fileName, resultBytes, {
+        contentType: 'image/png',
+        upsert: false,
+      });
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
@@ -266,7 +225,7 @@ Deno.serve(async (req) => {
       data: { publicUrl },
     } = supabase.storage.from('car-images').getPublicUrl(fileName);
 
-    console.log(`Background removed with locked car pixels: ${publicUrl}`);
+    console.log(`Background replaced successfully: ${publicUrl}`);
 
     return jsonResponse({ success: true, url: publicUrl });
   } catch (error) {
@@ -276,10 +235,9 @@ Deno.serve(async (req) => {
       return jsonResponse({ success: false, error: error.message }, 200);
     }
 
-    if (error instanceof HttpError) {
-      return jsonResponse({ error: error.message }, error.status);
-    }
-
-    return jsonResponse({ error: error instanceof Error ? error.message : 'Nežinoma klaida' }, 500);
+    return jsonResponse(
+      { error: error instanceof Error ? error.message : 'Nežinoma klaida' },
+      500
+    );
   }
 });

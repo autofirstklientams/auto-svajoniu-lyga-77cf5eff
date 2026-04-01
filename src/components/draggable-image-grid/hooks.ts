@@ -110,7 +110,7 @@ export function useAiBackground(
       let data: any = null;
       while (attempts < 3) {
         const result = await supabase.functions.invoke('replace-car-background', {
-          body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
+          body: { imageUrl: img.url, carId, isMainPhoto: images.length > 0 && images[0].id === img.id },
         });
 
         if (result.error) {
@@ -209,7 +209,7 @@ export function useAiBackground(
 
     for (let i = 0; i < imagesToProcess.length; i++) {
       const img = imagesToProcess[i];
-      const imageIndex = images.findIndex(im => im.id === img.id);
+      const isFirstImage = images.length > 0 && images[0].id === img.id;
       
       toast.info(`Keičiamas fonas ${i + 1}/${imagesToProcess.length}...`);
       setProcessingIds(prev => new Set(prev).add(img.id));
@@ -225,7 +225,7 @@ export function useAiBackground(
         let data: any = null;
         while (attempts < 3) {
           const result = await supabase.functions.invoke('replace-car-background', {
-            body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
+            body: { imageUrl: img.url, carId, isMainPhoto: isFirstImage },
           });
 
           if (result.error) {
@@ -249,7 +249,7 @@ export function useAiBackground(
         successCount++;
         toast.success(`Nuotrauka ${i + 1}/${imagesToProcess.length} – fonas pakeistas! Spauskite ↩ grąžinti.`);
       } catch (err: any) {
-        console.error('Bulk AI error for image', imageIndex, err);
+        console.error('Bulk AI error for image', i, err);
         setOriginalUrls(prev => {
           const next = new Map(prev);
           next.delete(img.id);

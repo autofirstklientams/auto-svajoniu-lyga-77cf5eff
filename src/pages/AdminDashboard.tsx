@@ -49,6 +49,7 @@ const AdminDashboard = () => {
   const [editingCar, setEditingCar] = useState<CarListing | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [aiAccessUserIds, setAiAccessUserIds] = useState<Set<string>>(new Set());
+  const [invoiceAccessUserIds, setInvoiceAccessUserIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     checkAdminAccess();
@@ -83,6 +84,7 @@ const AdminDashboard = () => {
       await fetchPartners();
       await fetchAllCars();
       await fetchAiAccess();
+      await fetchInvoiceAccess();
     } catch (error) {
       console.error("Error checking admin access:", error);
       toast.error("Klaida tikrinant prieigą");
@@ -132,6 +134,41 @@ const AdminDashboard = () => {
       setAiAccessUserIds(new Set((data || []).map((r: any) => r.user_id)));
     } catch (error) {
       console.error("Error fetching AI access:", error);
+    }
+  };
+
+  const fetchInvoiceAccess = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("invoice_access" as any)
+        .select("user_id");
+      if (error) throw error;
+      setInvoiceAccessUserIds(new Set((data || []).map((r: any) => r.user_id)));
+    } catch (error) {
+      console.error("Error fetching invoice access:", error);
+    }
+  };
+
+  const toggleInvoiceAccess = async (userId: string) => {
+    try {
+      if (invoiceAccessUserIds.has(userId)) {
+        const { error } = await supabase
+          .from("invoice_access" as any)
+          .delete()
+          .eq("user_id", userId);
+        if (error) throw error;
+        toast.success("Sąskaitų prieiga pašalinta");
+      } else {
+        const { error } = await supabase
+          .from("invoice_access" as any)
+          .insert({ user_id: userId, granted_by: currentUserId } as any);
+        if (error) throw error;
+        toast.success("Sąskaitų prieiga suteikta");
+      }
+      await fetchInvoiceAccess();
+    } catch (error) {
+      console.error("Error toggling invoice access:", error);
+      toast.error("Klaida keičiant sąskaitų prieigą");
     }
   };
 
@@ -459,6 +496,21 @@ const AdminDashboard = () => {
                           >
                             <Sparkles className="h-4 w-4 mr-2" />
                             {aiAccessUserIds.has(partner.id) ? "AI ✓" : "AI"}
+                          </Button>
+                        )}
+
+                        {/* Invoice access toggle */}
+                        {partner.id !== SUPER_ADMIN_ID && (
+                          <Button
+                            onClick={() => toggleInvoiceAccess(partner.id)}
+                            variant="outline"
+                            size="sm"
+                            className={invoiceAccessUserIds.has(partner.id) 
+                              ? "text-emerald-600 border-emerald-300 hover:bg-emerald-50" 
+                              : "text-muted-foreground"}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            {invoiceAccessUserIds.has(partner.id) ? "Sąskaitos ✓" : "Sąskaitos"}
                           </Button>
                         )}
 

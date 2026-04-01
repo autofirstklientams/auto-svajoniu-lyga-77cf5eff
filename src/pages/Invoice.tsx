@@ -43,7 +43,15 @@ const Invoice = () => {
       }
 
       const hasAdminRole = roles?.some((r) => r.role === "admin") ?? false;
-      if (!hasAdminRole) {
+
+      // Check invoice_access table
+      const { data: invoiceAccess } = await supabase
+        .from("invoice_access" as any)
+        .select("id")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!hasAdminRole && !invoiceAccess) {
         toast.error("Neturite prieigos prie sąskaitų generatoriaus");
         navigate("/partner-dashboard");
         return;

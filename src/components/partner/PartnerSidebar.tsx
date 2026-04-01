@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import logo from "@/assets/autokopers-logo.jpeg";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "@/components/ThemeProvider";
+import { useInvoiceAccess } from "@/hooks/useInvoiceAccess";
 
 interface PartnerSidebarProps {
   isCollapsed: boolean;
@@ -28,7 +29,7 @@ interface PartnerSidebarProps {
 const menuItems = [
   { title: "Dashboard", url: "/partner-dashboard", icon: LayoutDashboard },
   { title: "Mano skelbimai", url: "/partner-dashboard", icon: Car, section: "listings" },
-  { title: "Sąskaitos", url: "/invoice", icon: FileText, adminOnly: true },
+  { title: "Sąskaitos", url: "/invoice", icon: FileText, invoiceAccess: true },
 ];
 
 export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSidebarProps) {
@@ -36,6 +37,7 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { theme, setTheme } = useTheme();
+  const { hasInvoiceAccess } = useInvoiceAccess();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -98,9 +100,9 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
 
               {/* Navigation */}
               <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-                {menuItems
-                  .filter((item) => !item.adminOnly || isAdmin)
-                  .map((item) => {
+              {menuItems
+                .filter((item) => !item.invoiceAccess || isAdmin || hasInvoiceAccess)
+                .map((item) => {
                     const isActive = location.pathname === item.url;
                     return (
                       <Link
@@ -210,7 +212,7 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
       {/* Navigation */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {menuItems
-          .filter((item) => !item.adminOnly || isAdmin)
+          .filter((item) => !item.invoiceAccess || isAdmin || hasInvoiceAccess)
           .map((item) => {
             const isActive = location.pathname === item.url;
             return (

@@ -110,7 +110,7 @@ export function useAiBackground(
       let data: any = null;
       while (attempts < 3) {
         const result = await supabase.functions.invoke('replace-car-background', {
-          body: { imageUrl: img.url, carId, isMainPhoto: imageIndex === 0 },
+          body: { imageUrl: img.url, carId, isMainPhoto: images.length > 0 && images[0].id === img.id },
         });
 
         if (result.error) {

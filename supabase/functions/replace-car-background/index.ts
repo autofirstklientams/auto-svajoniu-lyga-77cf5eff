@@ -170,7 +170,7 @@ OUTPUT: One photorealistic composite image at the same resolution as the input.`
     const rawBase64 = base64Match[2];
 
     const aiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -178,7 +178,7 @@ OUTPUT: One photorealistic composite image at the same resolution as the input.`
           contents: [{
             parts: [
               { text: prompt },
-              { inline_data: { mime_type: mimeType, data: rawBase64 } },
+              { inlineData: { mimeType, data: rawBase64 } },
             ],
           }],
           generationConfig: {
@@ -200,21 +200,32 @@ OUTPUT: One photorealistic composite image at the same resolution as the input.`
         });
       }
 
+      if (aiResponse.status === 401 || aiResponse.status === 403) {
+        return new Response(JSON.stringify({ error: 'Neteisingas Gemini API raktas' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+
       throw new Error(`Gemini API error: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    
-    // Find the image part in the response
+
+    // Find the image part in the response (support both camelCase and snake_case)
     const parts = aiData.candidates?.[0]?.content?.parts || [];
-    const imagePart = parts.find((p: any) => p.inline_data?.mime_type?.startsWith('image/'));
-    
-    if (!imagePart) {
+    const imagePart = parts.find(
+      (p: any) =>
+        p.inlineData?.mimeType?.startsWith('image/') ||
+        p.inline_data?.mime_type?.startsWith('image/')
+    );
+
+    const generatedBase64 = imagePart?.inlineData?.data ?? imagePart?.inline_data?.data;
+
+    if (!generatedBase64) {
       console.error('No image in Gemini response:', JSON.stringify(aiData).slice(0, 500));
       throw new Error('AI nepateikė nuotraukos rezultato');
     }
-
-    const generatedBase64 = imagePart.inline_data.data;
 
     // Convert base64 to blob and upload to storage
     const imageBytes = Uint8Array.from(atob(generatedBase64), c => c.charCodeAt(0));

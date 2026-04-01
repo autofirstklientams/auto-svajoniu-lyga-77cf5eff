@@ -52,6 +52,15 @@
     });
     </script>
     <!-- End Meta Pixel Code -->
+
+    <!-- Auto-reload on stale chunk errors -->
+    <script>
+    window.addEventListener('error', function(e) {
+      if (e.message && e.message.includes('Failed to fetch dynamically imported module')) {
+        window.location.reload();
+      }
+    });
+    </script>
   </head>
 
   <body>

@@ -218,7 +218,7 @@ Deno.serve(async (req) => {
     const { bytes: originalBytes, mimeType } = await downloadSourceImage(supabase, normalizedUrl);
     console.log(`Downloaded image: ${originalBytes.length} bytes, ${mimeType}`);
 
-    const resultBytes = await replaceBackgroundWithAi(geminiApiKey, mimeType, bytesToBase64(originalBytes));
+    const resultBytes = await replaceBackgroundWithAi(geminiApiKey, mimeType, bytesToBase64(originalBytes), !!isMainPhoto);
     console.log(`AI result: ${resultBytes.length} bytes`);
 
     const fileName = `showroom/${carId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_bg-removed.png`;

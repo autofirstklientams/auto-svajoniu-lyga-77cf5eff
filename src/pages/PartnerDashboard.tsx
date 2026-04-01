@@ -177,6 +177,19 @@ const PartnerDashboard = () => {
   const fetchCars = useCallback(async () => {
     if (!user?.id) return;
     try {
+      // Check admin role directly to avoid stale closure
+      let adminStatus = isAdmin;
+      if (!adminStatus) {
+        const { data: roles } = await supabase
+          .from("user_roles")
+          .select("role")
+          .eq("user_id", user.id);
+        adminStatus = roles?.some((r) => r.role === "admin") ?? false;
+        if (adminStatus && !isAdmin) {
+          setIsAdmin(true);
+        }
+      }
+
       const query = supabase
         .from("cars")
         .select(`
@@ -192,7 +205,7 @@ const PartnerDashboard = () => {
         .order("created_at", { ascending: false });
 
       // Admin sees all cars, partner sees only their own
-      if (!isAdmin) {
+      if (!adminStatus) {
         query.eq("partner_id", user.id);
       }
 

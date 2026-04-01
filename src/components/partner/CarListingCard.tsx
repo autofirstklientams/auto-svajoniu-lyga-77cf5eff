@@ -200,6 +200,12 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
         </div>
 
         <CardContent className="p-4">
+          {showPartnerName && car.partner_name && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mb-2">
+              <User className="h-3 w-3" />
+              <span>{car.partner_name}</span>
+            </div>
+          )}
           <div className="flex justify-between items-start mb-2">
             <div>
               <h3 className="font-semibold text-foreground text-lg">

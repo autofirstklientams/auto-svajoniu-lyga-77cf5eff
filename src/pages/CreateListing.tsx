@@ -544,15 +544,77 @@ const CreateListing = ({
       }
 
       const newFiles = processedImages.map(r => r.file);
-      setImageFiles(prev => [...prev, ...newFiles]);
 
-      newFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setImagePreviews(prev => [...prev, reader.result as string]);
-        };
-        reader.readAsDataURL(file);
-      });
+      // If we have a car ID, upload immediately to storage so they become editable right away
+      const carId = draftCarId || car?.id;
+      if (carId) {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          toast.error("Neprisijungęs");
+          return;
+        }
+
+        const uploadToast = toast.loading(`Įkeliamos nuotraukos (0/${newFiles.length})...`);
+        const nextOrder = existingImages.length;
+        const uploadedImages: Array<{id: string, url: string, order: number}> = [];
+
+        for (let i = 0; i < newFiles.length; i++) {
+          const file = newFiles[i];
+          toast.loading(`Įkeliamos nuotraukos (${i + 1}/${newFiles.length})...`, { id: uploadToast });
+          
+          const ext = file.name.split('.').pop() || 'jpg';
+          const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${i}.${ext}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from("car-images")
+            .upload(fileName, file, { contentType: file.type });
+          
+          if (uploadError) {
+            console.error("Upload error:", uploadError);
+            toast.error(`Nepavyko įkelti: ${file.name}`);
+            continue;
+          }
+
+          const { data: { publicUrl } } = supabase.storage.from("car-images").getPublicUrl(fileName);
+          
+          const { data: imgRecord, error: dbError } = await supabase
+            .from("car_images")
+            .insert({
+              car_id: carId,
+              image_url: publicUrl,
+              display_order: nextOrder + i,
+            })
+            .select()
+            .single();
+          
+          if (dbError) {
+            console.error("DB insert error:", dbError);
+            continue;
+          }
+
+          uploadedImages.push({ id: imgRecord.id, url: publicUrl, order: nextOrder + i });
+        }
+
+        toast.success(`Įkelta ${uploadedImages.length} nuotrauk${uploadedImages.length === 1 ? 'a' : 'os'}`, { id: uploadToast });
+        
+        if (uploadedImages.length > 0) {
+          setExistingImages(prev => [...prev, ...uploadedImages]);
+          // Update main image if this is the first image
+          if (existingImages.length === 0 && uploadedImages.length > 0) {
+            await supabase.from("cars").update({ image_url: uploadedImages[0].url }).eq("id", carId);
+          }
+        }
+      } else {
+        // No car ID yet — store locally as before
+        setImageFiles(prev => [...prev, ...newFiles]);
+        newFiles.forEach(file => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImagePreviews(prev => [...prev, reader.result as string]);
+          };
+          reader.readAsDataURL(file);
+        });
+      }
     } catch (error) {
       console.error("Error processing images:", error);
       toast.error("Klaida apdorojant nuotraukas");

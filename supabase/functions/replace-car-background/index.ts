@@ -212,25 +212,6 @@ const overlayLogo = async (
     const topY = Math.round(h * 0.03);
     resultImage.composite(topLogo, topX, topY);
 
-    // Download bottom logo
-    const { data: bottomLogoData } = await supabase.storage
-      .from('car-images')
-      .download('branding/logo_bottom.png');
-
-    if (bottomLogoData) {
-      const bottomLogoBytes = new Uint8Array(await bottomLogoData.arrayBuffer());
-      let bottomLogo = await Image.decode(bottomLogoBytes);
-
-      // Scale bottom logo to ~22% of image width
-      const targetBottomW = Math.round(w * 0.22);
-      const bottomScale = targetBottomW / bottomLogo.width;
-      bottomLogo.resize(targetBottomW, Math.round(bottomLogo.height * bottomScale));
-
-      // Position: bottom right with margin
-      const bottomX = w - bottomLogo.width - Math.round(w * 0.03);
-      const bottomY = h - bottomLogo.height - Math.round(h * 0.03);
-      resultImage.composite(bottomLogo, bottomX, bottomY);
-    }
 
     return await resultImage.encode();
   } catch (err) {

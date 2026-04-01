@@ -1,0 +1,1 @@
+DELETE FROM public.car_images WHERE id = '59134fa8-ec8d-426c-9ac7-e44bd68b592c';

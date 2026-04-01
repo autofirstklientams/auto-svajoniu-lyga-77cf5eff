@@ -1498,23 +1498,23 @@ const CreateListing = ({
                 showAiBackground={hasAiAccess && !!car?.id}
               />
 
-              <DraggableImageGrid
+              {imagePreviews.length > 0 && <DraggableImageGrid
                 images={imagePreviews.map((preview, index) => ({ id: `new-${index}`, url: preview, isNew: true }))}
                 onReorder={handleReorderNewImages}
                 onRemove={handleRemoveNewImage}
                 onRotateImage={handleRotateNewImage}
                 onCropImage={handleCropNewImage}
                 title="Naujos nuotraukos:"
-              />
+              />}
 
-              <DraggableImageGrid
+              {importedImageUrls.length > 0 && <DraggableImageGrid
                 images={importedImageUrls.map((url, index) => ({ id: `imported-${index}`, url }))}
                 onReorder={handleReorderImportedImages}
                 onRemove={handleRemoveImportedImage}
                 onRotateImage={handleRotateImportedImage}
                 onCropImage={handleCropImportedImage}
                 title={`Importuotos nuotraukos (${importedImageUrls.length}):`}
-              />
+              />}
             </div>
           </section>
 

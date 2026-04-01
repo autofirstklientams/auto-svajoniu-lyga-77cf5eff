@@ -487,7 +487,7 @@ const PartnerDashboard = () => {
               onDuplicate={() => handleDuplicate(car)}
               onRefresh={fetchCars}
               isOwner={car.partner_id === user?.id}
-              showPartnerName={isAdmin && car.partner_id !== user?.id}
+              showPartnerName={isAdmin}
             />
           ))}
         </div>

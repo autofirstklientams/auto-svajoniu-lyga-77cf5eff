@@ -207,9 +207,9 @@ const overlayLogo = async (
     const topScale = targetTopW / topLogo.width;
     topLogo.resize(targetTopW, Math.round(topLogo.height * topScale));
 
-    // Position: top center with margin
+    // Position: centered on the wall behind the car (not ceiling)
     const topX = Math.round((w - topLogo.width) / 2);
-    const topY = Math.round(h * 0.03);
+    const topY = Math.round(h * 0.18);
     resultImage.composite(topLogo, topX, topY);
 
 

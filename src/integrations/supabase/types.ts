@@ -343,6 +343,27 @@ export type Database = {
         }
         Relationships: []
       }
+      invoice_access: {
+        Row: {
+          created_at: string
+          granted_by: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       invoices: {
         Row: {
           attachments: string[] | null

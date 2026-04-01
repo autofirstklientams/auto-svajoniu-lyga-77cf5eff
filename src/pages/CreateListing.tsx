@@ -149,6 +149,7 @@ const CreateListing = ({
   // Auto-save on blur
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const photosSectionRef = useRef<HTMLElement>(null);
   const [draftCarId, setDraftCarId] = useState<string | null>(car?.id || null);
 
   const getOrCreateCarId = useCallback(async (): Promise<string | null> => {
@@ -603,6 +604,10 @@ const CreateListing = ({
           if (existingImages.length === 0 && uploadedImages.length > 0) {
             await supabase.from("cars").update({ image_url: uploadedImages[0].url }).eq("id", carId);
           }
+          // Scroll to photos section after upload
+          setTimeout(() => {
+            photosSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 100);
         }
       } else {
         // No car ID yet — store locally as before
@@ -1456,7 +1461,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 4. NUOTRAUKOS ═══════════════ */}
-          <section>
+          <section ref={photosSectionRef}>
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">4</span>
               Nuotraukos

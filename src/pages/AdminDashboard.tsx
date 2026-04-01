@@ -512,6 +512,7 @@ const AdminDashboard = () => {
                             <FileText className="h-4 w-4 mr-2" />
                             {invoiceAccessUserIds.has(partner.id) ? "Sąskaitos ✓" : "Sąskaitos"}
                           </Button>
+                        )}
 
                         {partner.id !== SUPER_ADMIN_ID && partner.id !== currentUserId && partner.role !== "admin" && (
                           <Button

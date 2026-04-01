@@ -49,6 +49,7 @@ const AdminDashboard = () => {
   const [editingCar, setEditingCar] = useState<CarListing | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [aiAccessUserIds, setAiAccessUserIds] = useState<Set<string>>(new Set());
+  const [invoiceAccessUserIds, setInvoiceAccessUserIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     checkAdminAccess();

@@ -100,9 +100,9 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
 
               {/* Navigation */}
               <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
-                {menuItems
-                  .filter((item) => !item.adminOnly || isAdmin)
-                  .map((item) => {
+              {menuItems
+                .filter((item) => !item.invoiceAccess || isAdmin || hasInvoiceAccess)
+                .map((item) => {
                     const isActive = location.pathname === item.url;
                     return (
                       <Link

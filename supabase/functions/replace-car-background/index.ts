@@ -5,6 +5,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+const MODEL = 'gemini-2.5-flash-preview-05-20';
+
 class RecoverableUserError extends Error {
   constructor(message: string) {
     super(message);
@@ -78,7 +80,6 @@ const downloadSourceImage = async (
       );
     }
 
-    // Fallback: try direct fetch
     const fallbackResponse = await fetch(normalizedUrl);
     if (!fallbackResponse.ok) {
       if (fallbackResponse.status === 400 || fallbackResponse.status === 404) {
@@ -100,6 +101,14 @@ const downloadSourceImage = async (
   };
 };
 
+const parseGeneratedImageBase64 = (aiData: any): string | null => {
+  const parts = aiData?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find(
+    (p: any) => p?.inlineData?.mimeType?.startsWith('image/') || p?.inline_data?.mime_type?.startsWith('image/')
+  );
+  return imagePart?.inlineData?.data ?? imagePart?.inline_data?.data ?? null;
+};
+
 const replaceBackgroundWithAi = async (
   apiKey: string,
   mimeType: string,
@@ -116,89 +125,48 @@ Rules:
 - Output at the EXACT same resolution as the input.`;
 
   const response = await fetch(
-    `https://ai.gateway.lovable.dev/v1/chat/completions`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash-image',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: prompt },
-              {
-                type: 'image_url',
-                image_url: { url: `data:${mimeType};base64,${imageBase64}` },
-              },
-            ],
-          },
-        ],
+        contents: [{
+          parts: [
+            { text: prompt },
+            { inlineData: { mimeType, data: imageBase64 } },
+          ],
+        }],
+        generationConfig: {
+          responseModalities: ['IMAGE'],
+          temperature: 0,
+          maxOutputTokens: 8192,
+        },
       }),
     }
   );
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('AI Gateway error:', response.status, errorText);
+    console.error('Gemini API error:', response.status, errorText);
 
     if (response.status === 429) {
       throw new Error('Per daug užklausų, bandykite vėliau');
     }
-    if (response.status === 402) {
-      throw new Error('AI kreditai baigėsi');
+    if (response.status === 401 || response.status === 403) {
+      throw new Error('Neteisingas Gemini API raktas');
     }
-    throw new Error(`AI klaida: ${response.status}`);
+    throw new Error(`AI API klaida: ${response.status}`);
   }
 
-  const data = await response.json();
+  const aiData = await response.json();
+  const resultBase64 = parseGeneratedImageBase64(aiData);
 
-  // Extract image from OpenAI-compatible response
-  const content = data?.choices?.[0]?.message?.content;
-
-  if (!content) {
-    console.error('No content in AI response:', JSON.stringify(data).slice(0, 500));
-    throw new Error('AI nepateikė rezultato');
-  }
-
-  // Content could be an array with image parts or a string
-  let imageBase64Result: string | null = null;
-
-  if (Array.isArray(content)) {
-    for (const part of content) {
-      if (part.type === 'image_url' && part.image_url?.url) {
-        // data:image/png;base64,xxxx
-        const match = part.image_url.url.match(/^data:[^;]+;base64,(.+)$/);
-        if (match) {
-          imageBase64Result = match[1];
-          break;
-        }
-      }
-    }
-  }
-
-  if (!imageBase64Result) {
-    // Try Gemini native format
-    const parts = data?.candidates?.[0]?.content?.parts || [];
-    const imagePart = parts.find(
-      (p: any) =>
-        p?.inlineData?.mimeType?.startsWith('image/') ||
-        p?.inline_data?.mime_type?.startsWith('image/')
-    );
-    imageBase64Result =
-      imagePart?.inlineData?.data ?? imagePart?.inline_data?.data ?? null;
-  }
-
-  if (!imageBase64Result) {
-    console.error('No image in AI response. Content type:', typeof content, 
-      'Content preview:', JSON.stringify(content).slice(0, 300));
+  if (!resultBase64) {
+    console.error('No image in AI response:', JSON.stringify(aiData).slice(0, 500));
     throw new Error('AI nepateikė nuotraukos rezultato');
   }
 
-  return base64ToBytes(imageBase64Result);
+  return base64ToBytes(resultBase64);
 };
 
 Deno.serve(async (req) => {
@@ -222,26 +190,23 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error('Missing storage credentials');
     }
-    if (!lovableApiKey) {
-      throw new Error('LOVABLE_API_KEY is not configured');
+    if (!geminiApiKey) {
+      throw new Error('GEMINI_API_KEY is not configured');
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 1. Download source image
     const { bytes: originalBytes, mimeType } = await downloadSourceImage(supabase, normalizedUrl);
     console.log(`Downloaded image: ${originalBytes.length} bytes, ${mimeType}`);
 
-    // 2. Replace background via AI
-    const resultBytes = await replaceBackgroundWithAi(lovableApiKey, mimeType, bytesToBase64(originalBytes));
+    const resultBytes = await replaceBackgroundWithAi(geminiApiKey, mimeType, bytesToBase64(originalBytes));
     console.log(`AI result: ${resultBytes.length} bytes`);
 
-    // 3. Upload result
     const fileName = `showroom/${carId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_bg-removed.png`;
 
     const { error: uploadError } = await supabase.storage

@@ -137,6 +137,41 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchInvoiceAccess = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("invoice_access" as any)
+        .select("user_id");
+      if (error) throw error;
+      setInvoiceAccessUserIds(new Set((data || []).map((r: any) => r.user_id)));
+    } catch (error) {
+      console.error("Error fetching invoice access:", error);
+    }
+  };
+
+  const toggleInvoiceAccess = async (userId: string) => {
+    try {
+      if (invoiceAccessUserIds.has(userId)) {
+        const { error } = await supabase
+          .from("invoice_access" as any)
+          .delete()
+          .eq("user_id", userId);
+        if (error) throw error;
+        toast.success("Sąskaitų prieiga pašalinta");
+      } else {
+        const { error } = await supabase
+          .from("invoice_access" as any)
+          .insert({ user_id: userId, granted_by: currentUserId } as any);
+        if (error) throw error;
+        toast.success("Sąskaitų prieiga suteikta");
+      }
+      await fetchInvoiceAccess();
+    } catch (error) {
+      console.error("Error toggling invoice access:", error);
+      toast.error("Klaida keičiant sąskaitų prieigą");
+    }
+  };
+
   const toggleAiAccess = async (userId: string) => {
     try {
       if (aiAccessUserIds.has(userId)) {

@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const MASK_MODEL = 'google/gemini-3.1-flash-image-preview';
+const MASK_MODEL = 'gemini-2.0-flash-exp-image-generation';
 const BG_COLOR = { r: 240, g: 240, b: 240 };
 
 class HttpError extends Error {

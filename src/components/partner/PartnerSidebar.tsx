@@ -29,7 +29,7 @@ interface PartnerSidebarProps {
 const menuItems = [
   { title: "Dashboard", url: "/partner-dashboard", icon: LayoutDashboard },
   { title: "Mano skelbimai", url: "/partner-dashboard", icon: Car, section: "listings" },
-  { title: "Sąskaitos", url: "/invoice", icon: FileText, adminOnly: true },
+  { title: "Sąskaitos", url: "/invoice", icon: FileText, invoiceAccess: true },
 ];
 
 export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSidebarProps) {
@@ -37,6 +37,7 @@ export function PartnerSidebar({ isCollapsed, onToggle, isAdmin }: PartnerSideba
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { theme, setTheme } = useTheme();
+  const { hasInvoiceAccess } = useInvoiceAccess();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

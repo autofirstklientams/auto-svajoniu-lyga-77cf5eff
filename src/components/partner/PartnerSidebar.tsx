@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import logo from "@/assets/autokopers-logo.jpeg";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTheme } from "@/components/ThemeProvider";
+import { useInvoiceAccess } from "@/hooks/useInvoiceAccess";
 
 interface PartnerSidebarProps {
   isCollapsed: boolean;

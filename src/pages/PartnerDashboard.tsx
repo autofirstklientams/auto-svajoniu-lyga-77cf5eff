@@ -186,7 +186,8 @@ const PartnerDashboard = () => {
           condition, vin, defects, features, is_company_car, is_featured, 
           is_recommended, is_reserved, is_sold, euro_standard, fuel_cons_urban, fuel_cons_highway,
           fuel_cons_combined, origin_country, wheel_drive, co2_emission, city,
-          first_reg_date, mot_date, wheel_size, sdk_code, partner_id
+          first_reg_date, mot_date, wheel_size, sdk_code, partner_id,
+          profiles:partner_id(full_name)
         `)
         .order("created_at", { ascending: false });
 

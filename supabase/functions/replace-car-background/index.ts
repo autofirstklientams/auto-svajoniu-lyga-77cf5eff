@@ -80,23 +80,6 @@ const getKeepStrength = (maskRgba: Uint8ClampedArray) => {
 };
 
 const parseGeneratedImageBase64 = (aiData: any): string | null => {
-  // Lovable AI Gateway returns OpenAI-compatible format
-  const content = aiData?.choices?.[0]?.message?.content;
-  if (typeof content === 'string') {
-    // Check if it's a base64 image in markdown format
-    const match = content.match(/data:image\/[^;]+;base64,([A-Za-z0-9+/=]+)/);
-    if (match) return match[1];
-  }
-  // Also check for inline_data format (Gemini native)
-  if (Array.isArray(content)) {
-    for (const part of content) {
-      if (part?.type === 'image_url' && part?.image_url?.url) {
-        const m = part.image_url.url.match(/^data:image\/[^;]+;base64,(.+)$/);
-        if (m) return m[1];
-      }
-    }
-  }
-  // Fallback: check candidates format (direct Gemini)
   const parts = aiData?.candidates?.[0]?.content?.parts || [];
   const imagePart = parts.find(
     (p: any) => p?.inlineData?.mimeType?.startsWith('image/') || p?.inline_data?.mime_type?.startsWith('image/')
@@ -116,23 +99,18 @@ Output rules:
 - Do NOT crop, zoom, rotate, move, or redraw anything.`;
 
   const aiResponse = await fetch(
-    'https://ai.gateway.lovable.dev/v1/chat/completions',
+    `https://generativelanguage.googleapis.com/v1beta/models/${MASK_MODEL}:generateContent?key=${apiKey}`,
     {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: MASK_MODEL,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'text', text: maskPrompt },
-            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${imageBase64}` } },
-          ],
+        contents: [{
+          parts: [{ text: maskPrompt }, { inlineData: { mimeType, data: imageBase64 } }],
         }],
-        temperature: 0,
+        generationConfig: {
+          responseModalities: ['IMAGE'],
+          temperature: 0,
+        },
       }),
     }
   );
@@ -144,21 +122,17 @@ Output rules:
     if (aiResponse.status === 429) {
       throw new HttpError(429, 'Per daug užklausų, bandykite vėliau');
     }
-    if (aiResponse.status === 402) {
-      throw new HttpError(402, 'AI kreditas išnaudotas, papildykite sąskaitą');
-    }
     if (aiResponse.status === 401 || aiResponse.status === 403) {
-      throw new HttpError(401, 'Neteisingas AI API raktas');
+      throw new HttpError(401, 'Neteisingas Gemini API raktas');
     }
     throw new HttpError(500, `AI API klaida: ${aiResponse.status}`);
   }
 
   const aiData = await aiResponse.json();
-  console.log('AI response keys:', Object.keys(aiData));
   const maskBase64 = parseGeneratedImageBase64(aiData);
 
   if (!maskBase64) {
-    console.error('No mask image in AI response:', JSON.stringify(aiData).slice(0, 800));
+    console.error('No mask image in AI response:', JSON.stringify(aiData).slice(0, 500));
     throw new Error('AI nepateikė kaukės rezultato');
   }
 

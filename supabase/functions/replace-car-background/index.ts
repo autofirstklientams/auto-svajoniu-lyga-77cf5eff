@@ -11,11 +11,6 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY is not configured');
-    }
-
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
@@ -160,67 +155,69 @@ OUTPUT: One photorealistic composite image at the same resolution as the input.`
       throw new Error('Nepavyko atsisiųsti originalios nuotraukos');
     }
 
-    // Call Lovable AI Gateway with the base64 image
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-3.1-flash-image-preview',
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: prompt,
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: imageBase64,
-                },
-              },
+    // Call Gemini API directly
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+    if (!GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not configured');
+    }
+
+    // Extract base64 data and mime type from data URL
+    const base64Match = imageBase64.match(/^data:(image\/\w+);base64,(.+)$/);
+    if (!base64Match) {
+      throw new Error('Invalid base64 image format');
+    }
+    const mimeType = base64Match[1];
+    const rawBase64 = base64Match[2];
+
+    const aiResponse = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${GEMINI_API_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{
+            parts: [
+              { text: prompt },
+              { inline_data: { mime_type: mimeType, data: rawBase64 } },
             ],
+          }],
+          generationConfig: {
+            responseModalities: ['IMAGE', 'TEXT'],
+            temperature: 0.4,
           },
-        ],
-        modalities: ['image', 'text'],
-      }),
-    });
+        }),
+      }
+    );
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('AI Gateway error:', aiResponse.status, errorText);
-      
+      console.error('Gemini API error:', aiResponse.status, errorText);
+
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: 'Per daug užklausų, bandykite vėliau' }), {
           status: 429,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         });
       }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: 'AI kreditas išnaudotas' }), {
-          status: 402,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      
-      throw new Error(`AI Gateway error: ${aiResponse.status}`);
+
+      throw new Error(`Gemini API error: ${aiResponse.status}`);
     }
 
     const aiData = await aiResponse.json();
-    const generatedImageUrl = aiData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-
-    if (!generatedImageUrl) {
-      console.error('No image in AI response:', JSON.stringify(aiData).slice(0, 500));
+    
+    // Find the image part in the response
+    const parts = aiData.candidates?.[0]?.content?.parts || [];
+    const imagePart = parts.find((p: any) => p.inline_data?.mime_type?.startsWith('image/'));
+    
+    if (!imagePart) {
+      console.error('No image in Gemini response:', JSON.stringify(aiData).slice(0, 500));
       throw new Error('AI nepateikė nuotraukos rezultato');
     }
 
+    const generatedBase64 = imagePart.inline_data.data;
+
     // Convert base64 to blob and upload to storage
-    const base64Data = generatedImageUrl.replace(/^data:image\/\w+;base64,/, '');
-    const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    const imageBytes = Uint8Array.from(atob(generatedBase64), c => c.charCodeAt(0));
 
     // Reuse the supabase client created earlier
 

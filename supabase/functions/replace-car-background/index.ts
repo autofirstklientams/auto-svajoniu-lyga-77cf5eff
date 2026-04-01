@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const MODEL = 'gemini-2.5-flash-image-generation';
+const MODEL = 'gemini-2.5-flash-image';
 
 class RecoverableUserError extends Error {
   constructor(message: string) {

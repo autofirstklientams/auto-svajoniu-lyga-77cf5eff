@@ -222,8 +222,7 @@ OUTPUT: One photorealistic composite image at the same resolution as the input.`
     const generatedBase64 = imagePart.inline_data.data;
 
     // Convert base64 to blob and upload to storage
-    const base64Data = generatedImageUrl.replace(/^data:image\/\w+;base64,/, '');
-    const imageBytes = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    const imageBytes = Uint8Array.from(atob(generatedBase64), c => c.charCodeAt(0));
 
     // Reuse the supabase client created earlier
 

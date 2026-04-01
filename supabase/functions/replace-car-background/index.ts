@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: 'Unauthorized' }, 401);
     }
 
-    const { imageUrl, carId } = await req.json();
+    const { imageUrl, carId, isMainPhoto } = await req.json();
     if (!imageUrl || !carId) {
       return jsonResponse({ error: 'Missing imageUrl or carId' }, 400);
     }

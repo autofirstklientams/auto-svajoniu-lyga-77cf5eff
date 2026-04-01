@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { Image } from 'jsr:@matmen/imagescript';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -112,10 +113,9 @@ const parseGeneratedImageBase64 = (aiData: any): string | null => {
 const replaceBackgroundWithAi = async (
   apiKey: string,
   mimeType: string,
-  imageBase64: string,
-  isMainPhoto: boolean
+  imageBase64: string
 ): Promise<Uint8Array> => {
-  const basePrompt = `Replace the background of this car photo with a professional car dealership studio environment.
+  const prompt = `Replace ONLY the background of this car photo with a professional car dealership studio environment.
 
 Studio background requirements:
 - Clean, bright studio setting with soft professional lighting
@@ -124,19 +124,13 @@ Studio background requirements:
 - Soft, even lighting with no harsh shadows — like professional automotive photography
 - The environment should look like a high-end car dealership photo studio
 
-Car preservation rules:
-- Keep the car EXACTLY as it is — do not modify, redraw, distort, or recolor any part of the vehicle
-- Keep the car's position, angle, size, and all details (paint, wheels, lights, badges, mirrors, glass, reflections) 100% untouched
-- Do NOT add any text, watermarks, or logos
-- Output at the EXACT same resolution as the input`;
-
-  const mainPhotoAddition = isMainPhoto ? `
-
-Additional requirement for this photo:
-- Add the text "AUTO KOPERS" as a watermark/logo at the TOP CENTER of the image. The word "AUTO" should be in dark gray/charcoal color and "KOPERS" should be in a strong blue color (similar to #1A7FC4 or a rich medium blue). Use a bold, modern sans-serif font. Make it clearly visible but not overwhelming — approximately 5-8% of image height.
-- Add a smaller "AUTO KOPERS" logo at the BOTTOM RIGHT corner of the image, same style but smaller (about 3-4% of image height).` : '';
-
-  const prompt = basePrompt + mainPhotoAddition;
+CRITICAL — Car preservation rules:
+- The car must remain PIXEL-PERFECT — do NOT redraw, repaint, reshape, or alter the vehicle in ANY way
+- Every detail must be identical to the input: paint color, reflections, wheels, tires, lights, badges, mirrors, glass, interior visible through windows, license plates
+- Do NOT change the car's position, angle, scale, or proportions
+- Do NOT add any text, watermarks, logos, or overlays
+- Output at the EXACT same resolution as the input
+- If in doubt, leave the car pixel untouched`;
 
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
@@ -183,6 +177,68 @@ Additional requirement for this photo:
   return base64ToBytes(resultBase64);
 };
 
+const overlayLogo = async (
+  resultBytes: Uint8Array,
+  supabase: any,
+  isMainPhoto: boolean
+): Promise<Uint8Array> => {
+  if (!isMainPhoto) return resultBytes;
+
+  try {
+    const resultImage = await Image.decode(resultBytes);
+    const w = resultImage.width;
+    const h = resultImage.height;
+
+    // Download top logo
+    const { data: topLogoData } = await supabase.storage
+      .from('car-images')
+      .download('branding/logo_top.png');
+
+    if (!topLogoData) {
+      console.warn('Top logo not found, skipping overlay');
+      return resultBytes;
+    }
+
+    const topLogoBytes = new Uint8Array(await topLogoData.arrayBuffer());
+    let topLogo = await Image.decode(topLogoBytes);
+
+    // Scale top logo to ~30% of image width
+    const targetTopW = Math.round(w * 0.3);
+    const topScale = targetTopW / topLogo.width;
+    topLogo.resize(targetTopW, Math.round(topLogo.height * topScale));
+
+    // Position: top center with margin
+    const topX = Math.round((w - topLogo.width) / 2);
+    const topY = Math.round(h * 0.02);
+    resultImage.composite(topLogo, topX, topY);
+
+    // Download bottom logo
+    const { data: bottomLogoData } = await supabase.storage
+      .from('car-images')
+      .download('branding/logo_bottom.png');
+
+    if (bottomLogoData) {
+      const bottomLogoBytes = new Uint8Array(await bottomLogoData.arrayBuffer());
+      let bottomLogo = await Image.decode(bottomLogoBytes);
+
+      // Scale bottom logo to ~15% of image width
+      const targetBottomW = Math.round(w * 0.15);
+      const bottomScale = targetBottomW / bottomLogo.width;
+      bottomLogo.resize(targetBottomW, Math.round(bottomLogo.height * bottomScale));
+
+      // Position: bottom right with margin
+      const bottomX = w - bottomLogo.width - Math.round(w * 0.02);
+      const bottomY = h - bottomLogo.height - Math.round(h * 0.02);
+      resultImage.composite(bottomLogo, bottomX, bottomY);
+    }
+
+    return await resultImage.encode();
+  } catch (err) {
+    console.error('Logo overlay error (non-fatal):', err);
+    return resultBytes;
+  }
+};
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -200,7 +256,7 @@ Deno.serve(async (req) => {
     }
 
     const normalizedUrl = normalizeImageUrl(imageUrl);
-    console.log(`Processing background replacement for car ${carId}`);
+    console.log(`Processing background replacement for car ${carId}, isMainPhoto: ${!!isMainPhoto}`);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -215,17 +271,24 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // 1. Download source image
     const { bytes: originalBytes, mimeType } = await downloadSourceImage(supabase, normalizedUrl);
     console.log(`Downloaded image: ${originalBytes.length} bytes, ${mimeType}`);
 
-    const resultBytes = await replaceBackgroundWithAi(geminiApiKey, mimeType, bytesToBase64(originalBytes), !!isMainPhoto);
-    console.log(`AI result: ${resultBytes.length} bytes`);
+    // 2. AI replaces background ONLY (no logo, no car modification)
+    const aiResultBytes = await replaceBackgroundWithAi(geminiApiKey, mimeType, bytesToBase64(originalBytes));
+    console.log(`AI result: ${aiResultBytes.length} bytes`);
 
+    // 3. Programmatically overlay logo for main photo
+    const finalBytes = await overlayLogo(aiResultBytes, supabase, !!isMainPhoto);
+    console.log(`Final image: ${finalBytes.length} bytes`);
+
+    // 4. Upload result
     const fileName = `showroom/${carId}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_bg-removed.png`;
 
     const { error: uploadError } = await supabase.storage
       .from('car-images')
-      .upload(fileName, resultBytes, {
+      .upload(fileName, finalBytes, {
         contentType: 'image/png',
         upsert: false,
       });

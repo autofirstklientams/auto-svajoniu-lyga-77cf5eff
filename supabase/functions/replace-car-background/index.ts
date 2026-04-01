@@ -211,7 +211,7 @@ const overlayLogo = async (
     let topLogo = await Image.decode(topLogoBytes);
 
     // Scale top logo to ~28% of image width — visible but not covering the car
-    const targetTopW = Math.round(w * 0.23);
+    const targetTopW = Math.round(w * 0.30);
     const topScale = targetTopW / topLogo.width;
     topLogo.resize(targetTopW, Math.round(topLogo.height * topScale));
 

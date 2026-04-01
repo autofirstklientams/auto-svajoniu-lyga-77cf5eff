@@ -43,15 +43,23 @@ Deno.serve(async (req) => {
 
     const brandingSection = isMainPhoto ? `
 === MANDATORY BRANDING ON WALL ===
-THIS IS REQUIRED FOR THE MAIN PHOTO. You MUST place a dealership sign on the back wall:
-- The sign reads "AUTOKOPERS" (one word, all capital letters)
-- Split into two parts: "AUTO" on a dark blue rounded rectangle background (hex #2B5A8C), and "KOPERS" in dark grey text (#4A4A4A) with no background
-- The sign should look like a professional car dealership wall sign — flat mounted on the wall
-- Position: centered horizontally on the wall, in the upper portion of the wall ABOVE the car's roofline
-- Font: clean, bold, modern sans-serif (similar to Montserrat Bold or similar)
-- Size: clearly readable, approximately 15-20% of the wall width
-- The sign must be flat on the wall surface — NOT floating in air, NOT on the floor
-- Do NOT skip this step — the sign MUST appear in the final image
+THIS IS THE MOST IMPORTANT REQUIREMENT FOR THIS IMAGE. You MUST place a large dealership sign on the back wall:
+
+SIGN DESIGN (follow exactly):
+- The sign consists of TWO parts side by side: "AUTO" and "KOPERS"
+- "AUTO" text is WHITE and placed INSIDE a LARGE dark navy blue filled rectangle (hex #2B3A5C). The rectangle has slightly rounded corners.
+- "KOPERS" text is DARK GREY (hex #4A4A4A) placed directly to the RIGHT of the blue rectangle, with NO background — just the text on the white wall
+- Both parts are on the SAME horizontal line, forming one continuous sign: [AUTO] KOPERS
+- Font: very bold, wide, uppercase, modern sans-serif (like Impact, Montserrat Black, or similar heavy weight)
+
+SIGN SIZE AND POSITION:
+- The sign must be VERY LARGE — approximately 30-40% of the total wall width
+- The text height should be roughly 8-12% of the image height — it must be clearly dominant and readable
+- Centered horizontally on the wall
+- Positioned just above the car's roofline — NOT at the very top of the wall, but in the middle-upper area
+- The sign must be flat on the wall surface as if physically mounted there
+
+DO NOT make the sign small or subtle. It should be the DOMINANT visual element on the wall behind the car.
 ` : '';
 
     const forbiddenSigns = isMainPhoto 

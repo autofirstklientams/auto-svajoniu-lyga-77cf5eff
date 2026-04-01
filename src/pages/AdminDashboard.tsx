@@ -499,6 +499,20 @@ const AdminDashboard = () => {
                           </Button>
                         )}
 
+                        {/* Invoice access toggle */}
+                        {partner.id !== SUPER_ADMIN_ID && (
+                          <Button
+                            onClick={() => toggleInvoiceAccess(partner.id)}
+                            variant="outline"
+                            size="sm"
+                            className={invoiceAccessUserIds.has(partner.id) 
+                              ? "text-emerald-600 border-emerald-300 hover:bg-emerald-50" 
+                              : "text-muted-foreground"}
+                          >
+                            <FileText className="h-4 w-4 mr-2" />
+                            {invoiceAccessUserIds.has(partner.id) ? "Sąskaitos ✓" : "Sąskaitos"}
+                          </Button>
+
                         {partner.id !== SUPER_ADMIN_ID && partner.id !== currentUserId && partner.role !== "admin" && (
                           <Button
                             onClick={() => handleDeleteUser(partner.id, partner.email)}

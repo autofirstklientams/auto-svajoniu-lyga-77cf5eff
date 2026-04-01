@@ -133,7 +133,7 @@ Car preservation rules:
   const mainPhotoAddition = isMainPhoto ? `
 
 Additional requirement for this photo:
-- Add the text "AUTO KOPERS" as a watermark/logo at the TOP CENTER of the image. The word "AUTO" should be in dark gray/black color and "KOPERS" should be in purple/violet color (similar to #6B46C1). Use a bold, modern sans-serif font. Make it clearly visible but not overwhelming — approximately 5-8% of image height.
+- Add the text "AUTO KOPERS" as a watermark/logo at the TOP CENTER of the image. The word "AUTO" should be in dark gray/charcoal color and "KOPERS" should be in a strong blue color (similar to #1A7FC4 or a rich medium blue). Use a bold, modern sans-serif font. Make it clearly visible but not overwhelming — approximately 5-8% of image height.
 - Add a smaller "AUTO KOPERS" logo at the BOTTOM RIGHT corner of the image, same style but smaller (about 3-4% of image height).` : '';
 
   const prompt = basePrompt + mainPhotoAddition;

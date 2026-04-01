@@ -84,6 +84,7 @@ const AdminDashboard = () => {
       await fetchPartners();
       await fetchAllCars();
       await fetchAiAccess();
+      await fetchInvoiceAccess();
     } catch (error) {
       console.error("Error checking admin access:", error);
       toast.error("Klaida tikrinant prieigą");

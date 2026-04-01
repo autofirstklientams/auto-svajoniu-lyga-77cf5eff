@@ -16,6 +16,13 @@ class HttpError extends Error {
   }
 }
 
+class RecoverableUserError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RecoverableUserError';
+  }
+}
+
 const jsonResponse = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -209,8 +216,18 @@ Deno.serve(async (req) => {
 
       if (downloadError || !fileData) {
         console.error('Storage download error:', downloadError);
+
+        const storageStatusCode = (downloadError as { statusCode?: string | number } | null)?.statusCode;
+        const storageMessage = (downloadError as { message?: string } | null)?.message || '';
+        if (storageStatusCode === '404' || storageStatusCode === 404 || storageMessage.includes('Object not found')) {
+          throw new RecoverableUserError('Originali nuotrauka nerasta saugykloje. Įkelkite nuotrauką iš naujo ir bandykite dar kartą.');
+        }
+
         const fallbackResponse = await fetch(normalizedUrl);
         if (!fallbackResponse.ok) {
+          if (fallbackResponse.status === 400 || fallbackResponse.status === 404) {
+            throw new RecoverableUserError('Originali nuotrauka nerasta saugykloje. Įkelkite nuotrauką iš naujo ir bandykite dar kartą.');
+          }
           throw new Error(`Fetch fallback failed: ${fallbackResponse.status}`);
         }
 
@@ -221,6 +238,10 @@ Deno.serve(async (req) => {
         originalBytes = new Uint8Array(await fileData.arrayBuffer());
       }
     } catch (downloadError) {
+      if (downloadError instanceof RecoverableUserError) {
+        throw downloadError;
+      }
+
       console.error('Failed to download source image:', downloadError);
       throw new Error('Nepavyko atsisiųsti originalios nuotraukos');
     }
@@ -250,6 +271,10 @@ Deno.serve(async (req) => {
     return jsonResponse({ success: true, url: publicUrl });
   } catch (error) {
     console.error('Background replacement error:', error);
+
+    if (error instanceof RecoverableUserError) {
+      return jsonResponse({ success: false, error: error.message }, 200);
+    }
 
     if (error instanceof HttpError) {
       return jsonResponse({ error: error.message }, error.status);

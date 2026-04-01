@@ -202,14 +202,14 @@ const overlayLogo = async (
     const topLogoBytes = new Uint8Array(await topLogoData.arrayBuffer());
     let topLogo = await Image.decode(topLogoBytes);
 
-    // Scale top logo to ~30% of image width
-    const targetTopW = Math.round(w * 0.3);
+    // Scale top logo to ~45% of image width for clear visibility
+    const targetTopW = Math.round(w * 0.45);
     const topScale = targetTopW / topLogo.width;
     topLogo.resize(targetTopW, Math.round(topLogo.height * topScale));
 
     // Position: top center with margin
     const topX = Math.round((w - topLogo.width) / 2);
-    const topY = Math.round(h * 0.02);
+    const topY = Math.round(h * 0.03);
     resultImage.composite(topLogo, topX, topY);
 
     // Download bottom logo

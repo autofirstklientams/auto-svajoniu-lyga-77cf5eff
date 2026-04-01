@@ -199,10 +199,14 @@ const PartnerDashboard = () => {
       const { data, error } = await query;
       if (error) throw error;
       // Sort: sold cars go to the end, rest keep created_at desc order
-      const sorted = (data || []).sort((a: any, b: any) => {
+      const sorted = (data || []).map((car: any) => ({
+        ...car,
+        partner_name: car.profiles?.full_name || null,
+        profiles: undefined,
+      })).sort((a: any, b: any) => {
         if (a.is_sold && !b.is_sold) return 1;
         if (!a.is_sold && b.is_sold) return -1;
-        return 0; // preserve existing created_at desc order
+        return 0;
       });
       setCars(sorted);
     } catch (error: any) {

@@ -702,20 +702,30 @@ const CreateListing = ({
   }, []);
 
   const handleReplaceExistingImageUrl = useCallback(async (id: string, newUrl: string) => {
-    // Find old image to delete from storage
     const oldImage = existingImages.find(img => img.id === id);
     const oldUrl = oldImage?.url;
 
-    // Update in DB
-    await supabase.from("car_images").update({ image_url: newUrl }).eq("id", id);
+    const { error: updateError } = await supabase
+      .from("car_images")
+      .update({ image_url: newUrl })
+      .eq("id", id);
+
+    if (updateError) {
+      console.error("Failed to persist replaced image URL:", updateError);
+      toast.error("Nepavyko išsaugoti pakeisto fono");
+      return;
+    }
+
     setExistingImages(prev => prev.map(img => img.id === id ? { ...img, url: newUrl } : img));
 
-    // Delete old file from storage if it's a supabase storage URL
+    // Delete old file from storage only AFTER successful DB update
     if (oldUrl && oldUrl.includes("/storage/v1/object/public/car-images/")) {
       try {
-        const filePath = oldUrl.split("/storage/v1/object/public/car-images/")[1];
-        if (filePath) {
-          await supabase.storage.from("car-images").remove([decodeURIComponent(filePath)]);
+        const oldPath = decodeURIComponent(oldUrl.split("/storage/v1/object/public/car-images/")[1] || "");
+        const newPath = decodeURIComponent(newUrl.split("/storage/v1/object/public/car-images/")[1] || "");
+
+        if (oldPath && oldPath !== newPath) {
+          await supabase.storage.from("car-images").remove([oldPath]);
         }
       } catch (e) {
         console.warn("Failed to delete old image from storage:", e);

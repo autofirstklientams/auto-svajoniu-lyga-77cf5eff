@@ -497,6 +497,7 @@ const handler = async (req: Request): Promise<Response> => {
       carsResponse = await supabase
         .from("cars")
         .select("*")
+        .eq("is_sold", false)
         .or(`visible_autoplius.eq.true,id.eq.${includeCarId}`)
         .order("created_at", { ascending: false });
     } else {
@@ -504,6 +505,7 @@ const handler = async (req: Request): Promise<Response> => {
         .from("cars")
         .select("*")
         .eq("visible_autoplius", true)
+        .eq("is_sold", false)
         .order("created_at", { ascending: false });
     }
 

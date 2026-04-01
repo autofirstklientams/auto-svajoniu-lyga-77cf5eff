@@ -486,6 +486,8 @@ const PartnerDashboard = () => {
               onDelete={() => handleDelete(car.id)}
               onDuplicate={() => handleDuplicate(car)}
               onRefresh={fetchCars}
+              isOwner={car.partner_id === user?.id}
+              showPartnerName={isAdmin && car.partner_id !== user?.id}
             />
           ))}
         </div>

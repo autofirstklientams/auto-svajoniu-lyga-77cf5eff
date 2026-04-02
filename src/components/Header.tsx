@@ -117,38 +117,42 @@ const Header = () => {
                 </SheetTrigger>
                 <SheetContent side="right" className="w-72">
                   <div className="flex flex-col gap-4 mt-8">
-                    <Link to="/automobiliai" className="text-foreground hover:text-primary font-medium">{t("nav.cars")}</Link>
-                    <Link to="/sell-your-car" className="text-primary hover:text-primary/80 font-semibold transition-colors">{t("nav.carPurchase")}</Link>
-                    <Link 
-                      to="/leasing" 
-                      className="text-primary hover:text-primary/80 font-semibold transition-colors"
-                    >
-                      {t("nav.leasing")}
-                    </Link>
-                    <Link to="/about" className="text-foreground hover:text-primary font-medium">{t("nav.about")}</Link>
-                    <Link 
-                      to="/#contact" 
-                      className="text-foreground hover:text-primary font-medium"
-                    >
-                      {t("contact.title")}
-                    </Link>
+                    <SheetClose asChild>
+                      <Link to="/automobiliai" className="text-foreground hover:text-primary font-medium">{t("nav.cars")}</Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/sell-your-car" className="text-primary hover:text-primary/80 font-semibold transition-colors">{t("nav.carPurchase")}</Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/leasing" className="text-primary hover:text-primary/80 font-semibold transition-colors">{t("nav.leasing")}</Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/about" className="text-foreground hover:text-primary font-medium">{t("nav.about")}</Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link to="/#contact" className="text-foreground hover:text-primary font-medium">{t("contact.title")}</Link>
+                    </SheetClose>
                     {user ? (
-                      <Button 
-                        onClick={() => navigate("/partner-dashboard")}
-                        className="w-full"
-                      >
-                        <User className="h-4 w-4 mr-2" />
-                        {t("nav.partnerZone")}
-                      </Button>
+                      <SheetClose asChild>
+                        <Button 
+                          onClick={() => navigate("/partner-dashboard")}
+                          className="w-full"
+                        >
+                          <User className="h-4 w-4 mr-2" />
+                          {t("nav.partnerZone")}
+                        </Button>
+                      </SheetClose>
                     ) : (
-                      <Button 
-                        onClick={() => navigate("/partner-login")}
-                        variant="outline" 
-                        className="w-full border-primary text-primary hover:bg-primary/10"
-                      >
-                        <LogIn className="h-4 w-4 mr-2" />
-                        {t("nav.partnerZone")}
-                      </Button>
+                      <SheetClose asChild>
+                        <Button 
+                          onClick={() => navigate("/partner-login")}
+                          variant="outline" 
+                          className="w-full border-primary text-primary hover:bg-primary/10"
+                        >
+                          <LogIn className="h-4 w-4 mr-2" />
+                          {t("nav.partnerZone")}
+                        </Button>
+                      </SheetClose>
                     )}
                   </div>
                 </SheetContent>

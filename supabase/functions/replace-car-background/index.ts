@@ -7,6 +7,8 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
+const MODEL = "gemini-2.5-flash-image";
+
 class RecoverableUserError extends Error {
   constructor(message: string) {
     super(message);
@@ -143,80 +145,58 @@ const replaceBackgroundWithAi = async (
   mimeType: string,
   imageBase64: string,
 ): Promise<Uint8Array> => {
-  const imageDataUrl = `data:${mimeType};base64,${imageBase64}`;
-
   const response = await fetch(
-    "https://ai.gateway.lovable.dev/v1/chat/completions",
+    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
     {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image",
-        messages: [
-          {
-            role: "user",
-            content: [
-              { type: "text", text: PROMPT },
-              { type: "image_url", image_url: { url: imageDataUrl } },
-            ],
-          },
-        ],
-        modalities: ["image", "text"],
+        contents: [{
+          parts: [
+            { text: PROMPT },
+            { inlineData: { mimeType, data: imageBase64 } },
+          ],
+        }],
+        generationConfig: {
+          responseModalities: ["IMAGE"],
+          temperature: 0,
+          maxOutputTokens: 8192,
+        },
       }),
     },
   );
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("Lovable AI Gateway error:", response.status, errorText);
+    console.error("Gemini API error:", response.status, errorText);
 
     if (response.status === 429) {
       throw new Error("Per daug užklausų, bandykite vėliau");
     }
-    if (response.status === 402) {
-      throw new Error("AI kreditai išnaudoti. Papildykite balansą per Settings → Workspace → Usage.");
-    }
     if (response.status === 401 || response.status === 403) {
-      throw new Error("Neteisingas API raktas");
+      throw new Error("Neteisingas Gemini API raktas");
     }
     throw new Error(`AI API klaida: ${response.status}`);
   }
 
   const aiData = await response.json();
-  console.log("AI response keys:", Object.keys(aiData));
-
-  // Extract image from Lovable AI Gateway response format
-  const images = aiData?.choices?.[0]?.message?.images;
-  if (images && images.length > 0) {
-    const imageUrl = images[0]?.image_url?.url;
-    if (imageUrl && imageUrl.startsWith("data:")) {
-      const base64Part = imageUrl.split(",")[1];
-      if (base64Part) {
-        return base64ToBytes(base64Part);
-      }
-    }
-  }
-
-  // Fallback: check for inline_data format (direct Gemini format)
   const parts = aiData?.candidates?.[0]?.content?.parts || [];
   const imagePart = parts.find(
     (p: any) =>
       p?.inlineData?.mimeType?.startsWith("image/") ||
       p?.inline_data?.mime_type?.startsWith("image/"),
   );
-  const resultBase64 = imagePart?.inlineData?.data ?? imagePart?.inline_data?.data;
-  if (resultBase64) {
-    return base64ToBytes(resultBase64);
+  const resultBase64 = imagePart?.inlineData?.data ?? imagePart?.inline_data?.data ?? null;
+
+  if (!resultBase64) {
+    console.error(
+      "No image in AI response:",
+      JSON.stringify(aiData).slice(0, 500),
+    );
+    throw new Error("AI nepateikė nuotraukos rezultato");
   }
 
-  console.error(
-    "No image in AI response:",
-    JSON.stringify(aiData).slice(0, 500),
-  );
-  throw new Error("AI nepateikė nuotraukos rezultato");
+  return base64ToBytes(resultBase64);
 };
 
 const overlayLogo = async (
@@ -281,13 +261,13 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
 
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error("Missing storage credentials");
     }
-    if (!lovableApiKey) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    if (!geminiApiKey) {
+      throw new Error("GEMINI_API_KEY is not configured");
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -299,9 +279,9 @@ Deno.serve(async (req) => {
     );
     console.log(`Downloaded image: ${originalBytes.length} bytes, ${mimeType}`);
 
-    // 2. AI replaces background via Lovable AI Gateway
+    // 2. AI replaces background (direct Gemini API)
     const aiResultBytes = await replaceBackgroundWithAi(
-      lovableApiKey,
+      geminiApiKey,
       mimeType,
       bytesToBase64(originalBytes),
     );

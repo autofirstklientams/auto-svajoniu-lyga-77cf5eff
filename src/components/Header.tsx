@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SheetClose } from "@/components/ui/sheet";
 import { Phone, Mail, MapPin, Menu, LogIn, User } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import logo from "@/assets/autokopers-logo.jpeg";

@@ -555,14 +555,11 @@ const CreateListing = ({
           return;
         }
 
-        const uploadToast = toast.loading(`Įkeliamos nuotraukos (0/${newFiles.length})...`);
+        const uploadToast = toast.loading(`Įkeliamos nuotraukos...`);
         const nextOrder = existingImages.length;
-        const uploadedImages: Array<{id: string, url: string, order: number}> = [];
 
-        for (let i = 0; i < newFiles.length; i++) {
-          const file = newFiles[i];
-          toast.loading(`Įkeliamos nuotraukos (${i + 1}/${newFiles.length})...`, { id: uploadToast });
-          
+        // Upload all images in parallel for speed
+        const uploadPromises = newFiles.map(async (file, i) => {
           const ext = file.name.split('.').pop() || 'jpg';
           const fileName = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}_${i}.${ext}`;
           
@@ -573,7 +570,7 @@ const CreateListing = ({
           if (uploadError) {
             console.error("Upload error:", uploadError);
             toast.error(`Nepavyko įkelti: ${file.name}`);
-            continue;
+            return null;
           }
 
           const { data: { publicUrl } } = supabase.storage.from("car-images").getPublicUrl(fileName);
@@ -590,11 +587,14 @@ const CreateListing = ({
           
           if (dbError) {
             console.error("DB insert error:", dbError);
-            continue;
+            return null;
           }
 
-          uploadedImages.push({ id: imgRecord.id, url: publicUrl, order: nextOrder + i });
-        }
+          return { id: imgRecord.id, url: publicUrl, order: nextOrder + i };
+        });
+
+        const results = await Promise.all(uploadPromises);
+        const uploadedImages = results.filter((r): r is {id: string, url: string, order: number} => r !== null);
 
         toast.success(`Įkelta ${uploadedImages.length} nuotrauk${uploadedImages.length === 1 ? 'a' : 'os'}`, { id: uploadToast });
         

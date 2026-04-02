@@ -39,11 +39,11 @@ export const resizeImageIfNeeded = (file: File): Promise<ResizedImage> => {
       }
 
       // Also resize if file is too large
-      if (file.size > MAX_FILE_SIZE) {
+      if (file.size > MAX_FILE_SIZE * 2) {
         needsResize = true;
       }
 
-      if (!needsResize && file.size <= MAX_FILE_SIZE) {
+      if (!needsResize && file.size <= MAX_FILE_SIZE * 2) {
         resolve({ file, wasResized: false });
         return;
       }

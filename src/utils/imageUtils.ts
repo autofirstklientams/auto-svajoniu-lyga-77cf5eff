@@ -1,7 +1,7 @@
-const MAX_WIDTH = 1920;
-const MAX_HEIGHT = 1080;
-const MAX_FILE_SIZE = 1 * 1024 * 1024; // 1MB target after compression
-const QUALITY = 0.85;
+const MAX_WIDTH = 2560;
+const MAX_HEIGHT = 1440;
+const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB target after compression
+const QUALITY = 0.92;
 
 export interface ResizedImage {
   file: File;
@@ -39,11 +39,11 @@ export const resizeImageIfNeeded = (file: File): Promise<ResizedImage> => {
       }
 
       // Also resize if file is too large
-      if (file.size > MAX_FILE_SIZE) {
+      if (file.size > MAX_FILE_SIZE * 2) {
         needsResize = true;
       }
 
-      if (!needsResize && file.size <= MAX_FILE_SIZE) {
+      if (!needsResize && file.size <= MAX_FILE_SIZE * 2) {
         resolve({ file, wasResized: false });
         return;
       }

@@ -140,13 +140,10 @@ CAR PRESERVATION — MANDATORY:
 - Output at the EXACT same resolution as the input
 - If uncertain whether a pixel belongs to the car or background, treat it as CAR`;
 
-const replaceBackgroundWithAi = async (
+const callAiGateway = async (
   apiKey: string,
-  mimeType: string,
-  imageBase64: string,
-): Promise<Uint8Array> => {
-  const imageDataUrl = `data:${mimeType};base64,${imageBase64}`;
-
+  imageDataUrl: string,
+): Promise<any> => {
   const response = await fetch(
     "https://ai.gateway.lovable.dev/v1/chat/completions",
     {
@@ -174,10 +171,8 @@ const replaceBackgroundWithAi = async (
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("Lovable AI Gateway error:", response.status, errorText);
-
     if (response.status === 429) {
-      throw new Error("Per daug užklausų, bandykite vėliau");
+      throw { retryable: true, message: "Rate limited" };
     }
     if (response.status === 402) {
       throw new Error("AI kreditai išnaudoti. Papildykite balansą per Settings → Workspace → Usage.");
@@ -196,7 +191,7 @@ const replaceBackgroundWithAi = async (
     const errMsg = aiData.error.message || "Unknown AI error";
     console.error("AI gateway error in response body:", errCode, errMsg);
     if (errCode === 429) {
-      throw new Error("Per daug užklausų, bandykite vėliau");
+      throw { retryable: true, message: "Rate limited (in body)" };
     }
     if (errCode === 402) {
       throw new Error("AI kreditai išnaudoti. Papildykite balansą per Settings → Workspace → Usage.");
@@ -204,35 +199,70 @@ const replaceBackgroundWithAi = async (
     throw new Error(`AI klaida: ${errMsg}`);
   }
 
-  // Extract image from Lovable AI Gateway response format
-  const images = aiData?.choices?.[0]?.message?.images;
-  if (images && images.length > 0) {
-    const imageUrl = images[0]?.image_url?.url;
-    if (imageUrl && imageUrl.startsWith("data:")) {
-      const base64Part = imageUrl.split(",")[1];
-      if (base64Part) {
-        return base64ToBytes(base64Part);
+  return aiData;
+};
+
+const replaceBackgroundWithAi = async (
+  apiKey: string,
+  mimeType: string,
+  imageBase64: string,
+): Promise<Uint8Array> => {
+  const imageDataUrl = `data:${mimeType};base64,${imageBase64}`;
+
+  const MAX_RETRIES = 3;
+  const RETRY_DELAYS = [5000, 10000, 20000]; // 5s, 10s, 20s
+
+  let lastError: any;
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      if (attempt > 0) {
+        const delay = RETRY_DELAYS[attempt - 1] || 20000;
+        console.log(`Retry attempt ${attempt}/${MAX_RETRIES}, waiting ${delay}ms...`);
+        await new Promise(r => setTimeout(r, delay));
       }
+
+      const aiData = await callAiGateway(apiKey, imageDataUrl);
+
+      // Extract image from response
+      const images = aiData?.choices?.[0]?.message?.images;
+      if (images && images.length > 0) {
+        const imgUrl = images[0]?.image_url?.url;
+        if (imgUrl && imgUrl.startsWith("data:")) {
+          const base64Part = imgUrl.split(",")[1];
+          if (base64Part) {
+            return base64ToBytes(base64Part);
+          }
+        }
+      }
+
+      // Fallback: inline_data format
+      const parts = aiData?.candidates?.[0]?.content?.parts || [];
+      const imagePart = parts.find(
+        (p: any) =>
+          p?.inlineData?.mimeType?.startsWith("image/") ||
+          p?.inline_data?.mime_type?.startsWith("image/"),
+      );
+      const resultBase64 = imagePart?.inlineData?.data ?? imagePart?.inline_data?.data;
+      if (resultBase64) {
+        return base64ToBytes(resultBase64);
+      }
+
+      console.error("No image in AI response:", JSON.stringify(aiData).slice(0, 500));
+      throw new Error("AI nepateikė nuotraukos rezultato");
+
+    } catch (err: any) {
+      lastError = err;
+      if (err?.retryable && attempt < MAX_RETRIES) {
+        console.warn(`Rate limited, will retry (attempt ${attempt + 1}/${MAX_RETRIES})`);
+        continue;
+      }
+      throw err?.retryable
+        ? new Error("Per daug užklausų. Bandykite vėliau arba keiskite nuotraukas po vieną.")
+        : err;
     }
   }
 
-  // Fallback: check for inline_data format
-  const parts = aiData?.candidates?.[0]?.content?.parts || [];
-  const imagePart = parts.find(
-    (p: any) =>
-      p?.inlineData?.mimeType?.startsWith("image/") ||
-      p?.inline_data?.mime_type?.startsWith("image/"),
-  );
-  const resultBase64 = imagePart?.inlineData?.data ?? imagePart?.inline_data?.data;
-  if (resultBase64) {
-    return base64ToBytes(resultBase64);
-  }
-
-  console.error(
-    "No image in AI response:",
-    JSON.stringify(aiData).slice(0, 500),
-  );
-  throw new Error("AI nepateikė nuotraukos rezultato");
+  throw lastError;
 };
 
 const overlayLogo = async (

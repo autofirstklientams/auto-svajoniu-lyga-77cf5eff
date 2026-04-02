@@ -7,7 +7,7 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-class RecoverableUserError extends Error {
+const MODEL = "gemini-2.5-flash-image";
   constructor(message: string) {
     super(message);
     this.name = "RecoverableUserError";

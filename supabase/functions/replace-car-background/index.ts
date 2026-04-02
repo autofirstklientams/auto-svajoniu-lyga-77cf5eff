@@ -8,6 +8,8 @@ const corsHeaders = {
 };
 
 const MODEL = "gemini-2.5-flash-image";
+
+class RecoverableUserError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "RecoverableUserError";

@@ -131,14 +131,15 @@ STEP 1 — Identify the car:
 - Detect every single pixel that belongs to the car (body, paint, wheels, tires, rims, lights, mirrors, glass, reflections on paint, shadows on body, badges, emblems, license plates, antenna, wipers, door handles, exhaust pipes, interior visible through windows)
 - Create a precise mask around the car — every car pixel must be preserved EXACTLY as-is
 
-STEP 2 — Replace ONLY the background pixels with:
-- A simple, clean car photography studio backdrop
-- The WALL must be a single flat surface — light gray color (like RAL 7035 or similar), smooth matte finish, evenly lit, NO visible corners, NO ceiling, NO side walls, NO 3D room perspective
-- The wall should look like a seamless photography backdrop paper or cyclorama wall — one continuous curved surface from wall to floor with NO sharp edges or corners visible
-- The FLOOR must be a dark, glossy polished surface (dark charcoal/anthracite) that shows a subtle mirror-like reflection of the car underneath
-- The transition from wall to floor should be a smooth, gradual curve (infinity cove / cyclorama style) — NOT a sharp 90-degree corner
-- Soft, even studio lighting — no harsh shadows, no dramatic spotlights, no visible light sources
-- The overall look should resemble professional automotive photography with a seamless backdrop, NOT a 3D rendered room
+STEP 2 — Replace ONLY the background pixels with this EXACT style:
+- A real indoor car dealer photo bay / showroom background, not an abstract studio
+- The BACK WALL must be flat warm white / very light gray, smooth painted finish, front-facing, evenly lit, with a very soft natural light falloff
+- The FLOOR must be light gray to off-white smooth epoxy/concrete, clean, matte-to-satin, with only a faint soft reflection and soft contact shadow under the car
+- The wall and floor should meet in a subtle horizontal seam/shadow line near the bottom of the wall
+- Keep the upper wall area clean and empty behind the car for a large dealership wall logo overlay
+- Bright, soft, diffused indoor lighting like a real dealership photo booth
+- NO visible ceiling, NO side walls, NO room corners, NO dark floor, NO cyclorama curve, NO dramatic reflections, NO stylized gradients, NO CGI room look
+- The final look must match a clean white showroom photo: flat wall, light floor, realistic soft light, minimal distractions
 
 ABSOLUTE RULES — VIOLATION = FAILURE:
 - The car must be IDENTICAL to the input — copy every car pixel exactly, do NOT regenerate, redraw, recolor, reshape, or enhance the car
@@ -149,7 +150,8 @@ ABSOLUTE RULES — VIOLATION = FAILURE:
 - Do NOT smooth, sharpen, denoise, or enhance ANY part of the car
 - Do NOT change window tint, glass reflections, or interior visibility
 - Do NOT add any text, watermarks, logos, or overlays
-- Do NOT create a 3D room with visible walls, corners, or ceiling — use a FLAT seamless backdrop
+- Do NOT create a 3D room, ceiling, side walls, wall corners, or infinity-cove sweep
+- Do NOT add any logo, text, sign, plate text, watermark, or wall graphic — leave the wall clean
 - Output at the EXACT same resolution as the input
 - If ANY pixel is uncertain whether it belongs to the car or background, treat it as CAR and leave it untouched`;
 
@@ -226,14 +228,14 @@ const overlayLogo = async (
     const topLogoBytes = new Uint8Array(await topLogoData.arrayBuffer());
     let topLogo = await Image.decode(topLogoBytes);
 
-    // Keep the logo smaller and lower so it sits on the back wall, not in the ceiling area
-    const targetTopW = Math.round(w * 0.22);
+    // Match the reference look: large wall logo placed slightly left of center on the back wall
+    const targetTopW = Math.round(w * 0.42);
     const topScale = targetTopW / topLogo.width;
     topLogo.resize(targetTopW, Math.round(topLogo.height * topScale));
 
-    // Position: centered on the back wall with more vertical offset from the top edge
-    const topX = Math.round((w - topLogo.width) / 2);
-    const topY = Math.round(h * 0.18);
+    // Position: higher on the wall and slightly left, like the provided showroom reference
+    const topX = Math.round(w * 0.15);
+    const topY = Math.round(h * 0.13);
     resultImage.composite(topLogo, topX, topY);
 
     return await resultImage.encode();

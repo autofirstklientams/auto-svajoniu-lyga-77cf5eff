@@ -213,14 +213,14 @@ const overlayLogo = async (
     const topLogoBytes = new Uint8Array(await topLogoData.arrayBuffer());
     let topLogo = await Image.decode(topLogoBytes);
 
-    // Scale top logo to ~28% of image width — visible but not covering the car
-    const targetTopW = Math.round(w * 0.30);
+    // Keep the logo smaller and lower so it sits on the back wall, not in the ceiling area
+    const targetTopW = Math.round(w * 0.22);
     const topScale = targetTopW / topLogo.width;
     topLogo.resize(targetTopW, Math.round(topLogo.height * topScale));
 
-    // Position: on the wall above the car, not on the car itself
+    // Position: centered on the back wall with more vertical offset from the top edge
     const topX = Math.round((w - topLogo.width) / 2);
-    const topY = Math.round(h * 0.08);
+    const topY = Math.round(h * 0.18);
     resultImage.composite(topLogo, topX, topY);
 
 

@@ -190,6 +190,20 @@ const replaceBackgroundWithAi = async (
 
   const aiData = await response.json();
 
+  // Check for gateway-level errors wrapped in 200 response
+  if (aiData?.error) {
+    const errCode = aiData.error.code || aiData.error.status;
+    const errMsg = aiData.error.message || "Unknown AI error";
+    console.error("AI gateway error in response body:", errCode, errMsg);
+    if (errCode === 429) {
+      throw new Error("Per daug užklausų, bandykite vėliau");
+    }
+    if (errCode === 402) {
+      throw new Error("AI kreditai išnaudoti. Papildykite balansą per Settings → Workspace → Usage.");
+    }
+    throw new Error(`AI klaida: ${errMsg}`);
+  }
+
   // Extract image from Lovable AI Gateway response format
   const images = aiData?.choices?.[0]?.message?.images;
   if (images && images.length > 0) {

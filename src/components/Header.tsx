@@ -39,7 +39,7 @@ const Header = () => {
               <Phone className="h-3 w-3 md:h-4 md:w-4" />
               +370 628 51439
             </a>
-            <a href="https://maps.app.goo.gl/3HSKiXHLQmBC99e" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
+            <a href="https://maps.app.goo.gl/3HSKiXHLQmBC99eA7" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors">
               <MapPin className="h-3 w-3 md:h-4 md:w-4" />
               <span className="hidden sm:inline">Palemono g. 173, Kaunas</span>
             </a>

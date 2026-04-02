@@ -245,12 +245,13 @@ const overlayLogo = async (
     const topLogoBytes = new Uint8Array(await topLogoData.arrayBuffer());
     let topLogo = await Image.decode(topLogoBytes);
 
-    const targetTopW = Math.round(w * 0.42);
+    // Logo: large, centered horizontally on the wall above the car
+    const targetTopW = Math.round(w * 0.50);
     const topScale = targetTopW / topLogo.width;
     topLogo.resize(targetTopW, Math.round(topLogo.height * topScale));
 
-    const topX = Math.round(w * 0.15);
-    const topY = Math.round(h * 0.13);
+    const topX = Math.round((w - targetTopW) / 2); // centered
+    const topY = Math.round(h * 0.08); // high on wall
     resultImage.composite(topLogo, topX, topY);
 
     return await resultImage.encode();

@@ -277,9 +277,9 @@ Deno.serve(async (req) => {
     );
     console.log(`Downloaded image: ${originalBytes.length} bytes, ${mimeType}`);
 
-    // 2. AI replaces background via Lovable AI Gateway
+    // 2. AI replaces background (direct Gemini API)
     const aiResultBytes = await replaceBackgroundWithAi(
-      lovableApiKey,
+      geminiApiKey,
       mimeType,
       bytesToBase64(originalBytes),
     );

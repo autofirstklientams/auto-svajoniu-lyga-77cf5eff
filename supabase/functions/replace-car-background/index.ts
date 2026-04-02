@@ -7,8 +7,6 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const MODEL = "gemini-2.5-flash-image";
-
 class RecoverableUserError extends Error {
   constructor(message: string) {
     super(message);
@@ -109,23 +107,8 @@ const downloadSourceImage = async (
   };
 };
 
-const parseGeneratedImageBase64 = (aiData: any): string | null => {
-  const parts = aiData?.candidates?.[0]?.content?.parts || [];
-  const imagePart = parts.find(
-    (p: any) =>
-      p?.inlineData?.mimeType?.startsWith("image/") ||
-      p?.inline_data?.mime_type?.startsWith("image/"),
-  );
-  return imagePart?.inlineData?.data ?? imagePart?.inline_data?.data ?? null;
-};
-
-const replaceBackgroundWithAi = async (
-  apiKey: string,
-  mimeType: string,
-  imageBase64: string,
-): Promise<Uint8Array> => {
-  const prompt =
-    `You are a background replacement tool. Your ONLY job is to replace the background. You must NOT touch the car AT ALL.
+const PROMPT =
+  `You are a background replacement tool. Your ONLY job is to replace the background. You must NOT touch the car AT ALL.
 
 STEP 1 — Identify the car:
 - Detect every single pixel that belongs to the car (body, paint, wheels, tires, rims, lights, mirrors, glass, reflections on paint, shadows on body, badges, emblems, license plates, antenna, wipers, door handles, exhaust pipes, interior visible through windows)
@@ -155,52 +138,85 @@ ABSOLUTE RULES — VIOLATION = FAILURE:
 - Output at the EXACT same resolution as the input
 - If ANY pixel is uncertain whether it belongs to the car or background, treat it as CAR and leave it untouched`;
 
+const replaceBackgroundWithAi = async (
+  apiKey: string,
+  mimeType: string,
+  imageBase64: string,
+): Promise<Uint8Array> => {
+  const imageDataUrl = `data:${mimeType};base64,${imageBase64}`;
+
   const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`,
+    "https://ai.gateway.lovable.dev/v1/chat/completions",
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
-        contents: [{
-          parts: [
-            { text: prompt },
-            { inlineData: { mimeType, data: imageBase64 } },
-          ],
-        }],
-        generationConfig: {
-          responseModalities: ["IMAGE"],
-          temperature: 0,
-          maxOutputTokens: 8192,
-        },
+        model: "google/gemini-2.5-flash-image",
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: PROMPT },
+              { type: "image_url", image_url: { url: imageDataUrl } },
+            ],
+          },
+        ],
+        modalities: ["image", "text"],
       }),
     },
   );
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error("Gemini API error:", response.status, errorText);
+    console.error("Lovable AI Gateway error:", response.status, errorText);
 
     if (response.status === 429) {
       throw new Error("Per daug užklausų, bandykite vėliau");
     }
+    if (response.status === 402) {
+      throw new Error("AI kreditai išnaudoti. Papildykite balansą per Settings → Workspace → Usage.");
+    }
     if (response.status === 401 || response.status === 403) {
-      throw new Error("Neteisingas Gemini API raktas");
+      throw new Error("Neteisingas API raktas");
     }
     throw new Error(`AI API klaida: ${response.status}`);
   }
 
   const aiData = await response.json();
-  const resultBase64 = parseGeneratedImageBase64(aiData);
+  console.log("AI response keys:", Object.keys(aiData));
 
-  if (!resultBase64) {
-    console.error(
-      "No image in AI response:",
-      JSON.stringify(aiData).slice(0, 500),
-    );
-    throw new Error("AI nepateikė nuotraukos rezultato");
+  // Extract image from Lovable AI Gateway response format
+  const images = aiData?.choices?.[0]?.message?.images;
+  if (images && images.length > 0) {
+    const imageUrl = images[0]?.image_url?.url;
+    if (imageUrl && imageUrl.startsWith("data:")) {
+      const base64Part = imageUrl.split(",")[1];
+      if (base64Part) {
+        return base64ToBytes(base64Part);
+      }
+    }
   }
 
-  return base64ToBytes(resultBase64);
+  // Fallback: check for inline_data format (direct Gemini format)
+  const parts = aiData?.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find(
+    (p: any) =>
+      p?.inlineData?.mimeType?.startsWith("image/") ||
+      p?.inline_data?.mime_type?.startsWith("image/"),
+  );
+  const resultBase64 = imagePart?.inlineData?.data ?? imagePart?.inline_data?.data;
+  if (resultBase64) {
+    return base64ToBytes(resultBase64);
+  }
+
+  console.error(
+    "No image in AI response:",
+    JSON.stringify(aiData).slice(0, 500),
+  );
+  throw new Error("AI nepateikė nuotraukos rezultato");
 };
 
 const overlayLogo = async (
@@ -215,7 +231,6 @@ const overlayLogo = async (
     const w = resultImage.width;
     const h = resultImage.height;
 
-    // Download top logo
     const { data: topLogoData } = await supabase.storage
       .from("car-images")
       .download("branding/logo_top.png");
@@ -228,12 +243,10 @@ const overlayLogo = async (
     const topLogoBytes = new Uint8Array(await topLogoData.arrayBuffer());
     let topLogo = await Image.decode(topLogoBytes);
 
-    // Match the reference look: large wall logo placed slightly left of center on the back wall
     const targetTopW = Math.round(w * 0.42);
     const topScale = targetTopW / topLogo.width;
     topLogo.resize(targetTopW, Math.round(topLogo.height * topScale));
 
-    // Position: higher on the wall and slightly left, like the provided showroom reference
     const topX = Math.round(w * 0.15);
     const topY = Math.round(h * 0.13);
     resultImage.composite(topLogo, topX, topY);
@@ -268,13 +281,13 @@ Deno.serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
+    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
 
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error("Missing storage credentials");
     }
-    if (!geminiApiKey) {
-      throw new Error("GEMINI_API_KEY is not configured");
+    if (!lovableApiKey) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -286,9 +299,9 @@ Deno.serve(async (req) => {
     );
     console.log(`Downloaded image: ${originalBytes.length} bytes, ${mimeType}`);
 
-    // 2. AI replaces background ONLY (no logo, no car modification)
+    // 2. AI replaces background via Lovable AI Gateway
     const aiResultBytes = await replaceBackgroundWithAi(
-      geminiApiKey,
+      lovableApiKey,
       mimeType,
       bytesToBase64(originalBytes),
     );

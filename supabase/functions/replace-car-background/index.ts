@@ -122,14 +122,13 @@ STEP 1 — Identify the car:
 - Create a precise mask around the car — every car pixel must be preserved EXACTLY as-is
 
 STEP 2 — Replace ONLY the background pixels with:
-- A realistic professional car photography studio with visible walls and floor
-- Light warm-gray walls with subtle texture — NOT pure white, should look like real painted walls
-- A smooth, glossy dark gray or charcoal polished concrete/epoxy floor that shows realistic reflections of the car
-- The floor should have a visible reflection/mirror effect of the car underneath it
-- Soft, diffused studio lighting from above creating gentle highlights on walls and floor
-- The wall-to-floor transition should be natural with a subtle baseboard or smooth curve
-- The overall look should be like a real high-end car dealership showroom photo, NOT a CGI render
-- Realistic depth and perspective matching the car's angle
+- A simple, clean car photography studio backdrop
+- The WALL must be a single flat surface — light gray color (like RAL 7035 or similar), smooth matte finish, evenly lit, NO visible corners, NO ceiling, NO side walls, NO 3D room perspective
+- The wall should look like a seamless photography backdrop paper or cyclorama wall — one continuous curved surface from wall to floor with NO sharp edges or corners visible
+- The FLOOR must be a dark, glossy polished surface (dark charcoal/anthracite) that shows a subtle mirror-like reflection of the car underneath
+- The transition from wall to floor should be a smooth, gradual curve (infinity cove / cyclorama style) — NOT a sharp 90-degree corner
+- Soft, even studio lighting — no harsh shadows, no dramatic spotlights, no visible light sources
+- The overall look should resemble professional automotive photography with a seamless backdrop, NOT a 3D rendered room
 
 ABSOLUTE RULES — VIOLATION = FAILURE:
 - The car must be IDENTICAL to the input — copy every car pixel exactly, do NOT regenerate, redraw, recolor, reshape, or enhance the car
@@ -140,6 +139,7 @@ ABSOLUTE RULES — VIOLATION = FAILURE:
 - Do NOT smooth, sharpen, denoise, or enhance ANY part of the car
 - Do NOT change window tint, glass reflections, or interior visibility
 - Do NOT add any text, watermarks, logos, or overlays
+- Do NOT create a 3D room with visible walls, corners, or ceiling — use a FLAT seamless backdrop
 - Output at the EXACT same resolution as the input
 - If ANY pixel is uncertain whether it belongs to the car or background, treat it as CAR and leave it untouched`;
 

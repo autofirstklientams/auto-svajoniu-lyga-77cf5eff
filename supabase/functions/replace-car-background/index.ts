@@ -110,35 +110,35 @@ const downloadSourceImage = async (
 };
 
 const PROMPT =
-  `You are a background replacement tool. Your ONLY job is to replace the background. You must NOT touch the car AT ALL.
+  `Replace ONLY the background behind this car. Do NOT modify the car in any way.
 
-STEP 1 — Identify the car:
-- Detect every single pixel that belongs to the car (body, paint, wheels, tires, rims, lights, mirrors, glass, reflections on paint, shadows on body, badges, emblems, license plates, antenna, wipers, door handles, exhaust pipes, interior visible through windows)
-- Create a precise mask around the car — every car pixel must be preserved EXACTLY as-is
+BACKGROUND STYLE — THIS IS CRITICAL, follow exactly:
+- Think of a FLAT PHOTOGRAPH of a white wall, NOT a 3D room render
+- The background is a SINGLE flat surface: a smooth warm-white / very light gray painted wall
+- The wall fills the ENTIRE background behind the car from edge to edge, top to bottom
+- There are NO corners, NO side walls, NO ceiling, NO floor-to-wall curves, NO 3D perspective
+- The floor is light gray smooth epoxy, matte finish, with a very subtle contact shadow under the car
+- The wall and floor meet at a simple straight horizontal line — no curved sweep, no cove, no ramp
+- Lighting: bright, even, soft, diffused — like a professional car photography studio flat backdrop
+- The upper wall area must be completely clean and empty (no text, no logos, no signs)
+- This must look like a REAL dealership photo with a flat painted wall — NOT a CGI studio, NOT a cyclorama, NOT a 3D-rendered room
 
-STEP 2 — Replace ONLY the background pixels with this EXACT style:
-- A real indoor car dealer photo bay / showroom background, not an abstract studio
-- The BACK WALL must be flat warm white / very light gray, smooth painted finish, front-facing, evenly lit, with a very soft natural light falloff
-- The FLOOR must be light gray to off-white smooth epoxy/concrete, clean, matte-to-satin, with only a faint soft reflection and soft contact shadow under the car
-- The wall and floor should meet in a subtle horizontal seam/shadow line near the bottom of the wall
-- Keep the upper wall area clean and empty behind the car for a large dealership wall logo overlay
-- Bright, soft, diffused indoor lighting like a real dealership photo booth
-- NO visible ceiling, NO side walls, NO room corners, NO dark floor, NO cyclorama curve, NO dramatic reflections, NO stylized gradients, NO CGI room look
-- The final look must match a clean white showroom photo: flat wall, light floor, realistic soft light, minimal distractions
+WHAT TO ABSOLUTELY AVOID:
+- ❌ NO 3D room with visible corners where walls meet
+- ❌ NO curved infinity cove / cyclorama sweep between wall and floor  
+- ❌ NO visible ceiling or ceiling lights
+- ❌ NO side walls or wall edges
+- ❌ NO dark shadows in corners
+- ❌ NO dramatic lighting or gradients on walls
+- ❌ The result must NOT look like a box or enclosed room
 
-ABSOLUTE RULES — VIOLATION = FAILURE:
-- The car must be IDENTICAL to the input — copy every car pixel exactly, do NOT regenerate, redraw, recolor, reshape, or enhance the car
-- Do NOT change paint color, shine, reflections, scratches, dirt — keep them ALL
-- Do NOT alter wheels, tires, rims, brake calipers — they must be IDENTICAL
-- Do NOT modify headlights, taillights, indicators, fog lights
-- Do NOT change the car's position, angle, scale, proportions, or perspective
-- Do NOT smooth, sharpen, denoise, or enhance ANY part of the car
-- Do NOT change window tint, glass reflections, or interior visibility
+CAR PRESERVATION — MANDATORY:
+- Copy every car pixel exactly as-is — do NOT regenerate, redraw, recolor, reshape, or enhance
+- Do NOT change paint color, shine, reflections, scratches, wheels, lights, glass, interior
+- Do NOT change position, angle, scale, proportions, or perspective
 - Do NOT add any text, watermarks, logos, or overlays
-- Do NOT create a 3D room, ceiling, side walls, wall corners, or infinity-cove sweep
-- Do NOT add any logo, text, sign, plate text, watermark, or wall graphic — leave the wall clean
 - Output at the EXACT same resolution as the input
-- If ANY pixel is uncertain whether it belongs to the car or background, treat it as CAR and leave it untouched`;
+- If uncertain whether a pixel belongs to the car or background, treat it as CAR`;
 
 const replaceBackgroundWithAi = async (
   apiKey: string,

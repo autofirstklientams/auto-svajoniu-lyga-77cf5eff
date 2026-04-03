@@ -253,14 +253,20 @@ const PartnerDashboard = () => {
 
   const handleDuplicate = async (car: Car) => {
     try {
-      const { id, ...carData } = car;
+      const {
+        id, created_at, updated_at, slug, partner_name,
+        ...rest
+      } = car as any;
+
       const { data: newCar, error } = await supabase
         .from("cars")
         .insert({
-          ...carData,
+          ...rest,
           partner_id: user?.id,
           visible_web: false,
           visible_autoplius: false,
+          is_sold: false,
+          is_reserved: false,
         })
         .select()
         .single();

@@ -112,25 +112,24 @@ const downloadSourceImage = async (
 const PROMPT =
   `Replace ONLY the background behind this car. Do NOT modify the car in any way.
 
-BACKGROUND STYLE — THIS IS CRITICAL, follow exactly:
-- Think of a FLAT PHOTOGRAPH of a white wall, NOT a 3D room render
-- The background is a SINGLE flat surface: a smooth warm-white / very light gray painted wall
-- The wall fills the ENTIRE background behind the car from edge to edge, top to bottom
-- There are NO corners, NO side walls, NO ceiling, NO floor-to-wall curves, NO 3D perspective
-- The floor is light gray smooth epoxy, matte finish, with a very subtle contact shadow under the car
-- The wall and floor meet at a simple straight horizontal line — no curved sweep, no cove, no ramp
-- Lighting: bright, even, soft, diffused — like a professional car photography studio flat backdrop
-- The upper wall area must be completely clean and empty (no text, no logos, no signs)
-- This must look like a REAL dealership photo with a flat painted wall — NOT a CGI studio, NOT a cyclorama, NOT a 3D-rendered room
+BACKGROUND STYLE — Professional car showroom with visible 3D room structure:
+- A bright, clean showroom room with WHITE walls and a light gray smooth floor
+- The room has VISIBLE 3D structure: you can see where the back wall meets the side walls (subtle vertical corner lines)
+- The ceiling is visible with soft, even overhead lighting (panel lights or diffused strips)
+- The back wall is a large, clean, flat white surface — the main backdrop
+- Side walls are also white/light gray, visible at slight angles creating natural depth
+- The floor is light gray polished concrete or epoxy, smooth and reflective with subtle car reflections
+- Lighting is bright, even, and professional — soft shadows under the car, subtle reflections on the floor
+- The overall look is a REAL high-end car photography studio / showroom — NOT a flat 2D backdrop
+- Think: professional dealership photo studio with real walls, ceiling, and floor visible
 
 WHAT TO ABSOLUTELY AVOID:
-- ❌ NO 3D room with visible corners where walls meet
-- ❌ NO curved infinity cove / cyclorama sweep between wall and floor  
-- ❌ NO visible ceiling or ceiling lights
-- ❌ NO side walls or wall edges
-- ❌ NO dark shadows in corners
-- ❌ NO dramatic lighting or gradients on walls
-- ❌ The result must NOT look like a box or enclosed room
+- ❌ NO flat 2D backdrop without depth — it MUST look like a real 3D room
+- ❌ NO curved infinity cove / cyclorama sweep
+- ❌ NO dark or dramatic lighting
+- ❌ NO colored walls — keep everything white/light gray
+- ❌ NO outdoor backgrounds
+- ❌ The result must look like a REAL showroom photo, not CGI
 
 CAR PRESERVATION — MANDATORY:
 - Copy every car pixel exactly as-is — do NOT regenerate, redraw, recolor, reshape, or enhance

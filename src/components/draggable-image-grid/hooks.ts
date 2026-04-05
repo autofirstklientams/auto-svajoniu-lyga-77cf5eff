@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { DraggableImage } from "./types";
@@ -91,9 +91,29 @@ export function useAiBackground(
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [selectedForAi, setSelectedForAi] = useState<Set<string>>(new Set());
   const [originalUrls, setOriginalUrls] = useState<Map<string, string>>(new Map());
+  
+  // AbortController ref for cancellation
+  const abortRef = useRef<AbortController | null>(null);
+  const isMountedRef = useRef(true);
+
+  // Cleanup on unmount — cancel any in-flight AI work
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (abortRef.current) {
+        abortRef.current.abort();
+        abortRef.current = null;
+      }
+    };
+  }, []);
 
   const handleAiBackground = useCallback(async (img: DraggableImage, imageIndex: number) => {
     if (!carId || !onReplaceUrl) return;
+    
+    // Create abort controller for this operation
+    const controller = new AbortController();
+    abortRef.current = controller;
     
     setProcessingIds(prev => new Set(prev).add(img.id));
     
@@ -106,12 +126,19 @@ export function useAiBackground(
         return next;
       });
 
+      // Check if cancelled before starting
+      if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
+
       let attempts = 0;
       let data: any = null;
       while (attempts < 3) {
+        if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
+        
         const result = await supabase.functions.invoke('replace-car-background', {
           body: { imageUrl: img.url, carId, isMainPhoto: images.length > 0 && images[0].id === img.id },
         });
+
+        if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
         if (result.error) {
           const errorBody = result.data;
@@ -129,26 +156,46 @@ export function useAiBackground(
         break;
       }
 
+      if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
       if (!data?.success) throw new Error(data?.error || 'Nepavyko pakeisti fono');
 
-      onReplaceUrl(img.id, data.url);
-      toast.success('Fonas pakeistas! Galite atsaukti paspaudę ↩ mygtuką.');
+      // Only apply if still mounted
+      if (isMountedRef.current) {
+        onReplaceUrl(img.id, data.url);
+        toast.success('Fonas pakeistas! Galite atsaukti paspaudę ↩ mygtuką.');
+      }
     } catch (err: any) {
+      if (err?.name === 'AbortError') {
+        console.log('AI background replacement cancelled by user');
+        // Restore original URL if we saved it
+        if (isMountedRef.current) {
+          setOriginalUrls(prev => {
+            const next = new Map(prev);
+            next.delete(img.id);
+            return next;
+          });
+        }
+        return;
+      }
       console.error('AI background error:', err);
-      setOriginalUrls(prev => {
-        const next = new Map(prev);
-        next.delete(img.id);
-        return next;
-      });
-      toast.error(err.message || 'Klaida keičiant foną');
+      if (isMountedRef.current) {
+        setOriginalUrls(prev => {
+          const next = new Map(prev);
+          next.delete(img.id);
+          return next;
+        });
+        toast.error(err.message || 'Klaida keičiant foną');
+      }
     } finally {
-      setProcessingIds(prev => {
-        const next = new Set(prev);
-        next.delete(img.id);
-        return next;
-      });
+      if (isMountedRef.current) {
+        setProcessingIds(prev => {
+          const next = new Set(prev);
+          next.delete(img.id);
+          return next;
+        });
+      }
     }
-  }, [carId, onReplaceUrl]);
+  }, [carId, onReplaceUrl, images]);
 
   const handleUndoBackground = useCallback((img: DraggableImage) => {
     if (!onReplaceUrl) return;
@@ -195,6 +242,9 @@ export function useAiBackground(
   const handleBulkAiBackground = useCallback(async () => {
     if (!carId || !onReplaceUrl) return;
     
+    const controller = new AbortController();
+    abortRef.current = controller;
+    
     const imagesToProcess = images.filter(img => 
       selectedForAi.has(img.id) && !originalUrls.has(img.id) && !processingIds.has(img.id)
     );
@@ -208,6 +258,13 @@ export function useAiBackground(
     let failCount = 0;
 
     for (let i = 0; i < imagesToProcess.length; i++) {
+      // Check abort before each image
+      if (controller.signal.aborted || !isMountedRef.current) {
+        console.log('Bulk AI background cancelled by user');
+        toast.info(`AI fono keitimas atšauktas. Pakeista ${successCount}/${imagesToProcess.length}.`);
+        break;
+      }
+
       const img = imagesToProcess[i];
       const isFirstImage = images.length > 0 && images[0].id === img.id;
       
@@ -224,9 +281,13 @@ export function useAiBackground(
         let attempts = 0;
         let data: any = null;
         while (attempts < 3) {
+          if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
+          
           const result = await supabase.functions.invoke('replace-car-background', {
             body: { imageUrl: img.url, carId, isMainPhoto: isFirstImage },
           });
+
+          if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
 
           if (result.error) {
             const errorBody = result.data;
@@ -243,39 +304,58 @@ export function useAiBackground(
           break;
         }
 
+        if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError');
         if (!data?.success) throw new Error(data?.error || 'Nepavyko pakeisti fono');
 
-        onReplaceUrl(img.id, data.url);
-        successCount++;
-        toast.success(`Nuotrauka ${i + 1}/${imagesToProcess.length} – fonas pakeistas! Spauskite ↩ grąžinti.`);
+        if (isMountedRef.current) {
+          onReplaceUrl(img.id, data.url);
+          successCount++;
+          toast.success(`Nuotrauka ${i + 1}/${imagesToProcess.length} – fonas pakeistas! Spauskite ↩ grąžinti.`);
+        }
       } catch (err: any) {
+        if (err?.name === 'AbortError') {
+          // Restore this image's original
+          if (isMountedRef.current) {
+            setOriginalUrls(prev => {
+              const next = new Map(prev);
+              next.delete(img.id);
+              return next;
+            });
+          }
+          toast.info(`AI fono keitimas atšauktas. Pakeista ${successCount}/${imagesToProcess.length}.`);
+          break;
+        }
         console.error('Bulk AI error for image', i, err);
-        setOriginalUrls(prev => {
-          const next = new Map(prev);
-          next.delete(img.id);
-          return next;
-        });
+        if (isMountedRef.current) {
+          setOriginalUrls(prev => {
+            const next = new Map(prev);
+            next.delete(img.id);
+            return next;
+          });
+        }
         failCount++;
         toast.error(`Nuotrauka ${i + 1} – nepavyko: ${err.message}`);
       } finally {
-        setProcessingIds(prev => {
-          const next = new Set(prev);
-          next.delete(img.id);
-          return next;
-        });
-        setSelectedForAi(prev => {
-          const next = new Set(prev);
-          next.delete(img.id);
-          return next;
-        });
+        if (isMountedRef.current) {
+          setProcessingIds(prev => {
+            const next = new Set(prev);
+            next.delete(img.id);
+            return next;
+          });
+          setSelectedForAi(prev => {
+            const next = new Set(prev);
+            next.delete(img.id);
+            return next;
+          });
+        }
       }
       
-      if (i < imagesToProcess.length - 1) {
+      if (i < imagesToProcess.length - 1 && !controller.signal.aborted) {
          await new Promise(r => setTimeout(r, 3000));
       }
     }
     
-    if (imagesToProcess.length > 1) {
+    if (isMountedRef.current && imagesToProcess.length > 1 && !controller.signal.aborted) {
       if (successCount > 0) toast.success(`Baigta! Pakeista ${successCount}/${imagesToProcess.length}. Kiekvieną galite atsaukti ↩ mygtuku.`);
       if (failCount > 0) toast.error(`Nepavyko pakeisti ${failCount} nuotraukų fono.`);
     }

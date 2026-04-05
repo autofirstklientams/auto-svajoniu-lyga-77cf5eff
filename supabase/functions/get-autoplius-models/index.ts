@@ -56,52 +56,61 @@ serve(async (req) => {
       const text = await resp.text();
       console.error(`Autoplius API error: ${resp.status}`, text.substring(0, 200));
 
+      const staleModels = modelCache.get(makeId)?.data ?? [];
+
       // Fallback: try via Firecrawl
       const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
       if (firecrawlKey) {
-        console.log("Trying Firecrawl fallback...");
-        const fcResp = await fetch("https://api.firecrawl.dev/v1/scrape", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${firecrawlKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            url: targetUrl,
-            formats: ["html"],
-            waitFor: 2000,
-          }),
-        });
+        try {
+          console.log("Trying Firecrawl fallback...");
+          const fcResp = await fetch("https://api.firecrawl.dev/v1/scrape", {
+            method: "POST",
+            headers: {
+              "Authorization": `Bearer ${firecrawlKey}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              url: targetUrl,
+              formats: ["html"],
+              waitFor: 2000,
+            }),
+          });
 
-        if (fcResp.ok) {
-          const fcData = await fcResp.json();
-          const htmlContent = fcData?.data?.html || "";
-          if (htmlContent) {
-            const fcModels: Array<{ name: string; id: string }> = [];
-            const fcRegex = /<item>\s*<id>(\d+)<\/id>\s*<title>([^<]+)<\/title>\s*<\/item>/gi;
-            let fcMatch;
-            while ((fcMatch = fcRegex.exec(htmlContent)) !== null) {
-              const name = fcMatch[2].trim();
-              if (name !== "-kita-") {
-                fcModels.push({ id: fcMatch[1], name });
+          if (fcResp.ok) {
+            const fcData = await fcResp.json();
+            const htmlContent = fcData?.data?.html || fcData?.html || "";
+            if (htmlContent) {
+              const fcModels: Array<{ name: string; id: string }> = [];
+              const fcRegex = /<item>\s*<id>(\d+)<\/id>\s*<title>([^<]+)<\/title>\s*<\/item>/gi;
+              let fcMatch;
+              while ((fcMatch = fcRegex.exec(htmlContent)) !== null) {
+                const name = fcMatch[2].trim();
+                if (name !== "-kita-") {
+                  fcModels.push({ id: fcMatch[1], name });
+                }
+              }
+
+              if (fcModels.length > 0) {
+                fcModels.sort((a, b) => a.name.localeCompare(b.name));
+                modelCache.set(makeId, { data: fcModels, ts: Date.now() });
+                return new Response(JSON.stringify(fcModels), {
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
               }
             }
-            fcModels.sort((a, b) => a.name.localeCompare(b.name));
-            modelCache.set(makeId, { data: fcModels, ts: Date.now() });
-            return new Response(JSON.stringify(fcModels), {
-              headers: { ...corsHeaders, "Content-Type": "application/json" },
-            });
+          } else {
+            const fcErr = await fcResp.text();
+            console.error("Firecrawl fallback failed:", fcErr.substring(0, 200));
           }
-        } else {
-          const fcErr = await fcResp.text();
-          console.error("Firecrawl fallback failed:", fcErr.substring(0, 200));
+        } catch (firecrawlError) {
+          console.error("Firecrawl fallback error:", firecrawlError);
         }
       }
 
-      return new Response(
-        JSON.stringify({ error: "Failed to fetch models from Autoplius" }),
-        { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+      console.warn(`Returning stale or empty model list for make_id ${makeId}`);
+      return new Response(JSON.stringify(staleModels), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const xmlText = await resp.text();

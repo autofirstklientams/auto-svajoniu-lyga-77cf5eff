@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { getThumbnailUrl, getMediumUrl } from "@/utils/imageUtils";
 import { useParams, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Helmet } from "react-helmet";
@@ -145,6 +146,14 @@ const CarDetail = () => {
         ? [car.image_url] 
         : [];
   }, [images, car?.image_url]);
+
+  // Preload first few images eagerly for instant display
+  useEffect(() => {
+    allImages.slice(0, 3).forEach(url => {
+      const img = new Image();
+      img.src = getMediumUrl(url);
+    });
+  }, [allImages]);
 
   const handlePrevImage = useCallback(() => {
     setCurrentImageIndex((prev) => 
@@ -355,7 +364,7 @@ const CarDetail = () => {
                  aria-label="Atidaryti nuotrauką"
                >
                  <OptimizedImage
-                   src={allImages[currentImageIndex]}
+                   src={getMediumUrl(allImages[currentImageIndex])}
                    alt={`${car.make} ${car.model}`}
                    className="w-full h-full"
                    priority
@@ -397,7 +406,7 @@ const CarDetail = () => {
                   }`}
                 >
                    <OptimizedImage
-                     src={img}
+                     src={getThumbnailUrl(img)}
                      alt={`Nuotrauka ${index + 1}`}
                      className="w-full h-full"
                    />
@@ -461,7 +470,7 @@ const CarDetail = () => {
                      aria-label="Atidaryti nuotrauką"
                    >
                      <OptimizedImage
-                       src={allImages[currentImageIndex]}
+                       src={getMediumUrl(allImages[currentImageIndex])}
                        alt={`${car.make} ${car.model}`}
                        className="w-full h-full"
                        priority
@@ -504,7 +513,7 @@ const CarDetail = () => {
                     }`}
                   >
                      <OptimizedImage
-                       src={img}
+                       src={getThumbnailUrl(img)}
                        alt={`Nuotrauka ${index + 1}`}
                        className="w-full h-full"
                      />

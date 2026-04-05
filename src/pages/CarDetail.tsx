@@ -364,7 +364,7 @@ const CarDetail = () => {
                  aria-label="Atidaryti nuotrauką"
                >
                  <OptimizedImage
-                   src={allImages[currentImageIndex]}
+                   src={getMediumUrl(allImages[currentImageIndex])}
                    alt={`${car.make} ${car.model}`}
                    className="w-full h-full"
                    priority
@@ -406,7 +406,7 @@ const CarDetail = () => {
                   }`}
                 >
                    <OptimizedImage
-                     src={img}
+                     src={getThumbnailUrl(img)}
                      alt={`Nuotrauka ${index + 1}`}
                      className="w-full h-full"
                    />
@@ -470,7 +470,7 @@ const CarDetail = () => {
                      aria-label="Atidaryti nuotrauką"
                    >
                      <OptimizedImage
-                       src={allImages[currentImageIndex]}
+                       src={getMediumUrl(allImages[currentImageIndex])}
                        alt={`${car.make} ${car.model}`}
                        className="w-full h-full"
                        priority
@@ -513,7 +513,7 @@ const CarDetail = () => {
                     }`}
                   >
                      <OptimizedImage
-                       src={img}
+                       src={getThumbnailUrl(img)}
                        alt={`Nuotrauka ${index + 1}`}
                        className="w-full h-full"
                      />

@@ -792,8 +792,11 @@ const CreateListing = ({
       if (!user) throw new Error("Neprisijungęs");
       const response = await fetch(updatedImg.url);
       const blob = await response.blob();
-      const fileName = `${user.id}/${Date.now()}-cropped.jpg`;
-      const { error: uploadError } = await supabase.storage.from("car-images").upload(fileName, blob, { contentType: "image/jpeg", upsert: true });
+      const isPng = blob.type === "image/png";
+      const ext = isPng ? "png" : "jpg";
+      const contentType = isPng ? "image/png" : "image/jpeg";
+      const fileName = `${user.id}/${Date.now()}-cropped.${ext}`;
+      const { error: uploadError } = await supabase.storage.from("car-images").upload(fileName, blob, { contentType, upsert: true });
       if (uploadError) throw uploadError;
       const { data: { publicUrl } } = supabase.storage.from("car-images").getPublicUrl(fileName);
       await supabase.from("car_images").update({ image_url: publicUrl }).eq("id", updatedImg.id);

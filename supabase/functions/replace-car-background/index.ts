@@ -110,34 +110,20 @@ const downloadSourceImage = async (
 };
 
 const PROMPT =
-  `Replace ONLY the background behind this car. Do NOT modify the car in any way.
+  `Replace ONLY the background behind this car with a clean, professional car showroom/studio background. Keep the car EXACTLY as it is — same color, same angle, same details, same reflections, same everything. Do not modify, enhance, or redraw any part of the car.
 
-BACKGROUND STYLE — Professional car showroom with visible 3D room structure:
-- A bright, clean showroom room with WHITE walls and a light gray smooth floor
-- The room has VISIBLE 3D structure: you can see where the back wall meets the side walls (subtle vertical corner lines)
-- The ceiling is visible with soft, even overhead lighting (panel lights or diffused strips)
-- The back wall is a large, clean, flat white surface — the main backdrop
-- Side walls are also white/light gray, visible at slight angles creating natural depth
-- The floor is light gray polished concrete or epoxy, smooth and reflective with subtle car reflections
-- Lighting is bright, even, and professional — soft shadows under the car, subtle reflections on the floor
-- The overall look is a REAL high-end car photography studio / showroom — NOT a flat 2D backdrop
-- Think: professional dealership photo studio with real walls, ceiling, and floor visible
+Background requirements:
+- Clean white/light gray studio or showroom environment
+- Smooth, slightly reflective floor (light gray)
+- Soft, even lighting with gentle shadows under the car
+- Professional car photography look
 
-WHAT TO ABSOLUTELY AVOID:
-- ❌ NO flat 2D backdrop without depth — it MUST look like a real 3D room
-- ❌ NO curved infinity cove / cyclorama sweep
-- ❌ NO dark or dramatic lighting
-- ❌ NO colored walls — keep everything white/light gray
-- ❌ NO outdoor backgrounds
-- ❌ The result must look like a REAL showroom photo, not CGI
-
-CAR PRESERVATION — MANDATORY:
-- Copy every car pixel exactly as-is — do NOT regenerate, redraw, recolor, reshape, or enhance
-- Do NOT change paint color, shine, reflections, scratches, wheels, lights, glass, interior
-- Do NOT change position, angle, scale, proportions, or perspective
-- Do NOT add any text, watermarks, logos, or overlays
-- Output at the EXACT same resolution as the input
-- If uncertain whether a pixel belongs to the car or background, treat it as CAR`;
+Rules:
+- Do NOT change the car's paint color, shine, wheels, lights, glass, interior, or any detail
+- Do NOT change the car's position, angle, scale, or proportions
+- Do NOT add text, watermarks, or logos
+- Output at the same resolution as input
+- If unsure whether a pixel is car or background, keep it as car`;
 
 const callAiGateway = async (
   apiKey: string,

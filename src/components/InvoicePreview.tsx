@@ -212,45 +212,62 @@ const InvoicePreview = ({ data, onBack, onEdit }: InvoicePreviewProps) => {
 
         {/* Items Table - Closed with borders */}
         <div style={{ marginBottom: '24px' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000000' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000000', fontSize: '13px' }}>
             <thead>
               <tr>
-                <th style={{ border: '1px solid #000000', width: '50px', textAlign: 'left', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
-                  Eil. Nr.
+                <th style={{ border: '1px solid #000000', width: '40px', textAlign: 'center', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
+                  Nr.
                 </th>
-                <th style={{ border: '1px solid #000000', textAlign: 'left', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
-                  Prekės, paslaugos pavadinimas
+                <th style={{ border: '1px solid #000000', textAlign: 'left', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
+                  Prekė / Paslauga
                 </th>
-                <th style={{ border: '1px solid #000000', width: '70px', textAlign: 'center', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
+                <th style={{ border: '1px solid #000000', width: '60px', textAlign: 'center', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
                   Kiekis
                 </th>
-                <th style={{ border: '1px solid #000000', width: '100px', textAlign: 'right', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
-                  Kaina
+                <th style={{ border: '1px solid #000000', width: '80px', textAlign: 'right', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
+                  Kaina (€)
                 </th>
-                <th style={{ border: '1px solid #000000', width: '100px', textAlign: 'right', padding: '8px', fontWeight: 'bold', color: '#000000' }}>
-                  Suma
+                <th style={{ border: '1px solid #000000', width: '90px', textAlign: 'right', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
+                  Suma be PVM (€)
+                </th>
+                <th style={{ border: '1px solid #000000', width: '75px', textAlign: 'right', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
+                  PVM (€)
+                </th>
+                <th style={{ border: '1px solid #000000', width: '85px', textAlign: 'right', padding: '6px', fontWeight: 'bold', color: '#000000' }}>
+                  Viso (€)
                 </th>
               </tr>
             </thead>
             <tbody>
               {data.items.map((item, index) => {
                 const lineTotal = item.quantity * item.price;
+                const lineBasePrice = getBasePrice(lineTotal, item.vatType);
+                const lineVat = calculateVat(lineTotal, item.vatType);
+                const lineWithVat = item.vatType === "with_vat" 
+                  ? lineTotal + lineVat 
+                  : lineTotal;
                 return (
                   <tr key={index}>
-                    <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'center', color: '#000000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', color: '#000000' }}>
                       {index + 1}
                     </td>
-                    <td style={{ border: '1px solid #000000', padding: '8px', color: '#000000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '6px', color: '#000000' }}>
                       {item.description}
                     </td>
-                    <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'center', color: '#000000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'center', color: '#000000' }}>
                       {item.quantity}
                     </td>
-                    <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'right', color: '#000000' }}>
+                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'right', color: '#000000' }}>
                       {formatCurrency(item.price)}
                     </td>
-                    <td style={{ border: '1px solid #000000', padding: '8px', textAlign: 'right', color: '#000000' }}>
-                      {formatCurrency(lineTotal)}
+                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'right', color: '#000000' }}>
+                      {formatCurrency(lineBasePrice)}
+                    </td>
+                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'right', color: '#000000' }}>
+                      {formatCurrency(lineVat)}
+                    </td>
+                    <td style={{ border: '1px solid #000000', padding: '6px', textAlign: 'right', color: '#000000' }}>
+                      {formatCurrency(lineWithVat)}
                     </td>
                   </tr>
                 );

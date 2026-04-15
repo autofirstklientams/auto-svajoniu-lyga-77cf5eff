@@ -138,9 +138,6 @@ const handler = async (req: Request): Promise<Response> => {
                       </table>
                       ` : ''}
                       
-                      <p style="margin: 0; font-size: 14px; color: #71717a;">
-                        📎 Sąskaita faktūra pridėta kaip PDF failas prie šio laiško.
-                      </p>
                     </td>
                   </tr>
                   

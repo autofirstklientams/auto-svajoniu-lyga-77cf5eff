@@ -13,6 +13,7 @@ import { Search, Filter, X, ChevronDown, ChevronUp } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Helmet } from "react-helmet";
 import { useQuery } from "@tanstack/react-query";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface Car {
   id: string;
@@ -31,23 +32,7 @@ interface Car {
   is_sold: boolean;
 }
 
-interface MakeCount {
-  make: string;
-  count: number;
-}
-
 type SortOption = "recommended" | "newest" | "price_asc" | "price_desc" | "year_desc" | "year_asc" | "mileage_asc" | "mileage_desc";
-
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: "recommended", label: "Rekomenduojami" },
-  { value: "newest", label: "Naujausi viršuje" },
-  { value: "price_asc", label: "Pigiausi viršuje" },
-  { value: "price_desc", label: "Brangiausi viršuje" },
-  { value: "year_desc", label: "Metai mažėjančia tvarka" },
-  { value: "year_asc", label: "Metai didėjančia tvarka" },
-  { value: "mileage_asc", label: "Rida mažėjančia tvarka" },
-  { value: "mileage_desc", label: "Rida didėjančia tvarka" },
-];
 
 const fetchAllCars = async (): Promise<Car[]> => {
   const { data, error } = await supabase
@@ -60,6 +45,7 @@ const fetchAllCars = async (): Promise<Car[]> => {
 };
 
 const CarCatalog = () => {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const [selectedMakes, setSelectedMakes] = useState<string[]>(() => {
@@ -69,12 +55,22 @@ const CarCatalog = () => {
   const [sortBy, setSortBy] = useState<SortOption>((searchParams.get("sort") as SortOption) || "recommended");
   const [showAllMakes, setShowAllMakes] = useState(false);
 
+  const sortOptions: { value: SortOption; label: string }[] = [
+    { value: "recommended", label: t("catalog.sortRecommended") },
+    { value: "newest", label: t("catalog.sortNewest") },
+    { value: "price_asc", label: t("catalog.sortPriceAsc") },
+    { value: "price_desc", label: t("catalog.sortPriceDesc") },
+    { value: "year_desc", label: t("catalog.sortYearDesc") },
+    { value: "year_asc", label: t("catalog.sortYearAsc") },
+    { value: "mileage_asc", label: t("catalog.sortMileageAsc") },
+    { value: "mileage_desc", label: t("catalog.sortMileageDesc") },
+  ];
+
   const { data: allCars = [], isLoading } = useQuery({
     queryKey: ["catalog-cars"],
     queryFn: fetchAllCars,
   });
 
-  // Sync URL params when filters change
   const updateParams = (newSort: SortOption, newMakes: string[], newQuery: string) => {
     const newParams = new URLSearchParams();
     if (newSort !== "recommended") newParams.set("sort", newSort);
@@ -120,7 +116,6 @@ const CarCatalog = () => {
       filtered = filtered.filter((car) => selectedMakes.includes(car.make));
     }
 
-    // Always push sold cars to the end, then apply chosen sort
     const soldSort = (a: any, b: any) => {
       if (a.is_sold && !b.is_sold) return 1;
       if (!a.is_sold && b.is_sold) return -1;
@@ -183,7 +178,7 @@ const CarCatalog = () => {
   const FilterSidebar = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="font-semibold text-lg mb-4">Markė</h3>
+        <h3 className="font-semibold text-lg mb-4">{t("catalog.make")}</h3>
         <div className="space-y-2">
           {displayedMakes.map(({ make, count }) => (
             <label
@@ -211,12 +206,12 @@ const CarCatalog = () => {
             {showAllMakes ? (
               <>
                 <ChevronUp className="h-4 w-4 mr-2" />
-                Rodyti mažiau
+                {t("catalog.showLess")}
               </>
             ) : (
               <>
                 <ChevronDown className="h-4 w-4 mr-2" />
-                Rodyti visas ({makeCounts.length})
+                {t("catalog.showAll")} ({makeCounts.length})
               </>
             )}
           </Button>
@@ -226,7 +221,7 @@ const CarCatalog = () => {
       {selectedMakes.length > 0 && (
         <Button variant="outline" size="sm" onClick={clearFilters} className="w-full">
           <X className="h-4 w-4 mr-2" />
-          Išvalyti filtrus
+          {t("catalog.clearFilters")}
         </Button>
       )}
     </div>
@@ -247,30 +242,27 @@ const CarCatalog = () => {
         <Header />
 
         <main className="container mx-auto px-4 py-8">
-          {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <div>
               <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-                Automobiliai
+                {t("catalog.heading")}
               </h1>
               <p className="text-muted-foreground mt-2">
-                {filteredCars.length} {filteredCars.length === 1 ? "rezultatas" : "rezultatai"}
+                {filteredCars.length} {filteredCars.length === 1 ? t("catalog.resultOne") : t("catalog.resultMany")}
               </p>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3">
-              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Paieška..."
+                  placeholder={t("catalog.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => handleSearchChange(e.target.value)}
                   className="pl-10 w-full sm:w-64"
                 />
               </div>
 
-              {/* Sort */}
               <Select value={sortBy} onValueChange={handleSortChange}>
                 <SelectTrigger className="w-full sm:w-56">
                   <SelectValue />
@@ -284,12 +276,11 @@ const CarCatalog = () => {
                 </SelectContent>
               </Select>
 
-              {/* Mobile filter button */}
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="outline" className="md:hidden">
                     <Filter className="h-4 w-4 mr-2" />
-                    Filtrai
+                    {t("catalog.filters")}
                     {selectedMakes.length > 0 && (
                       <span className="ml-2 bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
                         {selectedMakes.length}
@@ -298,7 +289,7 @@ const CarCatalog = () => {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="left" className="w-80">
-                  <h2 className="text-xl font-bold mb-6">Filtrai</h2>
+                  <h2 className="text-xl font-bold mb-6">{t("catalog.filters")}</h2>
                   <FilterSidebar />
                 </SheetContent>
               </Sheet>
@@ -306,15 +297,13 @@ const CarCatalog = () => {
           </div>
 
           <div className="flex gap-8">
-            {/* Desktop Sidebar */}
             <aside className="hidden md:block w-64 flex-shrink-0">
               <div className="sticky top-24 bg-card rounded-xl border p-6">
-                <h2 className="text-xl font-bold mb-6">Filtrai</h2>
+                <h2 className="text-xl font-bold mb-6">{t("catalog.filters")}</h2>
                 <FilterSidebar />
               </div>
             </aside>
 
-            {/* Car Grid */}
             <div className="flex-1">
               {isLoading ? (
                 <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
@@ -336,10 +325,10 @@ const CarCatalog = () => {
               ) : filteredCars.length === 0 ? (
                 <div className="text-center py-16 bg-muted/30 rounded-xl">
                   <p className="text-muted-foreground text-lg">
-                    Automobilių pagal pasirinktus filtrus nerasta
+                    {t("catalog.notFound")}
                   </p>
                   <Button variant="outline" className="mt-4" onClick={clearFilters}>
-                    Išvalyti filtrus
+                    {t("catalog.clearFilters")}
                   </Button>
                 </div>
               ) : (

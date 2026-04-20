@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { toast } from "sonner";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { 
   ArrowLeft, 
   Calendar, 
@@ -68,6 +69,7 @@ interface Car {
 
 const CarDetail = () => {
   const { id, slug } = useParams<{ id?: string; slug?: string }>();
+  const { t } = useLanguage();
   const identifier = slug || id;
   const [car, setCar] = useState<Car | null>(null);
   const [images, setImages] = useState<CarImage[]>([]);
@@ -183,10 +185,10 @@ const CarDetail = () => {
 
       if (error) throw error;
 
-      toast.success("Užklausa išsiųsta! Susisieksime su jumis artimiausiu metu.");
+      toast.success(t("carDetail.requestSent"));
       setFormData({ name: "", phone: "", email: "", message: "" });
     } catch (error) {
-      toast.error("Klaida siunčiant užklausą. Bandykite dar kartą.");
+      toast.error(t("carDetail.requestError"));
     } finally {
       setIsSubmitting(false);
     }
@@ -221,14 +223,14 @@ const CarDetail = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <div className="container mx-auto px-4 py-16 text-center">
-          <h1 className="text-2xl font-bold mb-4">Automobilis nerastas</h1>
+          <h1 className="text-2xl font-bold mb-4">{t("carDetail.notFound")}</h1>
           <p className="text-muted-foreground mb-6">
-            Šis automobilis neegzistuoja arba buvo pašalintas.
+            {t("carDetail.notFoundDesc")}
           </p>
           <Link to="/car-search">
             <Button>
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Grįžti į paiešką
+              {t("carDetail.backToSearch")}
             </Button>
           </Link>
         </div>
@@ -246,7 +248,7 @@ const CarDetail = () => {
         <main className="container mx-auto px-4 py-8 max-w-2xl">
           <Link to="/automobiliai" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Grįžti į katalogą
+            {t("carDetail.backToCatalog")}
           </Link>
 
           {firstImage && (
@@ -259,7 +261,7 @@ const CarDetail = () => {
               />
               <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                 <span className="text-white font-bold text-2xl tracking-widest uppercase rotate-[-15deg] bg-black/50 px-6 py-2 rounded-lg">
-                  Parduota
+                  {t("carDetail.sold")}
                 </span>
               </div>
             </div>
@@ -278,11 +280,11 @@ const CarDetail = () => {
           <Card>
             <CardContent className="py-8 text-center">
               <p className="text-muted-foreground text-lg mb-4">
-                Šis automobilis jau parduotas.
+                {t("carDetail.soldMessage")}
               </p>
               <Link to="/automobiliai">
                 <Button>
-                  Peržiūrėti kitus automobilius
+                  {t("carDetail.viewOthers")}
                 </Button>
               </Link>
             </CardContent>
@@ -294,14 +296,14 @@ const CarDetail = () => {
   }
 
   const specs = [
-    { icon: Calendar, label: "Metai", value: car.year },
-    { icon: Gauge, label: "Rida", value: car.mileage ? `${car.mileage.toLocaleString()} km` : "-" },
-    { icon: Fuel, label: "Kuras", value: car.fuel_type || "-" },
-    { icon: Settings2, label: "Pavarų dėžė", value: car.transmission || "-" },
-    { icon: CarIcon, label: "Kėbulas", value: car.body_type || "-" },
-    { icon: Palette, label: "Spalva", value: car.color || "-" },
-    { icon: Users, label: "Vietos", value: car.seats || "-" },
-    { icon: DoorOpen, label: "Durys", value: car.doors || "-" },
+    { icon: Calendar, label: t("carDetail.specYear"), value: car.year },
+    { icon: Gauge, label: t("carDetail.specMileage"), value: car.mileage ? `${car.mileage.toLocaleString()} km` : "-" },
+    { icon: Fuel, label: t("carDetail.specFuel"), value: car.fuel_type || "-" },
+    { icon: Settings2, label: t("carDetail.specTransmission"), value: car.transmission || "-" },
+    { icon: CarIcon, label: t("carDetail.specBody"), value: car.body_type || "-" },
+    { icon: Palette, label: t("carDetail.specColor"), value: car.color || "-" },
+    { icon: Users, label: t("carDetail.specSeats"), value: car.seats || "-" },
+    { icon: DoorOpen, label: t("carDetail.specDoors"), value: car.doors || "-" },
   ];
 
   const carTitle = `${car.make} ${car.model} ${car.year}`;
@@ -349,7 +351,7 @@ const CarDetail = () => {
         {/* Back button - hidden on mobile, shown on desktop */}
         <Link to="/car-search" className="hidden sm:inline-flex items-center text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Grįžti į paiešką
+          {t("carDetail.backToSearch")}
         </Link>
 
         {/* Mobile: Image first, then title */}
@@ -361,7 +363,7 @@ const CarDetail = () => {
                  type="button"
                  onClick={() => setLightboxOpen(true)}
                  className="block w-full h-full"
-                 aria-label="Atidaryti nuotrauką"
+                 aria-label={t("carDetail.openImageAria")}
                >
                  <OptimizedImage
                    src={getMediumUrl(allImages[currentImageIndex])}
@@ -407,7 +409,7 @@ const CarDetail = () => {
                 >
                    <OptimizedImage
                      src={getThumbnailUrl(img)}
-                     alt={`Nuotrauka ${index + 1}`}
+                     alt={`${t("carDetail.thumbAria")} ${index + 1}`}
                      className="w-full h-full"
                    />
                 </button>
@@ -423,12 +425,12 @@ const CarDetail = () => {
               </h1>
               {car.is_reserved && (
                 <Badge className="bg-amber-500 text-white border-none text-xs">
-                  Rezervuotas
+                  {t("carDetail.reserved")}
                 </Badge>
               )}
             </div>
             <div className="flex items-center justify-between mt-1">
-              <p className="text-sm text-muted-foreground">{car.year} • {car.condition || "Naudotas"}</p>
+              <p className="text-sm text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
               <div className="text-xl sm:text-2xl font-bold text-primary">
                 {formatPrice(car.price)}
               </div>
@@ -445,11 +447,11 @@ const CarDetail = () => {
               </h1>
               {car.is_reserved && (
                 <Badge className="bg-amber-500 text-white border-none">
-                  Rezervuotas
+                  {t("carDetail.reserved")}
                 </Badge>
               )}
             </div>
-            <p className="text-muted-foreground">{car.year} • {car.condition || "Naudotas"}</p>
+            <p className="text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
           </div>
           <div className="text-3xl font-bold text-primary">
             {formatPrice(car.price)}
@@ -467,7 +469,7 @@ const CarDetail = () => {
                      type="button"
                      onClick={() => setLightboxOpen(true)}
                      className="block w-full h-full"
-                     aria-label="Atidaryti nuotrauką"
+                     aria-label={t("carDetail.openImageAria")}
                    >
                      <OptimizedImage
                        src={getMediumUrl(allImages[currentImageIndex])}
@@ -514,7 +516,7 @@ const CarDetail = () => {
                   >
                      <OptimizedImage
                        src={getThumbnailUrl(img)}
-                       alt={`Nuotrauka ${index + 1}`}
+                       alt={`${t("carDetail.thumbAria")} ${index + 1}`}
                        className="w-full h-full"
                      />
                   </button>
@@ -525,7 +527,7 @@ const CarDetail = () => {
             {/* Specifications */}
             <Card>
               <CardHeader>
-                <CardTitle>Specifikacijos</CardTitle>
+                <CardTitle>{t("carDetail.specificationsTitle")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -545,31 +547,31 @@ const CarDetail = () => {
                   <div className="mt-4 pt-4 border-t grid grid-cols-2 md:grid-cols-4 gap-4">
                     {car.engine_capacity && (
                       <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Variklis</p>
+                        <p className="text-xs text-muted-foreground">{t("carDetail.specEngine")}</p>
                         <p className="font-medium text-foreground">{Math.round(car.engine_capacity)} cm³</p>
                       </div>
                     )}
                     {car.power_kw && (
                       <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Galia</p>
+                        <p className="text-xs text-muted-foreground">{t("carDetail.specPower")}</p>
                         <p className="font-medium text-foreground">{car.power_kw} kW</p>
                       </div>
                     )}
                     {car.steering_wheel && (
                       <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-xs text-muted-foreground">Vairas</p>
+                        <p className="text-xs text-muted-foreground">{t("carDetail.specSteering")}</p>
                         <p className="font-medium text-foreground">{car.steering_wheel}</p>
                       </div>
                     )}
                     {car.vin && (
                       <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-xs text-muted-foreground">VIN</p>
+                        <p className="text-xs text-muted-foreground">{t("carDetail.specVin")}</p>
                         <p className="font-medium text-foreground text-sm">{car.vin}</p>
                       </div>
                     )}
                     {car.sdk_code && (
                       <div className="p-3 bg-muted/50 rounded-lg">
-                        <p className="text-xs text-muted-foreground">SDK kodas</p>
+                        <p className="text-xs text-muted-foreground">{t("carDetail.specSdk")}</p>
                         <p className="font-medium text-foreground">{car.sdk_code}</p>
                       </div>
                     )}
@@ -582,7 +584,7 @@ const CarDetail = () => {
             {car.description && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Aprašymas</CardTitle>
+                  <CardTitle>{t("carDetail.descriptionTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground whitespace-pre-line">{car.description}</p>
@@ -594,7 +596,7 @@ const CarDetail = () => {
             {car.defects && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Defektai</CardTitle>
+                  <CardTitle>{t("carDetail.defectsTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground whitespace-pre-line">{car.defects}</p>
@@ -606,7 +608,7 @@ const CarDetail = () => {
             {car.features && Object.keys(car.features).length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle>Įranga</CardTitle>
+                  <CardTitle>{t("carDetail.featuresTitle")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
@@ -641,12 +643,12 @@ const CarDetail = () => {
             {/* Contact Form */}
             <Card className="sticky top-4">
               <CardHeader>
-                <CardTitle>Domina šis automobilis?</CardTitle>
+                <CardTitle>{t("carDetail.interestedTitle")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="name">Vardas *</Label>
+                    <Label htmlFor="name">{t("carDetail.formName")}</Label>
                     <Input
                       id="name"
                       value={formData.name}
@@ -655,7 +657,7 @@ const CarDetail = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Telefonas *</Label>
+                    <Label htmlFor="phone">{t("carDetail.formPhone")}</Label>
                     <Input
                       id="phone"
                       type="tel"
@@ -665,7 +667,7 @@ const CarDetail = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">El. paštas</Label>
+                    <Label htmlFor="email">{t("carDetail.formEmail")}</Label>
                     <Input
                       id="email"
                       type="email"
@@ -674,22 +676,22 @@ const CarDetail = () => {
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="message">Žinutė</Label>
+                    <Label htmlFor="message">{t("carDetail.formMessage")}</Label>
                     <Textarea
                       id="message"
                       rows={3}
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                      placeholder="Jūsų klausimai ar pageidavimai..."
+                      placeholder={t("carDetail.formMessagePlaceholder")}
                     />
                   </div>
                   <Button type="submit" className="w-full btn-gradient" disabled={isSubmitting}>
-                    {isSubmitting ? "Siunčiama..." : "Siųsti užklausą"}
+                    {isSubmitting ? t("carDetail.formSubmitting") : t("carDetail.formSubmit")}
                   </Button>
                 </form>
 
                 <div className="mt-6 pt-6 border-t space-y-3">
-                  <p className="text-sm text-muted-foreground">Arba susisiekite tiesiogiai:</p>
+                  <p className="text-sm text-muted-foreground">{t("carDetail.orContact")}</p>
                   <a 
                     href="tel:+37062851439" 
                     className="flex items-center gap-2 text-foreground hover:text-primary transition-colors"

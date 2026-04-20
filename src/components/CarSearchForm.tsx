@@ -8,14 +8,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
-
-const formSchema = z.object({
-  name: z.string().trim().min(1, "Vardas privalomas").max(100),
-  email: z.string().trim().email("Neteisingas el. pašto formatas").max(255),
-  phone: z.string().trim().regex(/^\+?[0-9\s-]{8,15}$/, "Neteisingas telefono numerio formatas"),
-});
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const CarSearchForm = () => {
+  const { t } = useLanguage();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     make: "",
@@ -32,9 +28,15 @@ const CarSearchForm = () => {
     phone: "",
   });
 
+  const formSchema = z.object({
+    name: z.string().trim().min(1, t("carSearchForm.errNameRequired")).max(100),
+    email: z.string().trim().email(t("carSearchForm.errEmail")).max(255),
+    phone: z.string().trim().regex(/^\+?[0-9\s-]{8,15}$/, t("carSearchForm.errPhone")),
+  });
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const validation = formSchema.safeParse({
       name: formData.name,
       email: formData.email,
@@ -47,7 +49,7 @@ const CarSearchForm = () => {
     }
 
     setIsSubmitting(true);
-    
+
     try {
       const { data, error } = await supabase.functions.invoke('submit-car-search', {
         body: formData
@@ -55,9 +57,8 @@ const CarSearchForm = () => {
 
       if (error) throw error;
 
-      toast.success("Užklausa išsiųsta! Susisieksime su jumis artimiausiu metu.");
-      
-      // Reset form
+      toast.success(t("carSearchForm.success"));
+
       setFormData({
         make: "",
         model: "",
@@ -74,7 +75,7 @@ const CarSearchForm = () => {
       });
     } catch (error: any) {
       console.error("Error submitting car search:", error);
-      toast.error(error.message || "Nepavyko išsiųsti užklausos. Bandykite dar kartą.");
+      toast.error(error.message || t("carSearchForm.error"));
     } finally {
       setIsSubmitting(false);
     }
@@ -83,28 +84,28 @@ const CarSearchForm = () => {
   return (
     <Card className="max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl">Automobilio paieškos užklausa</CardTitle>
+        <CardTitle className="text-2xl">{t("carSearchForm.title")}</CardTitle>
         <CardDescription>
-          Užpildykite formą ir mes ieškosime jums tinkamo automobilio visoje Europoje
+          {t("carSearchForm.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="make">Gamintojas</Label>
+              <Label htmlFor="make">{t("carSearchForm.make")}</Label>
               <Input
                 id="make"
-                placeholder="pvz. BMW, Audi, Mercedes"
+                placeholder={t("carSearchForm.makePlaceholder")}
                 value={formData.make}
                 onChange={(e) => setFormData({ ...formData, make: e.target.value })}
               />
             </div>
             <div>
-              <Label htmlFor="model">Modelis</Label>
+              <Label htmlFor="model">{t("carSearchForm.model")}</Label>
               <Input
                 id="model"
-                placeholder="pvz. X5, A6, E-Class"
+                placeholder={t("carSearchForm.modelPlaceholder")}
                 value={formData.model}
                 onChange={(e) => setFormData({ ...formData, model: e.target.value })}
               />
@@ -113,21 +114,21 @@ const CarSearchForm = () => {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="yearFrom">Metai nuo</Label>
+              <Label htmlFor="yearFrom">{t("carSearchForm.yearFrom")}</Label>
               <Input
                 id="yearFrom"
                 type="number"
-                placeholder="pvz. 2018"
+                placeholder="2018"
                 value={formData.yearFrom}
                 onChange={(e) => setFormData({ ...formData, yearFrom: e.target.value })}
               />
             </div>
             <div>
-              <Label htmlFor="yearTo">Metai iki</Label>
+              <Label htmlFor="yearTo">{t("carSearchForm.yearTo")}</Label>
               <Input
                 id="yearTo"
                 type="number"
-                placeholder="pvz. 2023"
+                placeholder="2023"
                 value={formData.yearTo}
                 onChange={(e) => setFormData({ ...formData, yearTo: e.target.value })}
               />
@@ -136,21 +137,21 @@ const CarSearchForm = () => {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="priceFrom">Kaina nuo (€)</Label>
+              <Label htmlFor="priceFrom">{t("carSearchForm.priceFrom")}</Label>
               <Input
                 id="priceFrom"
                 type="number"
-                placeholder="pvz. 10000"
+                placeholder="10000"
                 value={formData.priceFrom}
                 onChange={(e) => setFormData({ ...formData, priceFrom: e.target.value })}
               />
             </div>
             <div>
-              <Label htmlFor="priceTo">Kaina iki (€)</Label>
+              <Label htmlFor="priceTo">{t("carSearchForm.priceTo")}</Label>
               <Input
                 id="priceTo"
                 type="number"
-                placeholder="pvz. 30000"
+                placeholder="30000"
                 value={formData.priceTo}
                 onChange={(e) => setFormData({ ...formData, priceTo: e.target.value })}
               />
@@ -159,45 +160,45 @@ const CarSearchForm = () => {
 
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="fuelType">Kuro tipas</Label>
+              <Label htmlFor="fuelType">{t("carSearchForm.fuelType")}</Label>
               <Select
                 value={formData.fuelType}
                 onValueChange={(value) => setFormData({ ...formData, fuelType: value })}
               >
                 <SelectTrigger id="fuelType">
-                  <SelectValue placeholder="Pasirinkite kuro tipą" />
+                  <SelectValue placeholder={t("carSearchForm.fuelPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Benzinas">Benzinas</SelectItem>
-                  <SelectItem value="Dyzelinas">Dyzelinas</SelectItem>
-                  <SelectItem value="Elektra">Elektra</SelectItem>
-                  <SelectItem value="Hibridas">Hibridas</SelectItem>
-                  <SelectItem value="Dujos">Dujos</SelectItem>
+                  <SelectItem value="Benzinas">{t("carSearchForm.fuelGasoline")}</SelectItem>
+                  <SelectItem value="Dyzelinas">{t("carSearchForm.fuelDiesel")}</SelectItem>
+                  <SelectItem value="Elektra">{t("carSearchForm.fuelElectric")}</SelectItem>
+                  <SelectItem value="Hibridas">{t("carSearchForm.fuelHybrid")}</SelectItem>
+                  <SelectItem value="Dujos">{t("carSearchForm.fuelGas")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label htmlFor="transmission">Pavarų dėžė</Label>
+              <Label htmlFor="transmission">{t("carSearchForm.transmission")}</Label>
               <Select
                 value={formData.transmission}
                 onValueChange={(value) => setFormData({ ...formData, transmission: value })}
               >
                 <SelectTrigger id="transmission">
-                  <SelectValue placeholder="Pasirinkite pavarų dėžę" />
+                  <SelectValue placeholder={t("carSearchForm.transmissionPlaceholder")} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Mechaninė">Mechaninė</SelectItem>
-                  <SelectItem value="Automatinė">Automatinė</SelectItem>
+                  <SelectItem value="Mechaninė">{t("carSearchForm.transManual")}</SelectItem>
+                  <SelectItem value="Automatinė">{t("carSearchForm.transAuto")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           <div>
-            <Label htmlFor="additionalInfo">Papildoma informacija</Label>
+            <Label htmlFor="additionalInfo">{t("carSearchForm.additionalInfo")}</Label>
             <Textarea
               id="additionalInfo"
-              placeholder="Nurodykite papildomus pageidavimus (spalva, įranga, rida ir t.t.)"
+              placeholder={t("carSearchForm.additionalInfoPlaceholder")}
               rows={4}
               value={formData.additionalInfo}
               onChange={(e) => setFormData({ ...formData, additionalInfo: e.target.value })}
@@ -205,10 +206,10 @@ const CarSearchForm = () => {
           </div>
 
           <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold mb-4">Jūsų kontaktiniai duomenys</h3>
+            <h3 className="text-lg font-semibold mb-4">{t("carSearchForm.contactDetails")}</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <div>
-                <Label htmlFor="name">Vardas, pavardė *</Label>
+                <Label htmlFor="name">{t("carSearchForm.name")}</Label>
                 <Input
                   id="name"
                   required
@@ -217,7 +218,7 @@ const CarSearchForm = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="email">El. paštas *</Label>
+                <Label htmlFor="email">{t("carSearchForm.email")}</Label>
                 <Input
                   id="email"
                   type="email"
@@ -227,7 +228,7 @@ const CarSearchForm = () => {
                 />
               </div>
               <div>
-                <Label htmlFor="phone">Telefonas *</Label>
+                <Label htmlFor="phone">{t("carSearchForm.phone")}</Label>
                 <Input
                   id="phone"
                   type="tel"
@@ -240,7 +241,7 @@ const CarSearchForm = () => {
           </div>
 
           <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Siunčiama..." : "Pateikti užklausą"}
+            {isSubmitting ? t("carSearchForm.submitting") : t("carSearchForm.submit")}
           </Button>
         </form>
       </CardContent>

@@ -45,7 +45,7 @@ function CarCardComponent({ id, slug, image, title, price, numericPrice, year, m
         {isSold && (
           <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/30">
             <span className="text-white font-bold text-xl tracking-widest uppercase rotate-[-15deg] bg-black/50 px-5 py-1.5 rounded-lg">
-              Parduota
+              {t("car.sold")}
             </span>
           </div>
         )}
@@ -63,7 +63,7 @@ function CarCardComponent({ id, slug, image, title, price, numericPrice, year, m
         {isReserved && !isSold && (
           <Badge className="absolute top-3 right-3 sm:top-4 sm:right-4 z-10 bg-amber-500 text-white border-none text-xs shadow-sm">
             <ShieldCheck className="h-3 w-3 mr-1" />
-            Rezervuotas
+            {t("car.reserved")}
           </Badge>
         )}
         <OptimizedImage

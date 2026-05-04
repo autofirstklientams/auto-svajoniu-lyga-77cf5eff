@@ -377,21 +377,58 @@ const SendInvoiceEmailDialog = ({
                     variant={recipients.includes(saved.email.toLowerCase()) ? "default" : "secondary"}
                     className="cursor-pointer hover:bg-secondary/80 flex items-center gap-1 pr-1"
                   >
-                    <span onClick={() => handleSavedEmailClick(saved.email)}>
-                      {saved.name ? `${saved.name} (${saved.email})` : saved.email}
-                      {saved.use_count > 0 && (
-                        <span className="ml-1 text-xs opacity-70">({saved.use_count})</span>
-                      )}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteSavedEmail(saved.id);
-                      }}
-                      className="ml-1 hover:bg-destructive/20 rounded p-0.5"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
+                    {editingEmailId === saved.id ? (
+                      <span className="flex items-center gap-1">
+                        <Input
+                          autoFocus
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") { e.preventDefault(); handleRenameSavedEmail(saved.id); }
+                            if (e.key === "Escape") { setEditingEmailId(null); setEditingName(""); }
+                          }}
+                          placeholder="Pavadinimas / įmonė"
+                          className="h-6 px-1 py-0 text-xs w-40"
+                        />
+                        <button
+                          onClick={(e) => { e.stopPropagation(); handleRenameSavedEmail(saved.id); }}
+                          className="hover:bg-primary/20 rounded p-0.5"
+                          title="Išsaugoti"
+                        >
+                          <Check className="w-3 h-3" />
+                        </button>
+                      </span>
+                    ) : (
+                      <>
+                        <span onClick={() => handleSavedEmailClick(saved.email)}>
+                          {saved.name ? `${saved.name} (${saved.email})` : saved.email}
+                          {saved.use_count > 0 && (
+                            <span className="ml-1 text-xs opacity-70">({saved.use_count})</span>
+                          )}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingEmailId(saved.id);
+                            setEditingName(saved.name || "");
+                          }}
+                          className="ml-1 hover:bg-primary/20 rounded p-0.5"
+                          title="Pervadinti"
+                        >
+                          <Pencil className="w-3 h-3" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteSavedEmail(saved.id);
+                          }}
+                          className="ml-1 hover:bg-destructive/20 rounded p-0.5"
+                          title="Ištrinti"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </>
+                    )}
                   </Badge>
                 ))}
               </div>

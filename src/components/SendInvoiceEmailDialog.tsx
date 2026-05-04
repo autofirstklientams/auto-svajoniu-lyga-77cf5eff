@@ -225,6 +225,24 @@ const SendInvoiceEmailDialog = ({
     }
   };
 
+  const handleRenameSavedEmail = async (id: string) => {
+    const newName = editingName.trim();
+    try {
+      const { error } = await supabase
+        .from("saved_emails")
+        .update({ name: newName || null })
+        .eq("id", id);
+      if (error) throw error;
+      setSavedEmails(savedEmails.map(e => e.id === id ? { ...e, name: newName || null } : e));
+      setEditingEmailId(null);
+      setEditingName("");
+      toast({ title: "Atnaujinta", description: "Pavadinimas išsaugotas" });
+    } catch (error) {
+      console.error("Error renaming email:", error);
+      toast({ title: "Klaida", description: "Nepavyko išsaugoti", variant: "destructive" });
+    }
+  };
+
   const updateEmailUsage = async (emailAddress: string) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();

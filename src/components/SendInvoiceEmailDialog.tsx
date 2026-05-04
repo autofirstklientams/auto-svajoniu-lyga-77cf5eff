@@ -194,6 +194,7 @@ const SendInvoiceEmailDialog = ({
           title: "Išsaugota!",
           description: "El. pašto adresas išsaugotas",
         });
+        setNameInput("");
         fetchSavedEmails();
       }
     } catch (error: any) {

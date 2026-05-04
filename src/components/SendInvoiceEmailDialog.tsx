@@ -177,7 +177,7 @@ const SendInvoiceEmailDialog = ({
         .insert({
           user_id: user.id,
           email: emailInput.trim(),
-          name: buyerName || null,
+          name: nameInput.trim() || buyerName || null,
         });
 
       if (error) {

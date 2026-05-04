@@ -74,6 +74,14 @@ const Header = () => {
               >
                 {t("nav.leasing")}
               </Link>
+              <a
+                href="https://koperseurope.de/auth"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-600 hover:text-amber-700 font-bold transition-colors"
+              >
+                Didmena
+              </a>
               <Link 
                 to="/about" 
                 className="text-foreground hover:text-primary font-medium transition-colors"

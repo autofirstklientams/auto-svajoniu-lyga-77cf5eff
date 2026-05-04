@@ -93,6 +93,47 @@ const Index = () => {
           </div>
           <Testimonials />
         </Suspense>
+
+        {/* Didmena / Wholesale section */}
+        <section className="py-16 bg-gradient-to-br from-amber-50 via-orange-50 to-amber-100 border-y-4 border-amber-500">
+          <div className="container mx-auto px-4">
+            <div className="max-w-4xl mx-auto text-center">
+              <div className="inline-flex items-center gap-2 bg-amber-500 text-white px-4 py-1.5 rounded-full text-sm font-bold mb-4 uppercase tracking-wider">
+                <Tag className="h-4 w-4" />
+                Didmena
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-4 text-amber-900">
+                Didmeniniai pasiūlymai automobilių prekiautojams
+              </h2>
+              <p className="text-lg text-amber-900/80 mb-8 max-w-2xl mx-auto">
+                Turime atskirą platformą ir Telegram kanalą, kuriame partneriai gauna
+                automobilius <strong>didmeninėmis kainomis</strong> tiesiai iš Europos.
+                Prisijunk ir gauk kasdienius pasiūlymus pirma kitų.
+              </p>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                <a
+                  href="https://koperseurope.de/auth"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors shadow-lg"
+                >
+                  <ExternalLink className="h-5 w-5" />
+                  Eiti į didmenos platformą
+                </a>
+                <a
+                  href="https://t.me/koperseurope"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center gap-2 bg-white hover:bg-amber-50 text-amber-700 font-semibold px-6 py-3 rounded-lg transition-colors border-2 border-amber-500"
+                >
+                  <Send className="h-5 w-5" />
+                  Telegram kanalas
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section id="contact" className="py-16 bg-muted/30">
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto text-center">

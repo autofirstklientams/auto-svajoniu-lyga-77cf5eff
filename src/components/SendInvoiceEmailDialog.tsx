@@ -333,6 +333,7 @@ const SendInvoiceEmailDialog = ({
       setOpen(false);
       setRecipients([]);
       setEmailInput("");
+      setNameInput("");
       setCustomMessage("");
     } catch (error: any) {
       console.error("Error sending invoice email:", error);

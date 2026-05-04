@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Mail, Phone, MapPin, Send, ExternalLink, Tag } from "lucide-react";
+import { Mail, Phone, MapPin, Send, ExternalLink, Crown, Sparkles, TrendingDown, Globe2 } from "lucide-react";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Footer from "@/components/Footer";

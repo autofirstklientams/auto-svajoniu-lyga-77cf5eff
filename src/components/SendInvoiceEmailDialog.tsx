@@ -57,7 +57,10 @@ const SendInvoiceEmailDialog = ({
 }: SendInvoiceEmailDialogProps) => {
   const [open, setOpen] = useState(false);
   const [emailInput, setEmailInput] = useState("");
+  const [nameInput, setNameInput] = useState("");
   const [recipients, setRecipients] = useState<string[]>([]);
+  const [editingEmailId, setEditingEmailId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
   const [customMessage, setCustomMessage] = useState("");
   const [senderEmail, setSenderEmail] = useState<SenderEmail>(() => {
     const saved = localStorage.getItem(SENDER_STORAGE_KEY);

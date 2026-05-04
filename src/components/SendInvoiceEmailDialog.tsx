@@ -477,6 +477,14 @@ const SendInvoiceEmailDialog = ({
           {/* Email input */}
           <div className="grid gap-2">
             <Label htmlFor="email">Pridėti gavėją</Label>
+            <Input
+              id="name"
+              type="text"
+              placeholder="Pavadinimas / įmonė (neprivaloma)"
+              value={nameInput}
+              onChange={(e) => setNameInput(e.target.value)}
+              disabled={sending}
+            />
             <div className="flex gap-2">
               <Input
                 id="email"
@@ -504,7 +512,7 @@ const SendInvoiceEmailDialog = ({
                 size="icon"
                 onClick={handleSaveEmail}
                 disabled={!emailInput || sending}
-                title="Išsaugoti el. paštą"
+                title="Išsaugoti el. paštą su pavadinimu"
               >
                 <Save className="w-4 h-4" />
               </Button>

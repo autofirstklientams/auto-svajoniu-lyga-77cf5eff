@@ -28,21 +28,36 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+// Target minimum longest-side resolution for cropped output.
+// Listing detail page uses ~1200px, thumbnails 400px – 1920px keeps everything sharp
+// without bloating storage. Upscaling uses high-quality smoothing.
+const TARGET_MIN_LONGEST_SIDE = 1920;
+
 function createCroppedImage(imageSrc: string, pixelCrop: CropArea): Promise<Blob> {
   return new Promise((resolve, reject) => {
     const image = new Image();
     image.crossOrigin = "anonymous";
 
     image.onload = () => {
+      // Compute output dimensions: keep source pixels, but upscale if the crop
+      // is smaller than our target so listings stay sharp.
+      const longest = Math.max(pixelCrop.width, pixelCrop.height);
+      const scale = longest < TARGET_MIN_LONGEST_SIDE ? TARGET_MIN_LONGEST_SIDE / longest : 1;
+      const outW = Math.round(pixelCrop.width * scale);
+      const outH = Math.round(pixelCrop.height * scale);
+
       const canvas = document.createElement("canvas");
-      canvas.width = pixelCrop.width;
-      canvas.height = pixelCrop.height;
+      canvas.width = outW;
+      canvas.height = outH;
       const ctx = canvas.getContext("2d");
 
       if (!ctx) {
         reject(new Error("No canvas context"));
         return;
       }
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
 
       ctx.drawImage(
         image,
@@ -52,8 +67,8 @@ function createCroppedImage(imageSrc: string, pixelCrop: CropArea): Promise<Blob
         pixelCrop.height,
         0,
         0,
-        pixelCrop.width,
-        pixelCrop.height
+        outW,
+        outH
       );
 
       canvas.toBlob(

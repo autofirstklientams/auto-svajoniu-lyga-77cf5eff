@@ -62,17 +62,16 @@ const Index = () => {
           "sameAs": ["https://www.facebook.com/AutoKopersLT", "https://www.instagram.com/autokoperslt/"]
         })}</script>
       </Helmet>
-      {/* Announcement banner - auto-hides after May 3, 2026 */}
-      {new Date() < new Date('2026-05-03') && (
-        <a
-          href="https://www.google.com/maps/place/Palemono+g.+173,+Kaunas"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block bg-primary text-primary-foreground text-center py-2 px-4 text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
-          {t("home.banner")}
-        </a>
-      )}
+      {/* Didmena announcement banner */}
+      <Link
+        to="/didmena"
+        className="block bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 text-amber-950 text-center py-2 px-4 text-sm font-semibold hover:brightness-110 transition-all"
+      >
+        <span className="inline-flex items-center gap-2 flex-wrap justify-center">
+          <span className="bg-amber-950 text-amber-200 px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">Naujiena</span>
+          Pristatome didmenos platformą — <span className="underline font-bold">plačiau</span>
+        </span>
+      </Link>
       <Header />
       <main>
         <Hero />

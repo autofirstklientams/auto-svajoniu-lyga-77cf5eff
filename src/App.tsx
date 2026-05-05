@@ -23,6 +23,7 @@ const PartnerDashboard = lazy(() => import("./pages/PartnerDashboard"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const SellYourCar = lazy(() => import("./pages/SellYourCar"));
 const Leasing = lazy(() => import("./pages/Leasing"));
+const Didmena = lazy(() => import("./pages/Didmena"));
 const Invoice = lazy(() => import("./pages/Invoice"));
 const InvoiceAuth = lazy(() => import("./pages/InvoiceAuth"));
 const NotFound = lazy(() => import("./pages/NotFound"));
@@ -64,6 +65,7 @@ const App = () => (
               <Route path="/sell-your-car" element={<SellYourCar />} />
               <Route path="/leasing" element={<Leasing />} />
               <Route path="/lizingas" element={<Leasing />} />
+              <Route path="/didmena" element={<Didmena />} />
               <Route path="/automobiliai" element={<CarCatalog />} />
               <Route path="/partner-login" element={<PartnerLogin />} />
               <Route path="/partner-dashboard" element={<PartnerDashboard />} />

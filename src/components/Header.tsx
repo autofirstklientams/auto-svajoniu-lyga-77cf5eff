@@ -74,14 +74,12 @@ const Header = () => {
               >
                 {t("nav.leasing")}
               </Link>
-              <a
-                href="https://koperseurope.de/auth"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/didmena"
                 className="text-amber-600 hover:text-amber-700 font-bold transition-colors"
               >
                 Didmena
-              </a>
+              </Link>
               <Link 
                 to="/about" 
                 className="text-foreground hover:text-primary font-medium transition-colors"
@@ -134,14 +132,9 @@ const Header = () => {
                       <Link to="/leasing" className="text-primary hover:text-primary/80 font-semibold transition-colors">{t("nav.leasing")}</Link>
                     </SheetClose>
                     <SheetClose asChild>
-                      <a
-                        href="https://koperseurope.de/auth"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-amber-600 hover:text-amber-700 font-bold"
-                      >
+                      <Link to="/didmena" className="text-amber-600 hover:text-amber-700 font-bold">
                         Didmena
-                      </a>
+                      </Link>
                     </SheetClose>
                     <SheetClose asChild>
                       <Link to="/about" className="text-foreground hover:text-primary font-medium">{t("nav.about")}</Link>

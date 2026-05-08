@@ -251,7 +251,7 @@ const SendInvoiceEmailDialog = ({
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const savedEmail = savedEmails.find(e => e.email === emailAddress);
+      const savedEmail = savedEmails.find(e => e.email.toLowerCase() === emailAddress.toLowerCase());
       if (savedEmail) {
         await supabase
           .from("saved_emails")
@@ -260,6 +260,17 @@ const SendInvoiceEmailDialog = ({
             last_used_at: new Date().toISOString(),
           })
           .eq("id", savedEmail.id);
+      } else {
+        // Auto-save newly used email so it's available next time
+        await supabase
+          .from("saved_emails")
+          .insert({
+            user_id: user.id,
+            email: emailAddress,
+            name: buyerName || null,
+            use_count: 1,
+            last_used_at: new Date().toISOString(),
+          });
       }
     } catch (error) {
       console.error("Error updating email usage:", error);

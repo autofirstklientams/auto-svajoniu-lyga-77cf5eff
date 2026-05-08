@@ -232,6 +232,7 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchAllCars = async () => {
     try {
       const { data, error } = await supabase
         .from("cars")

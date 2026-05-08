@@ -35,6 +35,27 @@ export type Database = {
         }
         Relationships: []
       }
+      all_listings_access: {
+        Row: {
+          created_at: string
+          granted_by: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       car_access: {
         Row: {
           car_id: string
@@ -666,6 +687,7 @@ export type Database = {
     }
     Functions: {
       cleanup_old_rate_limits: { Args: never; Returns: undefined }
+      has_all_listings_access: { Args: { _user_id: string }; Returns: boolean }
       has_car_access: {
         Args: { _car_id: string; _user_id: string }
         Returns: boolean

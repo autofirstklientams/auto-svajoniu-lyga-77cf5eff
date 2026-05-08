@@ -215,8 +215,8 @@ const PartnerDashboard = () => {
         `)
         .order("created_at", { ascending: false });
 
-      // Admin sees all cars, partner sees only their own
-      if (!adminStatus) {
+      // Admin or "all listings access" sees all cars, partner sees only their own
+      if (!canSeeAll) {
         query.eq("partner_id", user.id);
       }
 

@@ -190,6 +190,17 @@ const PartnerDashboard = () => {
         }
       }
 
+      // Check "all listings access" — partners with this can see/edit all listings
+      let canSeeAll = adminStatus;
+      if (!canSeeAll) {
+        const { data: allAccess } = await supabase
+          .from("all_listings_access" as any)
+          .select("user_id")
+          .eq("user_id", user.id)
+          .maybeSingle();
+        canSeeAll = !!allAccess;
+      }
+
       const query = supabase
         .from("cars")
         .select(`

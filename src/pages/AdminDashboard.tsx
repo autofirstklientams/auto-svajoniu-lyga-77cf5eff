@@ -197,7 +197,41 @@ const AdminDashboard = () => {
     }
   };
 
-  const fetchAllCars = async () => {
+  const fetchAllListingsAccess = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("all_listings_access" as any)
+        .select("user_id");
+      if (error) throw error;
+      setAllListingsAccessUserIds(new Set((data || []).map((r: any) => r.user_id)));
+    } catch (error) {
+      console.error("Error fetching all listings access:", error);
+    }
+  };
+
+  const toggleAllListingsAccess = async (userId: string) => {
+    try {
+      if (allListingsAccessUserIds.has(userId)) {
+        const { error } = await supabase
+          .from("all_listings_access" as any)
+          .delete()
+          .eq("user_id", userId);
+        if (error) throw error;
+        toast.success("Visų skelbimų prieiga pašalinta");
+      } else {
+        const { error } = await supabase
+          .from("all_listings_access" as any)
+          .insert({ user_id: userId, granted_by: currentUserId } as any);
+        if (error) throw error;
+        toast.success("Visų skelbimų prieiga suteikta");
+      }
+      await fetchAllListingsAccess();
+    } catch (error) {
+      console.error("Error toggling all listings access:", error);
+      toast.error("Klaida keičiant prieigą");
+    }
+  };
+
     try {
       const { data, error } = await supabase
         .from("cars")

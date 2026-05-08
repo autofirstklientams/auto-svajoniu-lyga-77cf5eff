@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
-import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText, Shield, ShieldOff, Pencil, Search, Sparkles } from "lucide-react";
+import { LogOut, Users, UserCheck, UserX, Car, Trash2, Eye, FileText, Shield, ShieldOff, Pencil, Search, Sparkles, Globe } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -50,6 +50,7 @@ const AdminDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [aiAccessUserIds, setAiAccessUserIds] = useState<Set<string>>(new Set());
   const [invoiceAccessUserIds, setInvoiceAccessUserIds] = useState<Set<string>>(new Set());
+  const [allListingsAccessUserIds, setAllListingsAccessUserIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     checkAdminAccess();
@@ -85,6 +86,7 @@ const AdminDashboard = () => {
       await fetchAllCars();
       await fetchAiAccess();
       await fetchInvoiceAccess();
+      await fetchAllListingsAccess();
     } catch (error) {
       console.error("Error checking admin access:", error);
       toast.error("Klaida tikrinant prieigą");
@@ -192,6 +194,41 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error("Error toggling AI access:", error);
       toast.error("Klaida keičiant AI prieigą");
+    }
+  };
+
+  const fetchAllListingsAccess = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("all_listings_access" as any)
+        .select("user_id");
+      if (error) throw error;
+      setAllListingsAccessUserIds(new Set((data || []).map((r: any) => r.user_id)));
+    } catch (error) {
+      console.error("Error fetching all listings access:", error);
+    }
+  };
+
+  const toggleAllListingsAccess = async (userId: string) => {
+    try {
+      if (allListingsAccessUserIds.has(userId)) {
+        const { error } = await supabase
+          .from("all_listings_access" as any)
+          .delete()
+          .eq("user_id", userId);
+        if (error) throw error;
+        toast.success("Visų skelbimų prieiga pašalinta");
+      } else {
+        const { error } = await supabase
+          .from("all_listings_access" as any)
+          .insert({ user_id: userId, granted_by: currentUserId } as any);
+        if (error) throw error;
+        toast.success("Visų skelbimų prieiga suteikta");
+      }
+      await fetchAllListingsAccess();
+    } catch (error) {
+      console.error("Error toggling all listings access:", error);
+      toast.error("Klaida keičiant prieigą");
     }
   };
 
@@ -511,6 +548,21 @@ const AdminDashboard = () => {
                           >
                             <FileText className="h-4 w-4 mr-2" />
                             {invoiceAccessUserIds.has(partner.id) ? "Sąskaitos ✓" : "Sąskaitos"}
+                          </Button>
+                        )}
+
+                        {/* All listings access toggle */}
+                        {partner.id !== SUPER_ADMIN_ID && (
+                          <Button
+                            onClick={() => toggleAllListingsAccess(partner.id)}
+                            variant="outline"
+                            size="sm"
+                            className={allListingsAccessUserIds.has(partner.id)
+                              ? "text-blue-600 border-blue-300 hover:bg-blue-50"
+                              : "text-muted-foreground"}
+                          >
+                            <Globe className="h-4 w-4 mr-2" />
+                            {allListingsAccessUserIds.has(partner.id) ? "Visi skelbimai ✓" : "Visi skelbimai"}
                           </Button>
                         )}
 

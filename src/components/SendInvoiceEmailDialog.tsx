@@ -379,15 +379,6 @@ const SendInvoiceEmailDialog = ({
         
         <div className="grid gap-4 py-4">
           {/* Saved emails */}
-          {savedEmails.length > 0 && (
-            <div className="space-y-2">
-              <Label className="text-sm text-muted-foreground flex items-center gap-1">
-                <Star className="w-3 h-3" />
-                Išsaugoti adresai
-              </Label>
-              <div className="flex flex-wrap gap-2">
-                {savedEmails.map((saved) => (
-                  <Badge
           {/* Saved emails */}
           {savedEmails.length > 0 && (() => {
             const q = savedSearch.trim().toLowerCase();

@@ -388,67 +388,107 @@ const SendInvoiceEmailDialog = ({
               <div className="flex flex-wrap gap-2">
                 {savedEmails.map((saved) => (
                   <Badge
-                    key={saved.id}
-                    variant={recipients.includes(saved.email.toLowerCase()) ? "default" : "secondary"}
-                    className="cursor-pointer hover:bg-secondary/80 flex items-center gap-1 pr-1"
-                  >
-                    {editingEmailId === saved.id ? (
-                      <span className="flex items-center gap-1">
-                        <Input
-                          autoFocus
-                          value={editingName}
-                          onChange={(e) => setEditingName(e.target.value)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") { e.preventDefault(); handleRenameSavedEmail(saved.id); }
-                            if (e.key === "Escape") { setEditingEmailId(null); setEditingName(""); }
-                          }}
-                          placeholder="Pavadinimas / įmonė"
-                          className="h-6 px-1 py-0 text-xs w-40"
-                        />
-                        <button
-                          onClick={(e) => { e.stopPropagation(); handleRenameSavedEmail(saved.id); }}
-                          className="hover:bg-primary/20 rounded p-0.5"
-                          title="Išsaugoti"
-                        >
-                          <Check className="w-3 h-3" />
-                        </button>
-                      </span>
-                    ) : (
-                      <>
-                        <span onClick={() => handleSavedEmailClick(saved.email)}>
-                          {saved.name ? `${saved.name} (${saved.email})` : saved.email}
-                          {saved.use_count > 0 && (
-                            <span className="ml-1 text-xs opacity-70">({saved.use_count})</span>
-                          )}
+          {/* Saved emails */}
+          {savedEmails.length > 0 && (() => {
+            const q = savedSearch.trim().toLowerCase();
+            const filtered = q
+              ? savedEmails.filter(s =>
+                  s.email.toLowerCase().includes(q) ||
+                  (s.name || "").toLowerCase().includes(q)
+                )
+              : savedEmails;
+            const visible = showAllSaved || q ? filtered : filtered.slice(0, 6);
+            return (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <Label className="text-sm text-muted-foreground flex items-center gap-1">
+                    <Star className="w-3 h-3" />
+                    Išsaugoti adresai ({savedEmails.length})
+                  </Label>
+                  <Input
+                    value={savedSearch}
+                    onChange={(e) => setSavedSearch(e.target.value)}
+                    placeholder="Ieškoti..."
+                    className="h-7 text-xs w-40"
+                  />
+                </div>
+                <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                  {visible.map((saved) => (
+                    <Badge
+                      key={saved.id}
+                      variant={recipients.includes(saved.email.toLowerCase()) ? "default" : "secondary"}
+                      className="cursor-pointer hover:bg-secondary/80 flex items-center gap-1 pr-1"
+                    >
+                      {editingEmailId === saved.id ? (
+                        <span className="flex items-center gap-1">
+                          <Input
+                            autoFocus
+                            value={editingName}
+                            onChange={(e) => setEditingName(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") { e.preventDefault(); handleRenameSavedEmail(saved.id); }
+                              if (e.key === "Escape") { setEditingEmailId(null); setEditingName(""); }
+                            }}
+                            placeholder="Pavadinimas / įmonė"
+                            className="h-6 px-1 py-0 text-xs w-40"
+                          />
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleRenameSavedEmail(saved.id); }}
+                            className="hover:bg-primary/20 rounded p-0.5"
+                            title="Išsaugoti"
+                          >
+                            <Check className="w-3 h-3" />
+                          </button>
                         </span>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setEditingEmailId(saved.id);
-                            setEditingName(saved.name || "");
-                          }}
-                          className="ml-1 hover:bg-primary/20 rounded p-0.5"
-                          title="Pervadinti"
-                        >
-                          <Pencil className="w-3 h-3" />
-                        </button>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteSavedEmail(saved.id);
-                          }}
-                          className="ml-1 hover:bg-destructive/20 rounded p-0.5"
-                          title="Ištrinti"
-                        >
-                          <X className="w-3 h-3" />
-                        </button>
-                      </>
-                    )}
-                  </Badge>
-                ))}
+                      ) : (
+                        <>
+                          <span onClick={() => handleSavedEmailClick(saved.email)}>
+                            {saved.name ? `${saved.name} (${saved.email})` : saved.email}
+                            {saved.use_count > 0 && (
+                              <span className="ml-1 text-xs opacity-70">({saved.use_count})</span>
+                            )}
+                          </span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditingEmailId(saved.id);
+                              setEditingName(saved.name || "");
+                            }}
+                            className="ml-1 hover:bg-primary/20 rounded p-0.5"
+                            title="Pervadinti"
+                          >
+                            <Pencil className="w-3 h-3" />
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteSavedEmail(saved.id);
+                            }}
+                            className="ml-1 hover:bg-destructive/20 rounded p-0.5"
+                            title="Ištrinti"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </>
+                      )}
+                    </Badge>
+                  ))}
+                  {filtered.length === 0 && (
+                    <span className="text-xs text-muted-foreground">Nerasta</span>
+                  )}
+                </div>
+                {!q && filtered.length > 6 && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllSaved(v => !v)}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {showAllSaved ? "Suskleisti" : `Rodyti visus (${filtered.length})`}
+                  </button>
+                )}
               </div>
-            </div>
-          )}
+            );
+          })()}
 
           {/* Sender email selection */}
           <div className="grid gap-2">

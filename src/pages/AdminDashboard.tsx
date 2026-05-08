@@ -551,6 +551,21 @@ const AdminDashboard = () => {
                           </Button>
                         )}
 
+                        {/* All listings access toggle */}
+                        {partner.id !== SUPER_ADMIN_ID && (
+                          <Button
+                            onClick={() => toggleAllListingsAccess(partner.id)}
+                            variant="outline"
+                            size="sm"
+                            className={allListingsAccessUserIds.has(partner.id)
+                              ? "text-blue-600 border-blue-300 hover:bg-blue-50"
+                              : "text-muted-foreground"}
+                          >
+                            <Globe className="h-4 w-4 mr-2" />
+                            {allListingsAccessUserIds.has(partner.id) ? "Visi skelbimai ✓" : "Visi skelbimai"}
+                          </Button>
+                        )}
+
                         {partner.id !== SUPER_ADMIN_ID && partner.id !== currentUserId && partner.role !== "admin" && (
                           <Button
                             onClick={() => handleDeleteUser(partner.id, partner.email)}

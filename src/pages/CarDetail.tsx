@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -311,22 +312,31 @@ const CarDetail = () => {
   const carDesc = `${carTitle} – ${car.mileage ? car.mileage.toLocaleString() + ' km' : ''} ${car.fuel_type || ''} ${car.transmission || ''}. Kaina: ${formatPrice(car.price)}. Autokopers, Kaunas.`;
   const carUrl = `https://www.autokopers.lt/automobiliai/${car.slug || car.id}`;
   const carImage = allImages[0] || car.image_url || "https://www.autokopers.lt/autokopers-social.jpg";
-  const shareUrl = `https://vjdzzaerrxfctkkiwkmn.supabase.co/functions/v1/og-preview?slug=${encodeURIComponent(car.slug || car.id)}`;
+  // Used only by Facebook/Messenger so they scrape the rich OG preview.
+  // The user never sees this URL.
+  const ogUrl = `https://vjdzzaerrxfctkkiwkmn.supabase.co/functions/v1/og-preview?slug=${encodeURIComponent(car.slug || car.id)}`;
 
-  const handleShare = async () => {
-    const data = { title: `${car.make} ${car.model} ${car.year}`, url: shareUrl };
+  const handleCopyLink = async () => {
     try {
-      if (navigator.share) {
-        await navigator.share(data);
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success("Nuoroda nukopijuota");
-      }
-    } catch (e) {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success("Nuoroda nukopijuota");
-      } catch {}
+      await navigator.clipboard.writeText(carUrl);
+      toast.success("Nuoroda nukopijuota");
+    } catch {
+      toast.error("Nepavyko nukopijuoti");
+    }
+  };
+
+  const openShare = (platform: "facebook" | "messenger" | "whatsapp" | "viber" | "native") => {
+    const text = `${carTitle} – ${formatPrice(car.price)}`;
+    if (platform === "facebook") {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogUrl)}`, "_blank", "noopener,width=626,height=436");
+    } else if (platform === "messenger") {
+      window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(ogUrl)}&app_id=140586622674265&redirect_uri=${encodeURIComponent(carUrl)}`, "_blank", "noopener,width=626,height=600");
+    } else if (platform === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + carUrl)}`, "_blank", "noopener");
+    } else if (platform === "viber") {
+      window.location.href = `viber://forward?text=${encodeURIComponent(text + " " + carUrl)}`;
+    } else if (platform === "native" && navigator.share) {
+      navigator.share({ title: carTitle, text, url: carUrl }).catch(() => {});
     }
   };
 
@@ -451,9 +461,20 @@ const CarDetail = () => {
             <div className="flex items-center justify-between mt-1">
               <p className="text-sm text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleShare} className="h-8 px-2">
-                  <Share2 className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 px-2">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => openShare("facebook")}>Facebook</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openShare("messenger")}>Messenger</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openShare("whatsapp")}>WhatsApp</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openShare("viber")}>Viber</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCopyLink}>Kopijuoti nuorodą</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <div className="text-xl sm:text-2xl font-bold text-primary">
                   {formatPrice(car.price)}
                 </div>
@@ -478,10 +499,21 @@ const CarDetail = () => {
             <p className="text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleShare}>
-              <Share2 className="h-4 w-4 mr-2" />
-              Dalintis
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Dalintis
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => openShare("facebook")}>Facebook</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openShare("messenger")}>Messenger</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openShare("whatsapp")}>WhatsApp</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openShare("viber")}>Viber</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyLink}>Kopijuoti nuorodą</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="text-3xl font-bold text-primary">
               {formatPrice(car.price)}
             </div>

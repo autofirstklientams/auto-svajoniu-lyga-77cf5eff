@@ -311,22 +311,31 @@ const CarDetail = () => {
   const carDesc = `${carTitle} – ${car.mileage ? car.mileage.toLocaleString() + ' km' : ''} ${car.fuel_type || ''} ${car.transmission || ''}. Kaina: ${formatPrice(car.price)}. Autokopers, Kaunas.`;
   const carUrl = `https://www.autokopers.lt/automobiliai/${car.slug || car.id}`;
   const carImage = allImages[0] || car.image_url || "https://www.autokopers.lt/autokopers-social.jpg";
-  const shareUrl = `https://vjdzzaerrxfctkkiwkmn.supabase.co/functions/v1/og-preview?slug=${encodeURIComponent(car.slug || car.id)}`;
+  // Used only by Facebook/Messenger so they scrape the rich OG preview.
+  // The user never sees this URL.
+  const ogUrl = `https://vjdzzaerrxfctkkiwkmn.supabase.co/functions/v1/og-preview?slug=${encodeURIComponent(car.slug || car.id)}`;
 
-  const handleShare = async () => {
-    const data = { title: `${car.make} ${car.model} ${car.year}`, url: shareUrl };
+  const handleCopyLink = async () => {
     try {
-      if (navigator.share) {
-        await navigator.share(data);
-      } else {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success("Nuoroda nukopijuota");
-      }
-    } catch (e) {
-      try {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success("Nuoroda nukopijuota");
-      } catch {}
+      await navigator.clipboard.writeText(carUrl);
+      toast.success("Nuoroda nukopijuota");
+    } catch {
+      toast.error("Nepavyko nukopijuoti");
+    }
+  };
+
+  const openShare = (platform: "facebook" | "messenger" | "whatsapp" | "viber" | "native") => {
+    const text = `${carTitle} – ${formatPrice(car.price)}`;
+    if (platform === "facebook") {
+      window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogUrl)}`, "_blank", "noopener,width=626,height=436");
+    } else if (platform === "messenger") {
+      window.open(`https://www.facebook.com/dialog/send?link=${encodeURIComponent(ogUrl)}&app_id=140586622674265&redirect_uri=${encodeURIComponent(carUrl)}`, "_blank", "noopener,width=626,height=600");
+    } else if (platform === "whatsapp") {
+      window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + carUrl)}`, "_blank", "noopener");
+    } else if (platform === "viber") {
+      window.location.href = `viber://forward?text=${encodeURIComponent(text + " " + carUrl)}`;
+    } else if (platform === "native" && navigator.share) {
+      navigator.share({ title: carTitle, text, url: carUrl }).catch(() => {});
     }
   };
 

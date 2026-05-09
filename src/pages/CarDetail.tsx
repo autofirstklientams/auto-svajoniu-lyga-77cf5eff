@@ -450,8 +450,13 @@ const CarDetail = () => {
             </div>
             <div className="flex items-center justify-between mt-1">
               <p className="text-sm text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
-              <div className="text-xl sm:text-2xl font-bold text-primary">
-                {formatPrice(car.price)}
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleShare} className="h-8 px-2">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+                <div className="text-xl sm:text-2xl font-bold text-primary">
+                  {formatPrice(car.price)}
+                </div>
               </div>
             </div>
           </div>
@@ -472,8 +477,14 @@ const CarDetail = () => {
             </div>
             <p className="text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
           </div>
-          <div className="text-3xl font-bold text-primary">
-            {formatPrice(car.price)}
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handleShare}>
+              <Share2 className="h-4 w-4 mr-2" />
+              Dalintis
+            </Button>
+            <div className="text-3xl font-bold text-primary">
+              {formatPrice(car.price)}
+            </div>
           </div>
         </div>
 

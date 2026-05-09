@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { OptimizedImage } from "@/components/OptimizedImage";
 import { toast } from "sonner";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -460,9 +461,20 @@ const CarDetail = () => {
             <div className="flex items-center justify-between mt-1">
               <p className="text-sm text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={handleShare} className="h-8 px-2">
-                  <Share2 className="h-4 w-4" />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 px-2">
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem onClick={() => openShare("facebook")}>Facebook</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openShare("messenger")}>Messenger</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openShare("whatsapp")}>WhatsApp</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => openShare("viber")}>Viber</DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleCopyLink}>Kopijuoti nuorodą</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <div className="text-xl sm:text-2xl font-bold text-primary">
                   {formatPrice(car.price)}
                 </div>
@@ -487,10 +499,21 @@ const CarDetail = () => {
             <p className="text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
           </div>
           <div className="flex items-center gap-3">
-            <Button variant="outline" size="sm" onClick={handleShare}>
-              <Share2 className="h-4 w-4 mr-2" />
-              Dalintis
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm">
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Dalintis
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuItem onClick={() => openShare("facebook")}>Facebook</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openShare("messenger")}>Messenger</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openShare("whatsapp")}>WhatsApp</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => openShare("viber")}>Viber</DropdownMenuItem>
+                <DropdownMenuItem onClick={handleCopyLink}>Kopijuoti nuorodą</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <div className="text-3xl font-bold text-primary">
               {formatPrice(car.price)}
             </div>

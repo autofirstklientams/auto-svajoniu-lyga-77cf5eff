@@ -30,7 +30,8 @@ import {
   Mail,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  Share2
 } from "lucide-react";
 
 interface CarImage {
@@ -310,6 +311,24 @@ const CarDetail = () => {
   const carDesc = `${carTitle} – ${car.mileage ? car.mileage.toLocaleString() + ' km' : ''} ${car.fuel_type || ''} ${car.transmission || ''}. Kaina: ${formatPrice(car.price)}. Autokopers, Kaunas.`;
   const carUrl = `https://www.autokopers.lt/automobiliai/${car.slug || car.id}`;
   const carImage = allImages[0] || car.image_url || "https://www.autokopers.lt/autokopers-social.jpg";
+  const shareUrl = `https://vjdzzaerrxfctkkiwkmn.supabase.co/functions/v1/og-preview?slug=${encodeURIComponent(car.slug || car.id)}`;
+
+  const handleShare = async () => {
+    const data = { title: `${car.make} ${car.model} ${car.year}`, url: shareUrl };
+    try {
+      if (navigator.share) {
+        await navigator.share(data);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Nuoroda nukopijuota");
+      }
+    } catch (e) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Nuoroda nukopijuota");
+      } catch {}
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -431,8 +450,13 @@ const CarDetail = () => {
             </div>
             <div className="flex items-center justify-between mt-1">
               <p className="text-sm text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
-              <div className="text-xl sm:text-2xl font-bold text-primary">
-                {formatPrice(car.price)}
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={handleShare} className="h-8 px-2">
+                  <Share2 className="h-4 w-4" />
+                </Button>
+                <div className="text-xl sm:text-2xl font-bold text-primary">
+                  {formatPrice(car.price)}
+                </div>
               </div>
             </div>
           </div>
@@ -453,8 +477,14 @@ const CarDetail = () => {
             </div>
             <p className="text-muted-foreground">{car.year} • {car.condition || t("carDetail.used")}</p>
           </div>
-          <div className="text-3xl font-bold text-primary">
-            {formatPrice(car.price)}
+          <div className="flex items-center gap-3">
+            <Button variant="outline" size="sm" onClick={handleShare}>
+              <Share2 className="h-4 w-4 mr-2" />
+              Dalintis
+            </Button>
+            <div className="text-3xl font-bold text-primary">
+              {formatPrice(car.price)}
+            </div>
           </div>
         </div>
 

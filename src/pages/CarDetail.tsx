@@ -30,7 +30,8 @@ import {
   Mail,
   ChevronLeft,
   ChevronRight,
-  X
+  X,
+  Share2
 } from "lucide-react";
 
 interface CarImage {
@@ -310,6 +311,24 @@ const CarDetail = () => {
   const carDesc = `${carTitle} – ${car.mileage ? car.mileage.toLocaleString() + ' km' : ''} ${car.fuel_type || ''} ${car.transmission || ''}. Kaina: ${formatPrice(car.price)}. Autokopers, Kaunas.`;
   const carUrl = `https://www.autokopers.lt/automobiliai/${car.slug || car.id}`;
   const carImage = allImages[0] || car.image_url || "https://www.autokopers.lt/autokopers-social.jpg";
+  const shareUrl = `https://vjdzzaerrxfctkkiwkmn.supabase.co/functions/v1/og-preview?slug=${encodeURIComponent(car.slug || car.id)}`;
+
+  const handleShare = async () => {
+    const data = { title: `${car.make} ${car.model} ${car.year}`, url: shareUrl };
+    try {
+      if (navigator.share) {
+        await navigator.share(data);
+      } else {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Nuoroda nukopijuota");
+      }
+    } catch (e) {
+      try {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success("Nuoroda nukopijuota");
+      } catch {}
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">

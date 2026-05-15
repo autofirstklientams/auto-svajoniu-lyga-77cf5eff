@@ -249,6 +249,13 @@ function CarListingCardComponent({ car, onEdit, onDelete, onDuplicate, onRefresh
               </>
             )}
           </div>
+
+          {car.created_at && (
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-2 pt-2 border-t">
+              <Calendar className="h-3 w-3" />
+              <span>Įkelta {new Date(car.created_at).toLocaleDateString("lt-LT", { year: "numeric", month: "2-digit", day: "2-digit" })}</span>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -104,7 +104,7 @@ const handler = async (req: Request): Promise<Response> => {
     const emailResponse = await resend.emails.send({
       from: fromEmail,
       to: [recipientEmail],
-      subject: `PVM Sąskaita faktūra Nr. ${invoiceNumber}`,
+      subject: `PVM Sąskaita faktūra Nr. ${safeInvoiceNumber}`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -133,7 +133,7 @@ const handler = async (req: Request): Promise<Response> => {
                       </h1>
                       
                       <p style="margin: 0 0 20px 0; font-size: 16px; line-height: 1.6; color: #3f3f46;">
-                        Sveiki, <strong>${buyerName}</strong>!
+                        Sveiki, <strong>${safeBuyerName}</strong>!
                       </p>
                       
                       <p style="margin: 0 0 24px 0; font-size: 16px; line-height: 1.6; color: #3f3f46;">
@@ -148,7 +148,7 @@ const handler = async (req: Request): Promise<Response> => {
                               <tr>
                                 <td style="padding-bottom: 12px;">
                                   <span style="font-size: 13px; color: #71717a; text-transform: uppercase; letter-spacing: 0.5px;">Sąskaitos numeris</span>
-                                  <div style="font-size: 18px; font-weight: 600; color: #18181b; margin-top: 4px;">${invoiceNumber}</div>
+                                  <div style="font-size: 18px; font-weight: 600; color: #18181b; margin-top: 4px;">${safeInvoiceNumber}</div>
                                 </td>
                               </tr>
                               <tr>

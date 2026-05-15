@@ -42,15 +42,41 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { 
-      recipientEmail, 
-      invoiceNumber, 
-      buyerName, 
-      totalAmount, 
-      pdfBase64, 
+    // Require authenticated user
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!,
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data: claimsData, error: authErr } = await authClient.auth.getClaims(
+      authHeader.replace("Bearer ", "")
+    );
+    if (authErr || !claimsData?.claims) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const {
+      recipientEmail,
+      invoiceNumber,
+      buyerName,
+      totalAmount,
+      pdfBase64,
       customMessage,
       senderEmail = "labas"
     }: InvoiceEmailRequest = await req.json();
+
+    const safeBuyerName = escapeHtml(buyerName);
+    const safeInvoiceNumber = escapeHtml(invoiceNumber);
 
     console.log("Sending invoice email to:", recipientEmail);
     console.log("Invoice number:", invoiceNumber);

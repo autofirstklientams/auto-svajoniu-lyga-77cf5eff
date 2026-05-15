@@ -26,23 +26,63 @@ const WATERMARK_SVG = `
 </svg>
 `;
 
+const ALLOWED_HOSTS = [
+  /^([a-z0-9-]+\.)*autoplius\.lt$/i,
+  /^([a-z0-9-]+\.)*supabase\.co$/i,
+  /^([a-z0-9-]+\.)*supabase\.in$/i,
+  /^([a-z0-9-]+\.)*autokopers\.lt$/i,
+];
+
+function isAllowedUrl(raw: string): boolean {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== 'https:') return false;
+    return ALLOWED_HOSTS.some((re) => re.test(u.hostname));
+  } catch {
+    return false;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // Require authenticated user
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader?.startsWith('Bearer ')) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+    const authClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+    const { data: claimsData, error: authErr } = await authClient.auth.getClaims(
+      authHeader.replace('Bearer ', '')
+    );
+    if (authErr || !claimsData?.claims) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Unauthorized' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const { imageUrl, carId } = await req.json();
 
-    if (!imageUrl) {
+    if (!imageUrl || !isAllowedUrl(imageUrl)) {
       return new Response(
-        JSON.stringify({ success: false, error: 'Image URL is required' }),
+        JSON.stringify({ success: false, error: 'Invalid or disallowed image URL' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     console.log('Fetching image:', imageUrl);

@@ -1242,7 +1242,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 2. TECHNINIAI DUOMENYS ═══════════════ */}
-          <section>
+          <section data-section="2" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
               Techniniai duomenys
@@ -1419,7 +1419,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 3. PAPILDOMI DUOMENYS ═══════════════ */}
-          <section>
+          <section data-section="3" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
               Papildomi duomenys
@@ -1537,7 +1537,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 4. NUOTRAUKOS ═══════════════ */}
-          <section ref={photosSectionRef}>
+          <section ref={photosSectionRef} data-section="4" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">4</span>
               Nuotraukos
@@ -1595,7 +1595,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 5. APRAŠYMAS ═══════════════ */}
-          <section>
+          <section data-section="5" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">5</span>
               Aprašymas
@@ -1615,7 +1615,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 6. YPATYBĖS ═══════════════ */}
-          <section>
+          <section data-section="6" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">6</span>
               Įranga ir ypatybės
@@ -1624,7 +1624,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 7. PUBLIKAVIMAS ═══════════════ */}
-          <section className="border rounded-lg p-4 bg-muted/30">
+          <section data-section="7" className="scroll-mt-32 border rounded-lg p-4 bg-muted/30">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">7</span>
               Publikavimo nustatymai

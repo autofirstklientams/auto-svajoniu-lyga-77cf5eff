@@ -150,7 +150,45 @@ const CreateListing = ({
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const photosSectionRef = useRef<HTMLElement>(null);
+  const formCardRef = useRef<HTMLDivElement>(null);
+  const [activeSection, setActiveSection] = useState<number>(1);
   const [draftCarId, setDraftCarId] = useState<string | null>(car?.id || null);
+
+  // Auto-scroll form into view on open / when switching listings
+  useEffect(() => {
+    const t = setTimeout(() => {
+      formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+    return () => clearTimeout(t);
+  }, [car?.id]);
+
+  // Scrollspy: highlight active section as user scrolls
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) {
+          const idx = Number((visible.target as HTMLElement).dataset.section);
+          if (idx) setActiveSection(idx);
+        }
+      },
+      { rootMargin: '-30% 0px -55% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    const sections = formCardRef.current?.querySelectorAll('[data-section]') ?? [];
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [car?.id]);
+
+  const scrollToSection = useCallback((n: number) => {
+    const el = formCardRef.current?.querySelector<HTMLElement>(`[data-section="${n}"]`);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }, []);
+
 
   const getOrCreateCarId = useCallback(async (): Promise<string | null> => {
     if (draftCarId) return draftCarId;

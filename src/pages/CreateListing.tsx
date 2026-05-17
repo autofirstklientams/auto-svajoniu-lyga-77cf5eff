@@ -1093,16 +1093,51 @@ const CreateListing = ({
     }
   };
 
+  const sectionLabels = [
+    { n: 1, label: 'Pagrindinė' },
+    { n: 2, label: 'Techniniai' },
+    { n: 3, label: 'Papildomi' },
+    { n: 4, label: 'Nuotraukos' },
+    { n: 5, label: 'Aprašymas' },
+    { n: 6, label: 'Ypatybės' },
+    { n: 7, label: 'Publikavimas' },
+  ];
+
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl">{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
+    <Card ref={formCardRef} className="mb-6 scroll-mt-4 border-primary/30 shadow-lg ring-1 ring-primary/10">
+      <CardHeader className="pb-4 sticky top-0 z-20 bg-card/95 backdrop-blur border-b">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <CardTitle className="text-xl">{car ? "✏️ Redaguoti skelbimą" : "✨ Naujas skelbimas"}</CardTitle>
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4 mr-1" /> Užverti
+          </Button>
+        </div>
+        {/* Sticky section navigator */}
+        <nav className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pt-2 scrollbar-thin" aria-label="Skelbimo sekcijos">
+          {sectionLabels.map(({ n, label }) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => scrollToSection(n)}
+              className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                activeSection === n
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted hover:bg-muted/70 text-muted-foreground'
+              }`}
+            >
+              <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold ${
+                activeSection === n ? 'bg-primary-foreground text-primary' : 'bg-background text-foreground'
+              }`}>{n}</span>
+              {label}
+            </button>
+          ))}
+        </nav>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} onBlur={handleFormBlur} className="space-y-8">
           
           {/* ═══════════════ 1. PAGRINDINĖ INFORMACIJA ═══════════════ */}
-          <section>
+          <section data-section="1" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
               Pagrindinė informacija

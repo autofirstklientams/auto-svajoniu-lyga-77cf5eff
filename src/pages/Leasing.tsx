@@ -105,6 +105,37 @@ const Leasing = () => {
         <meta property="og:title" content="Automobilių lizingas nuo 6.9% | Autokopers" />
         <meta property="og:description" content="Greitas automobilių finansavimas nuo 6.9% metinių palūkanų. Sprendimas per 1 darbo dieną." />
         <meta property="og:url" content="https://www.autokopers.lt/lizingas" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Kokia lizingo metinė palūkanų norma?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Autokopers automobilių lizingas prasideda nuo 6.9% metinių palūkanų. Galutinė norma priklauso nuo kliento patikimumo, automobilio amžiaus, pradinio įnašo ir lizingo termino." }
+            },
+            {
+              "@type": "Question",
+              "name": "Per kiek laiko gausiu sprendimą dėl lizingo?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Preliminarus atsakymas dažniausiai pateikiamas per 1 darbo dieną. Pateikus visus dokumentus, sutartis gali būti pasirašyta tą pačią dieną." }
+            },
+            {
+              "@type": "Question",
+              "name": "Koks reikalingas pradinis įnašas?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Standartinis pradinis įnašas — nuo 10% automobilio kainos. Kai kuriais atvejais galimas lizingas ir su mažesniu įnašu." }
+            },
+            {
+              "@type": "Question",
+              "name": "Kokie dokumentai reikalingi paraiškai?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Reikės asmens dokumento, paskutinių 3-6 mėn. pajamų išrašo arba darbdavio pažymos. Verslo klientams — įmonės registracijos pažymėjimo ir finansinės ataskaitos." }
+            },
+            {
+              "@type": "Question",
+              "name": "Ar galima lizinguoti naudotą automobilį?",
+              "acceptedAnswer": { "@type": "Answer", "text": "Taip. Lizinguojame tiek naujus, tiek naudotus automobilius, taip pat lizingo terminas gali siekti iki 144 mėnesių (12 metų)." }
+            }
+          ]
+        })}</script>
       </Helmet>
       <Header />
       <main>

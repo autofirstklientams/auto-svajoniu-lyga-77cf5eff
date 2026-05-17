@@ -150,7 +150,45 @@ const CreateListing = ({
   const [autoSaveStatus, setAutoSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const photosSectionRef = useRef<HTMLElement>(null);
+  const formCardRef = useRef<HTMLDivElement>(null);
+  const [activeSection, setActiveSection] = useState<number>(1);
   const [draftCarId, setDraftCarId] = useState<string | null>(car?.id || null);
+
+  // Auto-scroll form into view on open / when switching listings
+  useEffect(() => {
+    const t = setTimeout(() => {
+      formCardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
+    return () => clearTimeout(t);
+  }, [car?.id]);
+
+  // Scrollspy: highlight active section as user scrolls
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) {
+          const idx = Number((visible.target as HTMLElement).dataset.section);
+          if (idx) setActiveSection(idx);
+        }
+      },
+      { rootMargin: '-30% 0px -55% 0px', threshold: [0, 0.25, 0.5, 0.75, 1] }
+    );
+    const sections = formCardRef.current?.querySelectorAll('[data-section]') ?? [];
+    sections.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [car?.id]);
+
+  const scrollToSection = useCallback((n: number) => {
+    const el = formCardRef.current?.querySelector<HTMLElement>(`[data-section="${n}"]`);
+    if (el) {
+      const y = el.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+  }, []);
+
 
   const getOrCreateCarId = useCallback(async (): Promise<string | null> => {
     if (draftCarId) return draftCarId;
@@ -1055,16 +1093,51 @@ const CreateListing = ({
     }
   };
 
+  const sectionLabels = [
+    { n: 1, label: 'Pagrindinė' },
+    { n: 2, label: 'Techniniai' },
+    { n: 3, label: 'Papildomi' },
+    { n: 4, label: 'Nuotraukos' },
+    { n: 5, label: 'Aprašymas' },
+    { n: 6, label: 'Ypatybės' },
+    { n: 7, label: 'Publikavimas' },
+  ];
+
   return (
-    <Card className="mb-6">
-      <CardHeader className="pb-4">
-        <CardTitle className="text-xl">{car ? "Redaguoti skelbimą" : "Naujas skelbimas"}</CardTitle>
+    <Card ref={formCardRef} className="mb-6 scroll-mt-4 border-primary/30 shadow-lg ring-1 ring-primary/10">
+      <CardHeader className="pb-4 sticky top-0 z-20 bg-card/95 backdrop-blur border-b">
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <CardTitle className="text-xl">{car ? "✏️ Redaguoti skelbimą" : "✨ Naujas skelbimas"}</CardTitle>
+          <Button type="button" variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4 mr-1" /> Užverti
+          </Button>
+        </div>
+        {/* Sticky section navigator */}
+        <nav className="flex gap-1.5 overflow-x-auto -mx-1 px-1 pt-2 scrollbar-thin" aria-label="Skelbimo sekcijos">
+          {sectionLabels.map(({ n, label }) => (
+            <button
+              key={n}
+              type="button"
+              onClick={() => scrollToSection(n)}
+              className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-all ${
+                activeSection === n
+                  ? 'bg-primary text-primary-foreground shadow-sm'
+                  : 'bg-muted hover:bg-muted/70 text-muted-foreground'
+              }`}
+            >
+              <span className={`flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold ${
+                activeSection === n ? 'bg-primary-foreground text-primary' : 'bg-background text-foreground'
+              }`}>{n}</span>
+              {label}
+            </button>
+          ))}
+        </nav>
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} onBlur={handleFormBlur} className="space-y-8">
           
           {/* ═══════════════ 1. PAGRINDINĖ INFORMACIJA ═══════════════ */}
-          <section>
+          <section data-section="1" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">1</span>
               Pagrindinė informacija
@@ -1169,7 +1242,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 2. TECHNINIAI DUOMENYS ═══════════════ */}
-          <section>
+          <section data-section="2" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">2</span>
               Techniniai duomenys
@@ -1346,7 +1419,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 3. PAPILDOMI DUOMENYS ═══════════════ */}
-          <section>
+          <section data-section="3" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">3</span>
               Papildomi duomenys
@@ -1464,7 +1537,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 4. NUOTRAUKOS ═══════════════ */}
-          <section ref={photosSectionRef}>
+          <section ref={photosSectionRef} data-section="4" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">4</span>
               Nuotraukos
@@ -1522,7 +1595,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 5. APRAŠYMAS ═══════════════ */}
-          <section>
+          <section data-section="5" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">5</span>
               Aprašymas
@@ -1542,7 +1615,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 6. YPATYBĖS ═══════════════ */}
-          <section>
+          <section data-section="6" className="scroll-mt-32 rounded-lg border bg-card p-4">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">6</span>
               Įranga ir ypatybės
@@ -1551,7 +1624,7 @@ const CreateListing = ({
           </section>
 
           {/* ═══════════════ 7. PUBLIKAVIMAS ═══════════════ */}
-          <section className="border rounded-lg p-4 bg-muted/30">
+          <section data-section="7" className="scroll-mt-32 border rounded-lg p-4 bg-muted/30">
             <h3 className="text-base font-semibold mb-4 text-foreground flex items-center gap-2">
               <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary text-primary-foreground text-xs font-bold">7</span>
               Publikavimo nustatymai

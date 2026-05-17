@@ -356,22 +356,44 @@ const CarDetail = () => {
           "@type": "Car",
           "name": carTitle,
           "description": car.description || carDesc,
-          "image": carImage,
+          "image": allImages.length > 0 ? allImages.slice(0, 8) : [carImage],
           "url": carUrl,
+          "sku": car.vin || car.sdk_code || car.id,
+          "vehicleIdentificationNumber": car.vin || undefined,
           "brand": { "@type": "Brand", "name": car.make },
           "model": car.model,
           "vehicleModelDate": String(car.year),
+          "productionDate": String(car.year),
+          "itemCondition": "https://schema.org/UsedCondition",
           "mileageFromOdometer": car.mileage ? { "@type": "QuantitativeValue", "value": car.mileage, "unitCode": "KMT" } : undefined,
           "fuelType": car.fuel_type || undefined,
           "vehicleTransmission": car.transmission || undefined,
+          "bodyType": car.body_type || undefined,
+          "numberOfDoors": car.doors || undefined,
+          "vehicleSeatingCapacity": car.seats || undefined,
           "color": car.color || undefined,
+          "vehicleEngine": car.engine_capacity || car.power_kw ? {
+            "@type": "EngineSpecification",
+            "engineDisplacement": car.engine_capacity ? { "@type": "QuantitativeValue", "value": car.engine_capacity, "unitCode": "CMQ" } : undefined,
+            "enginePower": car.power_kw ? { "@type": "QuantitativeValue", "value": car.power_kw, "unitCode": "KWT" } : undefined,
+          } : undefined,
           "offers": {
             "@type": "Offer",
             "price": car.price,
             "priceCurrency": "EUR",
+            "itemCondition": "https://schema.org/UsedCondition",
             "availability": car.is_sold ? "https://schema.org/SoldOut" : car.is_reserved ? "https://schema.org/LimitedAvailability" : "https://schema.org/InStock",
-            "seller": { "@type": "AutoDealer", "name": "Autokopers", "url": "https://www.autokopers.lt" }
+            "seller": { "@type": "AutoDealer", "name": "Autokopers", "url": "https://www.autokopers.lt", "telephone": "+37062851439" }
           }
+        })}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Pradžia", "item": "https://www.autokopers.lt/" },
+            { "@type": "ListItem", "position": 2, "name": "Automobiliai", "item": "https://www.autokopers.lt/automobiliai" },
+            { "@type": "ListItem", "position": 3, "name": carTitle, "item": carUrl }
+          ]
         })}</script>
       </Helmet>
       <Header />

@@ -236,6 +236,26 @@ const CarCatalog = () => {
         <meta property="og:title" content="Naudoti automobiliai Kaune | Autokopers" />
         <meta property="og:description" content="Platus naudotų automobilių pasirinkimas su garantija ir finansavimu." />
         <meta property="og:url" content="https://www.autokopers.lt/automobiliai" />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          "name": "Autokopers automobilių katalogas",
+          "numberOfItems": filteredCars.length,
+          "itemListElement": filteredCars.slice(0, 24).map((c, i) => ({
+            "@type": "ListItem",
+            "position": i + 1,
+            "url": `https://www.autokopers.lt/automobiliai/${c.slug || c.id}`,
+            "name": `${c.make} ${c.model} ${c.year}`,
+          })),
+        })}</script>
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Pradžia", "item": "https://www.autokopers.lt/" },
+            { "@type": "ListItem", "position": 2, "name": "Automobiliai", "item": "https://www.autokopers.lt/automobiliai" },
+          ],
+        })}</script>
       </Helmet>
 
       <div className="min-h-screen bg-background">
